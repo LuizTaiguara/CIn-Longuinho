@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1400 700" width="1400" height="700">
+  <defs>
+    <marker id="arrowSolid2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#231F20"/>
+    </marker>
+    <marker id="arrowSolidRed2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#DB1E2F"/>
+    </marker>
+    <marker id="arrowHollow2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M 0.8 0.8 L 9.2 5 L 0.8 9.2 z" fill="#FFFFFF" stroke="#AF0421" stroke-width="1.5"/>
+    </marker>
+  </defs>
+
+  <rect x="0" y="0" width="1400" height="700" fill="#FFFFFF"/>
+
+  <text x="40" y="54" font-family="Mulish, Segoe UI, system-ui, sans-serif" font-size="32" font-weight="700" fill="#231F20">Integração: inserção em canal preexistente</text>
+  <rect x="40" y="68" width="150" height="4" fill="#DB1E2F"/>
+  <text x="40" y="98" font-family="Mulish, Segoe UI, system-ui, sans-serif" font-size="17" fill="#5E5854">O projeto não criou um canal novo — inscreveu-se num que já existia no CIn. Ninguém precisa mudar de comportamento.</text>
+
+  <!-- Publishers -->
+  <rect x="268" y="132" width="168" height="54" rx="8" fill="#F4F2EF" stroke="#231F20" stroke-width="2.5"/>
+  <text x="352" y="166" text-anchor="middle" font-family="Mulish, Segoe UI, system-ui, sans-serif" font-size="18" font-weight="700" fill="#231F20">quem acha</text>
+  <rect x="476" y="132" width="168" height="54" rx="8" fill="#F4F2EF" stroke="#231F20" stroke-width="2.5"/>
+  <text x="560" y="166" text-anchor="middle" font-family="Mulish, Segoe UI, system-ui, sans-serif" font-size="18" font-weight="700" fill="#231F20">quem perde</text>
+  <rect x="684" y="132" width="168" height="54" rx="8" fill="#F4F2EF" stroke="#231F20" stroke-width="2.5"/>
+  <text x="768" y="166" text-anchor="middle" font-family="Mulish, Segoe UI, system-ui, sans-serif" font-size="18" font-weight="700" fill="#231F20">quem acha</text>
+  <rect x="892" y="132" width="168" height="54" rx="8" fill="#F4F2EF" stroke="#231F20" stroke-width="2.5"/>
+  <text x="976" y="166" text-anchor="middle" font-family="Mulish, Segoe UI, system-ui, sans-serif" font-size="18" font-weight="700" fill="#231F20">quem perde</text>
+
+  <text x="40" y="160" font-family="Mulish, Segoe UI, system-ui, sans-serif" font-size="16" fill="#5E5854">publicadores</text>
+  <text x="40" y="182" font-family="Mulish, Segoe UI, system-ui, sans-serif" font-size="16" fill="#5E5854">(a comunidade)</text>
+
+  <path d="M 352 186 L 520 234" fill="none" stroke="#231F20" stroke-width="2.5" marker-end="url(#arrowSolid2)"/>
+  <path d="M 560 186 L 620 234" fill="none" stroke="#231F20" stroke-width="2.5" marker-end="url(#arrowSolid2)"/>
+  <path d="M 768 186 L 708 234" fill="none" stroke="#231F20" stroke-width="2.5" marker-end="url(#arrowSolid2)"/>
+  <path d="M 976 186 L 808 234" fill="none" stroke="#231F20" stroke-width="2.5" marker-end="url(#arrowSolid2)"/>
+
+  <!-- Channel -->
+  <rect x="200" y="244" width="872" height="94" rx="12" fill="#DB1E2F" stroke="#AF0421" stroke-width="5"/>
+  <text x="636" y="290" text-anchor="middle" font-family="Mulish, Segoe UI, system-ui, sans-serif" font-size="27" font-weight="700" fill="#FFFFFF">achados-perdidos@cin.ufpe.br</text>
+  <text x="636" y="318" text-anchor="middle" font-family="Mulish, Segoe UI, system-ui, sans-serif" font-size="17" fill="#FFFFFF">canal publish-subscribe preexistente</text>
+
+  <!-- LEFT branch -->
+  <path d="M 384 338 L 384 386" fill="none" stroke="#231F20" stroke-width="2.5" marker-end="url(#arrowSolid2)"/>
+  <rect x="212" y="390" width="344" height="52" rx="8" fill="#FFFFFF" stroke="#231F20" stroke-width="2.5"/>
+  <text x="384" y="423" text-anchor="middle" font-family="Mulish, Segoe UI, system-ui, sans-serif" font-size="19" font-weight="700" fill="#231F20">Assinantes humanos</text>
+
+  <path d="M 384 442 L 384 484" fill="none" stroke="#231F20" stroke-width="2.5" marker-end="url(#arrowSolid2)"/>
+  <rect x="212" y="488" width="344" height="52" rx="8" fill="#FFFFFF" stroke="#231F20" stroke-width="2.5"/>
+  <text x="384" y="521" text-anchor="middle" font-family="Mulish, Segoe UI, system-ui, sans-serif" font-size="19" fill="#231F20">listas de turma</text>
+
+  <path d="M 384 540 L 384 582" fill="none" stroke="#231F20" stroke-width="2.5" marker-end="url(#arrowSolid2)"/>
+  <rect x="212" y="586" width="344" height="52" rx="8" fill="#FFFFFF" stroke="#231F20" stroke-width="2.5"/>
+  <text x="384" y="619" text-anchor="middle" font-family="Mulish, Segoe UI, system-ui, sans-serif" font-size="19" fill="#231F20">caixa de entrada da comunidade</text>
+
+  <text x="40" y="414" font-family="Mulish, Segoe UI, system-ui, sans-serif" font-size="16" font-weight="700" fill="#231F20">comportamento</text>
+  <text x="40" y="436" font-family="Mulish, Segoe UI, system-ui, sans-serif" font-size="16" font-weight="700" fill="#231F20">atual, inalterado</text>
+
+  <!-- RIGHT branch -->
+  <path d="M 846 338 L 846 386" fill="none" stroke="#DB1E2F" stroke-width="2.5" marker-end="url(#arrowSolidRed2)"/>
+  <rect x="674" y="390" width="344" height="52" rx="8" fill="#FFFFFF" stroke="#DB1E2F" stroke-width="2.5"/>
+  <text x="846" y="423" text-anchor="middle" font-family="Mulish, Segoe UI, system-ui, sans-serif" font-size="19" font-weight="700" fill="#DB1E2F">Assinante automatizado</text>
+
+  <path d="M 846 442 L 846 484" fill="none" stroke="#DB1E2F" stroke-width="2.5" marker-end="url(#arrowSolidRed2)"/>
+  <rect x="674" y="488" width="344" height="52" rx="8" fill="#FFFFFF" stroke="#DB1E2F" stroke-width="2.5"/>
+  <text x="846" y="521" text-anchor="middle" font-family="Mulish, Segoe UI, system-ui, sans-serif" font-size="19" fill="#DB1E2F">Worker de ingestão</text>
+
+  <path d="M 846 540 L 846 582" fill="none" stroke="#DB1E2F" stroke-width="2.5" marker-end="url(#arrowSolidRed2)"/>
+  <rect x="674" y="586" width="344" height="52" rx="8" fill="#DB1E2F" stroke="#AF0421" stroke-width="3"/>
+  <text x="846" y="619" text-anchor="middle" font-family="Mulish, Segoe UI, system-ui, sans-serif" font-size="19" font-weight="700" fill="#FFFFFF">Catálogo web</text>
+
+  <text x="615" y="414" text-anchor="middle" font-family="Mulish, Segoe UI, system-ui, sans-serif" font-size="16" font-weight="700" fill="#DB1E2F">o que o</text>
+  <text x="615" y="436" text-anchor="middle" font-family="Mulish, Segoe UI, system-ui, sans-serif" font-size="16" font-weight="700" fill="#DB1E2F">projeto</text>
+  <text x="615" y="458" text-anchor="middle" font-family="Mulish, Segoe UI, system-ui, sans-serif" font-size="16" font-weight="700" fill="#DB1E2F">adicionou</text>
+
+  <!-- feedback arrow -->
+  <path d="M 1018 612 L 1092 612 L 1092 292 L 1072 292" fill="none" stroke="#AF0421" stroke-width="2.5" stroke-dasharray="10 7" marker-end="url(#arrowHollow2)"/>
+  <text x="1112" y="432" font-family="Mulish, Segoe UI, system-ui, sans-serif" font-size="16" fill="#AF0421">publica itens</text>
+  <text x="1112" y="454" font-family="Mulish, Segoe UI, system-ui, sans-serif" font-size="16" fill="#AF0421">cadastrados pelo site</text>
+  <rect x="1112" y="474" width="232" height="34" rx="6" fill="#FFFFFF" stroke="#AF0421" stroke-width="2" stroke-dasharray="7 5"/>
+  <text x="1128" y="497" font-family="Mulish, Segoe UI, system-ui, sans-serif" font-size="16" font-weight="700" fill="#AF0421">depende de autorização</text>
+
+  <!-- Legend -->
+  <line x1="40" y1="658" x2="1360" y2="658" stroke="#C3BDB6" stroke-width="2"/>
+  <rect x="40" y="672" width="34" height="18" rx="4" fill="#FFFFFF" stroke="#231F20" stroke-width="2.5"/>
+  <text x="86" y="687" font-family="Mulish, Segoe UI, system-ui, sans-serif" font-size="16" fill="#231F20">preto = preexistente</text>
+  <rect x="300" y="672" width="34" height="18" rx="4" fill="#FFFFFF" stroke="#DB1E2F" stroke-width="2.5"/>
+  <text x="346" y="687" font-family="Mulish, Segoe UI, system-ui, sans-serif" font-size="16" fill="#DB1E2F">vermelho = adicionado pelo projeto</text>
+  <path d="M 660 681 L 700 681" fill="none" stroke="#AF0421" stroke-width="2.5" stroke-dasharray="8 6"/>
+  <text x="712" y="687" font-family="Mulish, Segoe UI, system-ui, sans-serif" font-size="16" fill="#5E5854">tracejado = fluxo previsto, ainda dependente de autorização institucional</text>
+</svg>

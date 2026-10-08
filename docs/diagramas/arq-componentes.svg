@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1400 760" width="1400" height="760">
+  <defs>
+    <marker id="arrowSolid1" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#231F20"/>
+    </marker>
+    <marker id="arrowHollow1" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M 0.8 0.8 L 9.2 5 L 0.8 9.2 z" fill="#FFFFFF" stroke="#5E5854" stroke-width="1.4"/>
+    </marker>
+  </defs>
+
+  <rect x="0" y="0" width="1400" height="760" fill="#FFFFFF"/>
+
+  <text x="40" y="54" font-family="Mulish, Segoe UI, system-ui, sans-serif" font-size="32" font-weight="700" fill="#231F20">Componentes e conectores</text>
+  <rect x="40" y="68" width="150" height="4" fill="#DB1E2F"/>
+  <text x="40" y="98" font-family="Mulish, Segoe UI, system-ui, sans-serif" font-size="17" fill="#5E5854">Sistema de Achados e Perdidos — CIn/UFPE</text>
+
+  <!-- dashed system boundary -->
+  <rect x="352" y="126" width="1016" height="458" rx="18" fill="#F4F2EF" stroke="#231F20" stroke-width="2.5" stroke-dasharray="12 8"/>
+  <text x="376" y="158" font-family="Mulish, Segoe UI, system-ui, sans-serif" font-size="18" font-weight="700" fill="#231F20">Sistema de Achados e Perdidos</text>
+  <text x="376" y="180" font-family="Mulish, Segoe UI, system-ui, sans-serif" font-size="15" fill="#5E5854">fronteira do que o projeto controla</text>
+
+  <!-- External system: Gmail -->
+  <rect x="40" y="286" width="256" height="138" rx="10" fill="#FFFFFF" stroke="#C3BDB6" stroke-width="2.5"/>
+  <text x="168" y="332" text-anchor="middle" font-family="Mulish, Segoe UI, system-ui, sans-serif" font-size="21" font-weight="700" fill="#5E5854">Gmail /</text>
+  <text x="168" y="358" text-anchor="middle" font-family="Mulish, Segoe UI, system-ui, sans-serif" font-size="21" font-weight="700" fill="#5E5854">Google Groups</text>
+  <text x="168" y="388" text-anchor="middle" font-family="Mulish, Segoe UI, system-ui, sans-serif" font-size="15" fill="#5E5854">sistema externo</text>
+  <text x="168" y="408" text-anchor="middle" font-family="Mulish, Segoe UI, system-ui, sans-serif" font-size="15" fill="#5E5854">não controlado</text>
+
+  <!-- Worker: box + annotation band -->
+  <rect x="392" y="212" width="320" height="140" rx="10" fill="#FFFFFF" stroke="#231F20" stroke-width="2.5"/>
+  <text x="552" y="256" text-anchor="middle" font-family="Mulish, Segoe UI, system-ui, sans-serif" font-size="21" font-weight="700" fill="#231F20">WORKER DE INGESTÃO</text>
+  <text x="552" y="290" text-anchor="middle" font-family="Mulish, Segoe UI, system-ui, sans-serif" font-size="15" fill="#5E5854">processo agendado</text>
+  <text x="552" y="312" text-anchor="middle" font-family="Mulish, Segoe UI, system-ui, sans-serif" font-size="15" fill="#5E5854">roda a cada 5 min</text>
+  <text x="552" y="334" text-anchor="middle" font-family="Mulish, Segoe UI, system-ui, sans-serif" font-size="15" fill="#5E5854">carrega o modelo de extração</text>
+
+  <!-- Site -->
+  <rect x="392" y="430" width="320" height="118" rx="10" fill="#FFFFFF" stroke="#231F20" stroke-width="2.5"/>
+  <text x="552" y="474" text-anchor="middle" font-family="Mulish, Segoe UI, system-ui, sans-serif" font-size="21" font-weight="700" fill="#231F20">SITE / CATÁLOGO</text>
+  <text x="552" y="506" text-anchor="middle" font-family="Mulish, Segoe UI, system-ui, sans-serif" font-size="15" fill="#5E5854">processo web</text>
+  <text x="552" y="528" text-anchor="middle" font-family="Mulish, Segoe UI, system-ui, sans-serif" font-size="15" fill="#5E5854">sempre disponível</text>
+
+  <!-- Repository -->
+  <rect x="1004" y="280" width="332" height="152" rx="12" fill="#DB1E2F" stroke="#AF0421" stroke-width="5"/>
+  <text x="1170" y="342" text-anchor="middle" font-family="Mulish, Segoe UI, system-ui, sans-serif" font-size="26" font-weight="700" fill="#FFFFFF">REPOSITÓRIO</text>
+  <text x="1170" y="376" text-anchor="middle" font-family="Mulish, Segoe UI, system-ui, sans-serif" font-size="16" fill="#FFFFFF">fonte de verdade</text>
+  <text x="1170" y="400" text-anchor="middle" font-family="Mulish, Segoe UI, system-ui, sans-serif" font-size="16" fill="#FFFFFF">append-only</text>
+
+  <!-- Gmail <-> Worker : horizontal into left face of worker -->
+  <path d="M 296 282 L 392 282" fill="none" stroke="#231F20" stroke-width="2.5" marker-start="url(#arrowSolid1)" marker-end="url(#arrowSolid1)"/>
+  <text x="168" y="470" text-anchor="middle" font-family="Mulish, Segoe UI, system-ui, sans-serif" font-size="15" fill="#231F20">conector: lê mensagens novas e</text>
+  <text x="168" y="492" text-anchor="middle" font-family="Mulish, Segoe UI, system-ui, sans-serif" font-size="15" fill="#231F20">envia publicação de volta</text>
+  <path d="M 168 452 L 168 428" fill="none" stroke="#C3BDB6" stroke-width="2" stroke-dasharray="5 5"/>
+
+  <!-- Worker -> Repositorio -->
+  <path d="M 712 268 L 1004 316" fill="none" stroke="#231F20" stroke-width="2.5" marker-end="url(#arrowSolid1)"/>
+  <text x="858" y="262" text-anchor="middle" font-family="Mulish, Segoe UI, system-ui, sans-serif" font-size="18" font-weight="700" fill="#231F20">grava</text>
+
+  <!-- Site <-> Repositorio -->
+  <path d="M 712 482 L 1004 406" fill="none" stroke="#231F20" stroke-width="2.5" marker-start="url(#arrowSolid1)" marker-end="url(#arrowSolid1)"/>
+  <text x="858" y="482" text-anchor="middle" font-family="Mulish, Segoe UI, system-ui, sans-serif" font-size="18" font-weight="700" fill="#231F20">lê e grava</text>
+
+  <!-- NO direct communication -->
+  <path d="M 552 352 L 552 430" fill="none" stroke="#DB1E2F" stroke-width="2.5" stroke-dasharray="10 7"/>
+  <g stroke="#DB1E2F" stroke-width="5" stroke-linecap="round">
+    <path d="M 534 373 L 570 409"/>
+    <path d="M 570 373 L 534 409"/>
+  </g>
+  <text x="596" y="380" font-family="Mulish, Segoe UI, system-ui, sans-serif" font-size="18" font-weight="700" fill="#DB1E2F">não há comunicação direta</text>
+  <text x="596" y="406" font-family="Mulish, Segoe UI, system-ui, sans-serif" font-size="15" fill="#5E5854">worker e site falham de forma</text>
+  <text x="596" y="426" font-family="Mulish, Segoe UI, system-ui, sans-serif" font-size="15" fill="#5E5854">independente</text>
+
+  <!-- Legend -->
+  <line x1="40" y1="624" x2="1360" y2="624" stroke="#C3BDB6" stroke-width="2"/>
+  <rect x="40" y="646" width="46" height="30" rx="5" fill="#F4F2EF" stroke="#231F20" stroke-width="2.5" stroke-dasharray="8 6"/>
+  <text x="100" y="667" font-family="Mulish, Segoe UI, system-ui, sans-serif" font-size="16" fill="#231F20">fronteira do sistema: o que o projeto constrói e mantém</text>
+
+  <g stroke="#DB1E2F" stroke-width="4" stroke-linecap="round">
+    <path d="M 646 650 L 674 674"/>
+    <path d="M 674 650 L 646 674"/>
+  </g>
+  <text x="694" y="667" font-family="Mulish, Segoe UI, system-ui, sans-serif" font-size="16" fill="#231F20">conector ausente por decisão: worker e site só falam com o repositório</text>
+
+  <rect x="40" y="696" width="46" height="30" rx="5" fill="#FFFFFF" stroke="#C3BDB6" stroke-width="2.5"/>
+  <text x="100" y="717" font-family="Mulish, Segoe UI, system-ui, sans-serif" font-size="16" fill="#5E5854">componente externo, fora do controle do projeto</text>
+  <rect x="646" y="696" width="46" height="30" rx="5" fill="#DB1E2F" stroke="#AF0421" stroke-width="3"/>
+  <text x="706" y="717" font-family="Mulish, Segoe UI, system-ui, sans-serif" font-size="16" fill="#231F20">único ponto de acoplamento entre os componentes internos</text>
+</svg>

@@ -1,0 +1,23 @@
+# Segredos e configuração local
+.env
+.env.*
+!.env.exemplo
+.claude/settings.local.json
+
+# Material local do PO (fora do repositório)
+IMG_*.jpeg
+apresentacao/
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# JavaScript
+node_modules/
+dist/
+
+# Sistema
+.DS_Store
+Thumbs.db
