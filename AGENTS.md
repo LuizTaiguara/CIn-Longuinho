@@ -85,6 +85,7 @@ Não carregue os documentos de `docs/` inteiros, leia só a seção de que a tar
 - **Nunca** faça commit ou push na `main`, nem merge, rebase ou force-push de branch alheia.
 - Você para no PR. Quem faz merge é humano, e nunca o autor do PR.
 - Branch: `SCRUM-NN-descricao-curta`. A chave do Jira no nome liga a branch à task.
+- Exceção: o PR de treino do onboarding (preencher `docs/EQUIPE.md`) usa a branch `treino-<nome>` e não tem task.
 - Commit: `SCRUM-NN: verbo no imperativo em português`. Exemplo: `SCRUM-84: cria leitor de arquivos .eml`.
 - Faça PRs pequenos. Um PR resolve uma task.
 - Peça permissão antes de instalar dependência nova.

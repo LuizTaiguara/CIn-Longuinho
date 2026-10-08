@@ -9,6 +9,7 @@ description: Abre o pull request da branch atual ligado à task do Jira, sugere 
 
 1. **Pré-checagem.** Se algo abaixo falhar, pare e diga o que falta.
    - A branch atual **não** é `main` e segue `SCRUM-NN-...`. Extraia o `SCRUM-NN`.
+   - Branch `treino-<nome>` (onboarding): sem task. Pule o passo 5 (Jira) e use o título `Treino: <nome> preenche docs/EQUIPE.md`.
    - `git status` está limpo. Se houver mudança solta, pergunte se entra no commit.
    - Commits seguem `SCRUM-NN: verbo no imperativo`.
    - Testes e lint da pasta passam. Os comandos estão no `AGENTS.md` da pasta. Se ainda não existirem, diga isso.
