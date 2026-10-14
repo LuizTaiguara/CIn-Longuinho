@@ -1,0 +1,448 @@
+# Catálogo anonimizado das threads da lista achados-perdidos@cin.ufpe.br (mai/2025 a out/2026)
+# Sem nomes, sem e-mails, sem telefones. O id é o threadId do Gmail (só resolve na caixa de quem é membro).
+# id|data|tipo|objeto|local|bloco|custodia|desfecho|msgs|flags
+# tipo: A=achado P=perdido R=aviso de processo X=fora de tema ?=ambíguo
+# bloco: A=vermelho E=branco B C D EXT=fora do prédio/outro centro MULTI=vários ?=não informado
+# custodia (do achado): local | achador | secgrad | recepcao | gerinfra | setor | informal | ? ; "-" para perdido
+# desfecho: o que a THREAD registra (aberto | reivindicado | encerrado). Desfechos fora da lista não aparecem.
+1a137faf6cfabde0|2026-10-13|P|carregador|Grad 5|A|-|aberto|1|crosspost
+1a137e52e982d422|2026-10-13|P|cracha|CIn|?|-|aberto|1|nome_dono
+1a13697985f465b3|2026-10-13|A|fone|Grad 2|A|local|aberto|1|
+1a135d6798fb71c9|2026-10-13|A|oculos|Grad 5|A|?|aberto|1|local_preciso
+1a11d739d6588474|2026-10-08|P|carregador|DA|?|-|aberto|1|
+1a11d14208192e67|2026-10-08|A|bolsa|banheiro masc 2o andar bloco E|E|local|aberto|1|assunto_contradiz
+1a1185b6ffa9e2ad|2026-10-07|P|lancheira|anfiteatro|A|-|aberto|1|
+1a1176657801fb40|2026-10-07|P|casaco|CIn|?|-|aberto|1|local_vago
+1a110deaf9132d09|2026-10-06|A|maquiagem|Grad 3|A|local|reivindicado|1|correcao_local;duplicata
+1a110dd1782434ee|2026-10-06|A|maquiagem|Grad 3|A|local|reivindicado|4|assunto_contradiz;correcao_local;sensivel
+1a10bdc3998a59eb|2026-10-05|A|fone|Grad 2|A|achador|aberto|1|multi_item
+1a10b93203034505|2026-10-05|P|cracha|DA|?|-|aberto|1|nome_dono
+1a0fc4c4eee57768|2026-10-02|P|carregador|?|?|-|aberto|1|local_vago
+1a0f91df0a9e6e4d|2026-10-01|A|garrafa|E112|E|informal|aberto|6|multi_item;ruido;reivindicacao_falhou;staff
+1a0f4f4893225185|2026-10-01|P|fone|Grad 5|A|-|aberto|1|
+1a0f4c04f9f6ae23|2026-09-30|P|joia|banheiro 1o andar|?|-|aberto|1|crosspost
+1a0ea9a482844de0|2026-09-29|P|fone|Grad 5 ou lab hardware|A|-|aberto|1|multi_local;crosspost
+1a0d5a7f86366ff4|2026-09-24|P|fone|E131 ou mezanino|E|-|aberto|1|multi_local;crosspost;item_parcial
+1a0d4391933c1719|2026-09-24|A|fone|Grad 5|A|achador|aberto|1|lista_so_cc
+1a0d39f82ec322cf|2026-09-24|P|fone|anfiteatro|A|-|aberto|1|crosspost
+1a0d00738a23e20c|2026-09-23|A|pendrive|Grad 4|A|?|aberto|1|
+1a0cb621a08c45f4|2026-09-22|P|garrafa|E132|E|-|aberto|1|pergunta
+1a0c96f38715a1a3|2026-09-22|P|fone|perto E112|E|-|aberto|2|item_parcial;reforco
+1a0b9705dab6e61c|2026-09-19|P|fone|Grad 5|A|-|aberto|1|sem_assunto;local_por_aula
+1a0b6dad99543bd6|2026-09-18|P|fone|Grad 5|A|-|aberto|1|local_por_aula
+1a0b06df79bca6f0|2026-09-17|P|garrafa|E112|E|secgrad|reivindicado|2|staff
+1a0b06635d45ef8a|2026-09-17|P|carregador|lab hardware|A|-|aberto|1|
+1a0b04d772c354f1|2026-09-17|P|garrafa|bloco vermelho ou branco|?|-|aberto|1|multi_local
+1a0aae094607b0b6|2026-09-16|A|carregador|Grad 3|A|local|aberto|1|local_preciso
+1a0aa3a846799ecf|2026-09-16|P|mouse|Grad 2|A|-|aberto|1|
+1a0a774629b2f4c6|2026-09-15|P|fone|CIn|?|-|aberto|1|item_parcial;crosspost
+1a09fe5027dd7031|2026-09-14|A|chave|banheiro fem frente lab pos|A|recepcao|aberto|1|
+1a09766ffdd6e9cf|2026-09-12|A|cartao|frente da portaria|A|achador|aberto|1|staff
+1a0911fad5192b0a|2026-09-11|A|chaveiro|passarela frente bloco A|A|achador|aberto|1|
+1a091136ff934a88|2026-09-11|A|outro|banco bloco A|A|?|aberto|1|assunto_contradiz;multi_item
+1a090fbeaa9c5565|2026-09-11|P|carregador|Grad 4|A|-|aberto|1|local_preciso
+1a09054e8a4fbe3d|2026-09-11|P|mouse|um dos grads|A|-|aberto|1|duplicata;multi_item;crosspost
+1a08d70135f437bb|2026-09-10|P|garrafa|bloco E 2o andar|E|-|encerrado|3|fwd;lista_so_cc;local_por_aula
+1a08cf47a048b021|2026-09-10|P|carregador|Grad 3|A|-|aberto|1|
+1a08ca7da0588042|2026-09-10|A|roupa|frente da recepcao|?|achador|aberto|1|lista_so_cc
+1a08b8842af21f7b|2026-09-10|P|carteira|?|?|-|aberto|1|local_vago
+1a08b3a157eb69a9|2026-09-10|P|mouse|um dos grads|A|-|aberto|1|multi_item;local_vago
+1a087f06ceb46e4e|2026-09-09|P|fone|Grad 4|A|-|aberto|1|
+1a087af68512e65d|2026-09-09|A|fone|lab hardware|A|local|reivindicado|3|local_preciso
+1a06e7afa0b78b10|2026-09-04|P|carteira|Grad 5|A|-|aberto|1|
+1a06c7853a0eea2b|2026-09-04|A|fone|banheiro|?|recepcao|aberto|1|
+1a05f5e898f1ec83|2026-09-01|A|garrafa|pia 2o andar bloco E|E|local|aberto|1|multi_item
+1a05e3826a6c31e8|2026-09-01|R|eletronico|Area II sala 5|EXT|-|encerrado|1|registro_pos_facto
+1a0599ff619968c3|2026-08-31|A|estojo|Grad 5|A|local|aberto|1|local_preciso
+1a0594da28e468d9|2026-08-31|P|garrafa|E113|E|-|aberto|1|data_errada
+1a048670b60f400a|2026-08-28|A|cracha|Grad 2|A|recepcao|aberto|1|terceiro_nomeado;assunto_contradiz
+1a03f42922697d00|2026-08-26|A|garrafa|E122|E|?|aberto|1|
+1a03e6933dc6b83a|2026-08-26|P|fone|?|?|-|aberto|1|local_vago
+1a03e479f8474152|2026-08-26|P|maquiagem|CIn|?|-|aberto|1|sensivel;local_vago
+1a03908209ebb327|2026-08-25|A|acessorio|bloco E|E|?|aberto|1|
+1a0335d360fdb8ae|2026-08-24|P|pendrive|E132 ou Grad 5 ou Grad 1|MULTI|-|aberto|1|multi_item;multi_local
+1a01f4815f32feed|2026-08-20|P|garrafa|Area II sala 5|EXT|-|aberto|1|local_por_aula
+1a01f260d6d043db|2026-08-20|P|carregador|lab hardware|A|-|aberto|1|sem_assunto
+1a01c68eff3acff7|2026-08-19|P|garrafa|sofa entrada bloco vermelho|A|-|aberto|1|
+1a0008b7de2b17a3|2026-08-14|P|cracha|um dos blocos|?|-|aberto|1|nome_dono
+19ffb35b073c870a|2026-08-13|P|copo|CIn|?|-|aberto|1|crosspost;anuncio_tardio
+19ff691733e2f897|2026-08-12|P|mouse|mezanino bloco E ou Grad 2|MULTI|-|aberto|1|multi_local
+19ff102fdfa62cf8|2026-08-11|A|celular|bloco E 1o andar|E|gerinfra|encerrado|3|assunto_contradiz;staff
+19fed3254462f2e1|2026-08-10|A|dinheiro|bloco E terreo|E|gerinfra|aberto|1|assunto_contradiz;staff
+19faaa16041503a0|2026-07-28|A|fone|janela da SecGrad|E|secgrad|aberto|1|staff
+19f2cf44f6006ca0|2026-07-04|P|maquiagem|anfiteatro|A|-|aberto|1|sensivel
+19efa7f15e22c6cf|2026-06-24|P|garrafa|E112|E|-|aberto|1|sem_assunto;nome_dono
+19ef53e74e50c9e5|2026-06-23|P|eletronico|Grad 1|A|-|aberto|1|sem_assunto
+19ef485cbedb2646|2026-06-23|P|fone|Grad 1|A|-|aberto|1|sem_assunto
+19edcb8f8889e8fc|2026-06-18|P|fone|Grad 2 ou Grad 3|A|-|aberto|1|sem_assunto;item_parcial
+19ed748360e5e30b|2026-06-17|P|fone|?|?|-|aberto|1|local_vago
+19ed6f836257f3be|2026-06-17|A|joia|estacionamento CCEN|EXT|achador|aberto|1|fora_cin
+19ed3074f9db30ae|2026-06-17|P|mouse|Grad 5|A|-|aberto|1|multi_item;rotulo_offtopic
+19ed2cb95d577805|2026-06-16|P|fone|predio branco|E|-|aberto|1|
+19ed13dc977d8188|2026-06-16|A|celular|copa bloco B|B|gerinfra|aberto|1|staff
+19ecd569583f8d0a|2026-06-15|P|carregador|Grad 5|A|-|aberto|1|sem_corpo
+19ecac45eb06f53f|2026-06-15|A|joia|lab hardware|A|setor|aberto|1|
+19eb9cb9df232a63|2026-06-12|P|joia|APG ou banheiro 1o andar|?|-|aberto|1|multi_local
+19eb8c9772ec2a56|2026-06-11|A|joia|Grad 4|A|local|aberto|1|local_preciso
+19eb65ebc8996cd1|2026-06-11|A|outro|E131|E|setor|aberto|1|crosspost;staff
+19eb230489aaa85a|2026-06-10|P|guarda-chuva|atras recepcao predio vermelho|A|-|aberto|1|telefone
+19e8e3bdafcc05d7|2026-06-03|A|caderno|bloco E|E|?|aberto|1|terceiro_nomeado
+19e8925945ff3e4f|2026-06-02|A|mouse|Grad 3|A|recepcao|aberto|1|
+19e833083f3a48fa|2026-06-01|?|garrafa|Grad 5|A|?|aberto|1|sem_corpo;ambiguo
+19e764469ba683cc|2026-05-30|A|higiene|banheiro 1o andar bloco E|E|achador|aberto|1|telefone;sensivel
+19e6fb8ce0c01fb0|2026-05-28|P|mouse|Grad 1|A|-|aberto|1|sem_corpo;local_preciso
+19e6a832ce8905d5|2026-05-27|P|guarda-chuva|INES 3o andar bloco E|E|-|aberto|1|
+19e69dfdc646a704|2026-05-27|P|caderno|Grad 4|A|-|aberto|1|crosspost
+19e3b47f06134368|2026-05-18|P|mochila|E132|E|-|aberto|5|multi_item;ruido;reforco;fwd
+19e2d1853675d249|2026-05-15|P|mouse|um dos grads|A|-|aberto|1|multi_item;local_vago
+19e28fd5728132bb|2026-05-15|P|garrafa|E231 ou E232|E|-|aberto|1|sem_corpo;multi_local
+19e26be23be8e760|2026-05-14|P|fone|Grad 5|A|-|aberto|1|local_preciso
+19e26893dec50124|2026-05-14|A|chave|sofa recepcao bloco A|A|recepcao|reivindicado|2|
+19e219bec4237bf2|2026-05-13|A|celular|banheiro fem bloco B|B|gerinfra|aberto|1|staff
+19e1deebeebda000|2026-05-12|P|guarda-chuva|?|?|-|aberto|1|local_vago;crosspost
+19e0dacd2df490f3|2026-05-09|A|fone|Grad 5|A|recepcao|aberto|1|staff
+19e09ea09e5d5734|2026-05-08|P|guarda-chuva|sofa recepcao bloco branco|E|-|aberto|1|
+19e09dd54febf58f|2026-05-08|P|guarda-chuva|Grad 2|A|-|aberto|1|
+19e08d6a27a3ba0d|2026-05-08|A|carregador|E203|E|setor|aberto|1|staff
+19e07b4a7eeaf348|2026-05-08|A|fone|cantinas bloco E|E|recepcao|aberto|1|item_parcial
+19e04ae34594263d|2026-05-07|P|eletronico|Grad 2|A|-|aberto|1|telefone
+19dfef0840e45a93|2026-05-06|P|garrafa|E122|E|-|aberto|1|
+19df97566422e891|2026-05-05|P|guarda-chuva|Grad 4|A|-|aberto|2|pista_terceiro
+19de406681961d24|2026-05-01|P|carregador|Grad 3|A|-|aberto|1|
+19de0f174e67f268|2026-05-01|A|fone|E233|E|?|aberto|2|sem_corpo;crosspost
+19de05d6036aa37c|2026-04-30|P|eletronico|E132|E|-|aberto|1|crosspost
+19ddc524e3d15b0a|2026-04-30|P|carregador|anfiteatro|A|-|aberto|1|crosspost;nome_dono
+19dd9b6a354dc246|2026-04-29|A|fone|Grad 5|A|local|encerrado|3|local_preciso;fechado_por_terceiro
+19dd53246e79f24f|2026-04-28|A|caderno|Grad 5|A|?|aberto|1|local_preciso
+19dcfdbd41af90b6|2026-04-27|P|estojo|?|?|-|aberto|1|fwd
+19dc635ee18a004d|2026-04-25|P|carregador|mezanino ou SandPit|MULTI|-|aberto|1|multi_local;crosspost
+19dc56af5351c01a|2026-04-25|A|casaco|anfiteatro bloco A|A|achador|aberto|1|caso_atipico;crosspost
+19dc183d5f18b1be|2026-04-24|A|guarda-chuva|Grad 3|A|local|aberto|1|local_preciso
+19db4c63853b2cf8|2026-04-22|A|fone|Grad 5|A|achador|aberto|1|item_parcial;crosspost
+19db1b74e58a7645|2026-04-21|P|fone|CIn|?|-|aberto|1|pergunta;local_vago
+19d9bfb9c0918512|2026-04-17|P|cartao|CIn|?|-|aberto|1|local_vago
+19d9ba018a73fa4b|2026-04-17|A|bone|Grad 2|A|?|aberto|1|assunto_misto;crosspost
+19d9aeccc741e595|2026-04-17|P|fone|Grad 5|A|-|aberto|1|crosspost
+19d97fa6f853cbbc|2026-04-16|P|mouse|aula de Programacao|?|-|aberto|1|local_por_aula;crosspost
+19d97cca767f8d77|2026-04-16|A|cracha|onibus|EXT|?|aberto|1|fora_cin;multi_item;ambiguo
+19d789243e9b87cc|2026-04-10|A|caderno|E132|E|local|aberto|1|local_preciso
+19d725b47a04f88e|2026-04-09|A|fone|E122|E|?|aberto|1|assunto_contradiz
+19d71ee72ebe0833|2026-04-09|P|cracha|area externa dos blocos|EXT|-|encerrado|2|nome_dono
+19d6df7fc78160cc|2026-04-08|P|caderno|Grad 3|A|-|aberto|1|
+19d650090c4e6d13|2026-04-06|P|carregador|1o andar perto E122|E|-|aberto|1|multi_item
+19d6390c227a460d|2026-04-06|P|garrafa|bloco E|E|-|aberto|1|nome_dono
+19d631be11c1463e|2026-04-06|P|carregador|E132|E|-|aberto|2|reforco;local_por_aula
+19d45dfd237156ea|2026-03-31|A|fone|E131|E|achador|aberto|3|reforco;ruido;crosspost
+19d3ee058fce52fd|2026-03-30|A|fone|Grad 5|A|local|reivindicado|2|crosspost
+19d36cbf23d90aa8|2026-03-28|A|joia|Grad 1|A|?|aberto|1|multi_item;sem_corpo
+19d3140c1ae3f414|2026-03-27|A|carregador|Grad 2|A|achador|aberto|1|
+19d2b540d58f57c2|2026-03-26|A|garrafa|corredor 1o andar bloco E|E|secgrad|aberto|1|staff
+19d27f2ca8ad195b|2026-03-26|A|garrafa|aula de Algoritmos|?|achador|aberto|1|local_por_aula;crosspost
+19d27579e6d3e14e|2026-03-25|A|casaco|estacionamento|EXT|achador|aberto|1|recusa_recepcao;crosspost
+19d21d13ab5ff54d|2026-03-24|A|cartao|?|A|recepcao|aberto|1|terceiro_nomeado;crosspost
+19d2122423246e11|2026-03-24|A|garrafa|E112|E|secgrad|encerrado|2|staff
+19d0b97ede16801b|2026-03-20|A|garrafa|E233|E|?|aberto|1|multi_item
+19d0729447fe294d|2026-03-19|A|higiene|E112|E|secgrad|aberto|1|sensivel;staff
+19d029023aaea70e|2026-03-18|A|garrafa|mesas 1o andar bloco E|E|secgrad|aberto|1|staff
+19d028c6706b9089|2026-03-18|A|garrafa|E131|E|secgrad|aberto|1|staff
+19d01b89459b7553|2026-03-18|P|garrafa|E231|E|-|aberto|1|
+19d014c73dbb5f4d|2026-03-18|P|chave|bloco E|E|-|aberto|2|pista_terceiro
+19cfd0e6f0e0661e|2026-03-17|P|carregador|E232|E|-|aberto|1|pergunta
+19cfcbe825a07a5c|2026-03-17|A|garrafa|E232|E|secgrad|encerrado|2|staff
+19cfc0c6cddc3e0b|2026-03-17|A|chave|banheiro fem bloco B terreo|B|gerinfra|aberto|1|staff
+19cf8caf339dd02e|2026-03-16|A|fone|E132|E|?|aberto|1|item_parcial
+19cf8713c14f3ec7|2026-03-16|P|carregador|E223|E|-|aberto|1|pergunta;crosspost
+19ce83ba765f9318|2026-03-13|A|estojo|E112|E|secgrad|encerrado|2|staff
+19ce8391173b4b1f|2026-03-13|A|garrafa|E113|E|secgrad|aberto|2|ruido;staff
+19ce836e698c270c|2026-03-13|A|garrafa|E122|E|secgrad|aberto|1|staff
+19ce8320907882a3|2026-03-13|A|garrafa|E112|E|secgrad|encerrado|2|multi_item;staff
+19ce47e8d57ff8e4|2026-03-13|P|chave|Grad 4|A|-|aberto|1|
+19ce3b75d29b3a24|2026-03-12|P|lancheira|bloco E|E|-|aberto|1|multi_item;sem_assunto
+19ce343c1e2d181d|2026-03-12|A|fone|Grad 5|A|?|aberto|1|
+19ce2ed8f4378fd3|2026-03-12|P|garrafa|E122|E|secgrad|encerrado|3|staff
+19cdf4a4af92fa9a|2026-03-11|P|garrafa|Area II sala 1|EXT|-|aberto|1|
+19cdef8d9ad9fe03|2026-03-11|A|garrafa|Grad 4|A|recepcao|aberto|1|staff;local_preciso
+19cdd1da8ded35e4|2026-03-11|P|garrafa|Grad 4 ou recepcao|A|-|aberto|1|multi_item;multi_local
+19cd8ee4645433b3|2026-03-10|A|celular|mesinha ao lado E121|E|recepcao|aberto|1|assunto_contradiz;duplicata_cruzada
+19cd8ed96f48d9e3|2026-03-10|A|celular|?|E|recepcao|aberto|1|assunto_contradiz;duplicata_cruzada
+19cd4df17f2d0cdc|2026-03-09|P|eletronico|E232|E|-|aberto|1|crosspost
+19cc06b46aa432a7|2026-03-05|?|oculos|Grad 5|A|?|aberto|1|sem_corpo;ambiguo
+19cbddb96231e92b|2026-03-05|P|garrafa|sala do pitch (evento)|?|-|aberto|1|local_por_evento
+19cb57ba19bf5b64|2026-03-03|P|guarda-chuva|Grad 5|A|-|aberto|3|pista_terceiro;local_preciso
+19c4e267c7680ecc|2026-02-11|P|fone|4o andar ate estacionamento|MULTI|-|aberto|1|item_parcial;multi_local
+19c4d9540601ec44|2026-02-11|P|fone|terreo|?|-|aberto|1|item_parcial
+19bfa87f10208bb2|2026-01-26|A|celular|bloco B|B|gerinfra|aberto|1|staff
+19b37d2223061c6e|2025-12-19|P|fone|CIn|?|-|aberto|2|item_parcial;resposta_negativa
+19b379cf5df82f8f|2025-12-19|P|garrafa|CIn|?|-|aberto|1|sem_assunto;nome_dono
+19b339d7b8133336|2025-12-18|A|oculos|banheiro masc frente B011 predio vermelho|A|local|aberto|1|
+19b2935a41a30994|2025-12-16|A|eletronico|Grad 1|A|local|aberto|1|
+19b1974e1269cc33|2025-12-13|P|carregador|Grad 3|A|-|aberto|1|
+19b11fed0e1b3106|2025-12-12|A|carregador|Grad 3|A|local|aberto|1|local_preciso
+19b0fc5e845373e9|2025-12-11|P|carregador|Grad 5|A|-|reivindicado|3|
+19b0e8887fd19685|2025-12-11|P|chave|bloco E|E|-|aberto|2|multi_item
+19b0e210c6ee699b|2025-12-11|R|varios|SecGrad|E|secgrad|-|1|prazo_descarte;staff
+19b0d4fecc04bd20|2025-12-11|P|garrafa|E131|E|-|aberto|1|
+19b0ad75f09e59b8|2025-12-11|P|garrafa|lab hardware|A|-|aberto|1|
+19b097e35b1544f6|2025-12-10|A|eletronico|lab hardware|A|?|reivindicado|2|reivindicacao_fraca
+19b0938754d750bd|2025-12-10|A|mouse|mezanino bloco E|E|setor|aberto|1|multi_item;staff
+19b03b54f2142ab6|2025-12-09|A|joia|?|?|setor|aberto|1|staff;local_vago
+19ae6d7dfd5c2799|2025-12-04|P|fone|Grad 5|A|-|aberto|1|
+19ae6bc578f91eac|2025-12-04|P|fone|lab hardware|A|-|aberto|1|email_terceiro_no_corpo
+19ae60f183860744|2025-12-03|P|garrafa|Grad 1|A|-|aberto|1|
+19ae23f0ab154823|2025-12-03|P|carregador|lab pos-graduacao|A|-|aberto|1|
+19adf1e36e170561|2025-12-02|P|garrafa|banheiro fem bloco E|E|-|aberto|1|
+19adbd722caa7ddb|2025-12-01|A|outro|?|?|recepcao|aberto|1|sem_corpo;duplicata;staff
+19adbd4d99be3413|2025-12-01|A|outro|estacionamento|EXT|recepcao|aberto|1|staff
+19adb108d66b1d97|2025-12-01|A|garrafa|anfiteatro|A|?|aberto|1|sem_corpo
+19adaba8c921d64c|2025-12-01|A|celular|sofa convivencia bloco E|E|secgrad|encerrado|2|staff
+19acfde4847fa690|2025-11-29|A|fone|lab pos-graduacao|A|local|aberto|1|crosspost
+19ac1b95e2ea8a88|2025-11-26|P|fone|lab hardware|A|-|aberto|1|crosspost;local_preciso
+19abbdc2d5263986|2025-11-25|A|chave|estacionamento de motos|EXT|?|aberto|1|
+19a9c1dcefe4e315|2025-11-19|P|carregador|lab hardware|A|-|aberto|1|multi_item
+19a99253f90528a2|2025-11-18|A|cartao|parada de onibus|EXT|?|aberto|1|terceiro_nomeado;fora_cin
+19a98ad460b8fb2d|2025-11-18|A|fone|Grad 3|A|achador|aberto|1|
+19a988af0d372877|2025-11-18|A|garrafa|E131|E|secgrad|aberto|1|multi_item;staff
+19a92c1ff25a902d|2025-11-17|P|carregador|Grad 5|A|-|aberto|2|reforco;local_preciso
+19a83f48f606a55a|2025-11-14|A|casaco|?|?|?|aberto|1|local_vago
+19a83201eb17d35e|2025-11-14|A|dinheiro|mezanino bloco A|A|?|aberto|14|ruido
+19a821318e155e55|2025-11-14|P|mouse|Grad 2|A|-|aberto|2|fwd;local_por_aula
+19a7fe560d7916b8|2025-11-14|A|garrafa|sala 233|E|informal|aberto|1|lista_so_cc
+19a7ec0d4cb63667|2025-11-13|P|carregador|?|?|-|aberto|1|local_vago
+19a7d695285d1ca2|2025-11-13|P|roupa|banheiro 4o andar bloco E|E|-|aberto|1|multi_item
+19a7aaad59c1d582|2025-11-13|P|fone|terreo predio branco|E|-|encerrado|2|achado_na_portaria
+19a70b861aab8857|2025-11-11|P|garrafa|Grad 3 ou Grad 4|A|-|aberto|1|multi_local
+19a6f924b324b1f7|2025-11-10|P|fone|?|?|-|aberto|1|local_vago
+19a5ea8b449f6389|2025-11-07|P|garrafa|E132|E|-|aberto|2|resposta_negativa
+19a5e7fdc68cc7f3|2025-11-07|A|garrafa|E232|E|?|aberto|2|reforco;staff
+19a5b25f95af6dc4|2025-11-06|P|estojo|?|?|-|aberto|1|local_vago
+19a5aca0ffea63fd|2025-11-06|A|pendrive|grama|EXT|achador|aberto|1|
+19a5a5bfe6c944ff|2025-11-06|A|eletronico|E233|E|achador|aberto|1|
+19a59d244da3d48f|2025-11-06|P|garrafa|copa predio vermelho|A|-|aberto|1|nome_dono
+19a55883e6ac0e5f|2025-11-05|P|garrafa|bloco E|E|-|aberto|1|nome_dono
+19a53ceb8dcb0c24|2025-11-05|P|mouse|Grad 4|A|-|aberto|1|
+19a5242e2cb8a367|2025-11-05|P|roupa|?|?|-|aberto|1|multi_item;local_vago
+19a4f7341077183c|2025-11-04|P|carregador|lab hardware|A|-|aberto|1|
+19a4c8dab6a5f2d1|2025-11-04|A|lancheira|lab hardware|A|?|aberto|1|crosspost
+19a4b7bec076f6cd|2025-11-03|A|?|?|?|recepcao|aberto|1|sem_corpo;staff;objeto_so_na_foto
+19a4b740da348388|2025-11-03|P|fone|E233|E|-|aberto|1|item_parcial;local_preciso
+19a4b05c6c8fa9cd|2025-11-03|A|carteira|banheiro predio vermelho|A|recepcao|aberto|1|terceiro_nomeado
+19a4a5e6d7410a7c|2025-11-03|A|casaco|um dos grads|A|?|aberto|1|sem_corpo
+19a3c6e5a822b477|2025-10-31|A|cracha|?|?|achador|aberto|1|terceiro_nomeado;local_vago
+19a3a4e88cdb6d3b|2025-10-31|P|mouse|Grad 5|A|-|aberto|1|duplicata
+19a39bcbf59a3a2c|2025-10-31|P|mouse|CIn|?|-|aberto|1|local_vago
+19a37f625dd8edd6|2025-10-31|P|mouse|Grad 5|A|-|aberto|1|
+19a366126b38673c|2025-10-30|P|cracha|trajeto ate outro centro|EXT|-|aberto|1|fora_cin
+19a32cf7a87dfc09|2025-10-30|P|casaco|bloco E ou lab pos|MULTI|-|aberto|1|multi_local
+19a32b048b898e13|2025-10-30|P|carregador|Grad 5|A|-|aberto|1|duplicata
+19a32aa4112c22ed|2025-10-30|P|carregador|Grad 5|A|-|reivindicado|3|sem_assunto
+19a313f492a3d8c0|2025-10-29|P|caderno|bloco E|E|-|aberto|1|duplicata
+19a313d18e8b8b93|2025-10-29|P|caderno|bloco E|E|-|aberto|1|
+19a311ddc6c907da|2025-10-29|P|cracha|Grad 2|A|-|aberto|1|duplicata
+19a300db2885c9d5|2025-10-29|A|casaco|Grad 3|A|?|aberto|1|sem_corpo
+19a2bb8339abe8d4|2025-10-28|P|garrafa|auditorio ou Grad 2|A|-|aberto|1|multi_local
+19a2611b68453a61|2025-10-27|X|-|-|-|-|-|1|fora_de_tema
+19a1b9c4638c518e|2025-10-25|P|cracha|Grad 2|A|-|aberto|1|
+19a11bfcfc881a85|2025-10-23|P|fone|Grad 5|A|-|aberto|1|
+19a117d73aec9dda|2025-10-23|P|garrafa|mezanino|?|-|aberto|1|crosspost
+19a08757bd408f17|2025-10-21|P|carregador|Grad 5|A|-|aberto|1|
+19a084fc279908dd|2025-10-21|A|carregador|A014|A|recepcao|aberto|1|
+19a07e69fb045ae6|2025-10-21|A|bone|E132|E|?|aberto|1|multi_item;assunto_contradiz
+19a0340208fa8e38|2025-10-20|A|garrafa|E112|E|secgrad|aberto|1|staff
+199f8b058e401dcf|2025-10-18|P|estojo|Grad 3|A|-|aberto|1|
+199f4b22a2ff9a53|2025-10-18|A|casaco|um dos grads|A|?|aberto|1|sem_corpo
+199eed9b2e1a33a2|2025-10-16|A|fone|Grad 5|A|?|aberto|1|multi_item
+199ee35d92ee436d|2025-10-16|A|celular|E132|E|?|aberto|1|
+199ed1c86eec93c7|2025-10-16|P|casaco|lab hardware|A|-|aberto|1|
+199e8a5603d43c0b|2025-10-15|A|acessorio|?|?|secgrad|aberto|2|atualiza_custodia
+199e7b21ed281f95|2025-10-15|A|fone|mezanino bloco E|E|achador|aberto|2|atualiza_custodia;recusa_recepcao
+199e55f44183ff7f|2025-10-15|P|carregador|E112|E|-|aberto|1|
+199e5351d53f6e2f|2025-10-15|A|garrafa|E233|E|?|aberto|1|
+199d458cc590b3f0|2025-10-11|A|fone|Grad 1|A|?|aberto|1|
+199d0022f95d140d|2025-10-10|A|joia|Grad 5|A|?|aberto|1|
+199c59f0d0f3a8d4|2025-10-08|A|mouse|E131|E|secgrad|aberto|1|staff
+199c59749b1ff792|2025-10-08|P|fone|E122|E|-|aberto|1|
+199bb0d91df2b20c|2025-10-06|A|remedio|Grad 1|A|local|aberto|1|sensivel;crosspost;local_preciso
+199bad397bc5ea3e|2025-10-06|A|estojo|copa bloco E|E|secgrad|aberto|1|
+199bac77011a6b9b|2025-10-06|P|eletronico|lab hardware|A|-|aberto|1|
+199ba69eeb417a50|2025-10-06|P|carregador|Grad 5|A|-|aberto|1|local_preciso
+199b4f0395350c27|2025-10-05|A|carregador|Grad 3|A|local|aberto|2|fwd;local_preciso
+199af08e94d588c4|2025-10-04|P|carregador|Grad 1|A|-|aberto|1|
+199ad078154ca911|2025-10-04|P|carregador|Grad 1|A|-|aberto|1|
+199abf0da44652f8|2025-10-03|P|oculos|lab hardware ou DA|MULTI|-|aberto|1|multi_local
+199ab6fc9d0b2eb8|2025-10-03|A|fone|Grad 5|A|?|aberto|1|assunto_contradiz;local_preciso
+199aa45180f06153|2025-10-03|P|mouse|Grad 4|A|-|aberto|1|local_preciso;local_por_aula
+199a9ead8208d070|2025-10-03|A|oculos|Grad 5|A|?|aberto|1|assunto_contradiz;local_preciso
+199a9940a1f3ccc4|2025-10-03|P|outro|estacionamento|EXT|-|aberto|2|pista_terceiro;placa_veiculo
+199a74d0fa287001|2025-10-02|A|garrafa|sala 233 e hall bloco E|E|?|aberto|1|multi_item;sem_corpo
+199a728ed2a240ac|2025-10-02|A|garrafa|banheiro masc perto da copa|?|achador|aberto|1|
+199a67155383850a|2025-10-02|A|garrafa|E232|E|secgrad|aberto|1|staff
+199a626e8a03ed96|2025-10-02|P|chave|sofa predio branco|E|-|encerrado|2|staff
+199a56a9a6d50057|2025-10-02|P|fone|Grad 1|A|-|aberto|1|item_parcial;local_preciso
+199a029834eee108|2025-10-01|P|fone|sofa recepcao predio vermelho|A|-|aberto|1|
+199a02088de9a07a|2025-10-01|?|fone|banheiro masc perto Grad 1|A|?|aberto|1|sem_corpo;ambiguo
+1999fe00ab68fae7|2025-10-01|?|mouse|Grad 2|A|?|aberto|1|ambiguo;assunto_contradiz;crosspost
+1999c5e273415b97|2025-09-30|P|garrafa|E232|E|-|aberto|1|
+19995a5b465111bb|2025-09-29|P|garrafa|sala D003 (outro centro)|EXT|-|aberto|2|duplicata;nome_dono;fora_cin;pedido_descadastro
+19986e05e62d33eb|2025-09-26|A|fone|Grad 5|A|?|aberto|1|sem_corpo;staff;multi_item
+19986abe99d532b6|2025-09-26|P|garrafa|sala D003 (outro centro)|EXT|-|aberto|1|sem_corpo;fora_cin
+199868a663c52057|2025-09-26|A|higiene|banheiro masc ao lado do Grad 5|A|?|aberto|1|sem_corpo;sensivel;assunto_contradiz
+199853cfc3e8e0ec|2025-09-26|A|fone|laboratorio de informatica 3|A|?|aberto|1|
+199832e5cd750377|2025-09-25|A|chaveiro|caminho para o circular|EXT|achador|aberto|1|fora_cin
+199829ee6d1f1260|2025-09-25|P|garrafa|Grad 5|A|-|aberto|1|local_preciso
+1998272706194200|2025-09-25|A|mouse|Grad 5|A|?|aberto|1|sem_corpo
+19981798f627c7c4|2025-09-25|A|cartao|E112|E|secgrad|encerrado|2|staff
+19980a32c9b8e702|2025-09-25|A|celular|banheiro fem perto do helpdesk|?|?|encerrado|3|mencao
+1997dba61bb3e76a|2025-09-24|P|carregador|E102|E|-|aberto|1|
+1997771c7e257b74|2025-09-23|A|fone|?|E|secgrad|aberto|1|staff;duplicata_cruzada
+1997435d212bce67|2025-09-23|P|carteira|Grad 3 ou E232|MULTI|secgrad|reivindicado|3|multi_local;staff
+1997431ac10dcef4|2025-09-23|P|fone|1o andar predio branco|E|secgrad|reivindicado|5|duplicata_cruzada;staff
+19973f0904568e2a|2025-09-23|P|carregador|Grad 5|A|-|aberto|1|local_preciso
+1996d2c4418617ec|2025-09-21|A|garrafa|E402 ou E403|E|achador|aberto|1|multi_local
+1996d142773a17a9|2025-09-21|P|estojo|E113|E|-|aberto|1|telefone
+19968d205f4f9fa9|2025-09-20|A|carregador|Grad 3|A|local|aberto|1|local_preciso
+1996513239f8bf5e|2025-09-20|P|fone|Grad 1|A|-|aberto|1|
+1995f64d0be0ea06|2025-09-19|P|carteira|CIn|?|-|aberto|1|duplicata
+1995f323b9fdd1e1|2025-09-18|A|garrafa|mesas externas bloco E|E|?|reivindicado|2|
+1995e32e70fc21d2|2025-09-18|A|carregador|E204|E|?|aberto|1|
+1995e1679e83d6c6|2025-09-18|A|chave|E131|E|secgrad|encerrado|2|staff
+1995ce715e16af0d|2025-09-18|A|mouse|Grad 3|A|?|aberto|1|local_preciso
+1995974e2bfdbfe5|2025-09-17|A|oculos|Grad 5|A|achador|aberto|1|local_preciso
+199540362f2d302a|2025-09-16|A|carregador|lab hardware|A|?|aberto|1|
+199535b7b107f7dd|2025-09-16|A|outro|estacionamento|EXT|achador|aberto|1|
+199531d6c5955c46|2025-09-16|A|cartao|parada de onibus|EXT|achador|reivindicado|2|terceiro_nomeado;fora_cin
+1994f795570bbbe2|2025-09-15|P|carregador|E204|E|-|aberto|1|
+1994ea29fec8a65b|2025-09-15|A|?|E232|E|secgrad|aberto|2|fwd;staff;objeto_so_na_foto
+1994361a5a08c5af|2025-09-13|P|carregador|CIn|?|-|aberto|1|local_vago
+19942dbd63082d67|2025-09-13|P|garrafa|CIn|?|-|aberto|1|local_vago
+19940b60be4b38fc|2025-09-13|P|carregador|Grad 3|A|-|aberto|2|resposta_negativa
+1993ec636ea314ac|2025-09-12|A|garrafa|anfiteatro|A|setor|aberto|1|staff
+19936711ed2ce3cf|2025-09-11|A|casaco|Area II sala 10|EXT|setor|aberto|1|
+1993526ed1bb9e77|2025-09-10|A|pendrive|Grad 5|A|achador|aberto|1|telefone
+19934c96888d5b5e|2025-09-10|A|cartao|entre o CIn e o NIATE|EXT|secgrad|aberto|1|duplicata_cruzada;staff
+19934a3d5d96668a|2025-09-10|A|cartao|entre o CIn e o NIATE|EXT|recepcao|aberto|1|duplicata_cruzada
+19933de29b8dd454|2025-09-10|A|caderno|sala D003 (outro centro)|EXT|achador|aberto|1|fora_cin
+1993076ff2bddc86|2025-09-09|A|garrafa|bloco E|E|secgrad|aberto|1|
+1992f5f17af48dbd|2025-09-09|A|estojo|Grad 5|A|local|aberto|1|local_preciso
+1992b5b03f409799|2025-09-08|A|carregador|Grad 4|A|setor|aberto|1|staff
+1990991e1ac89239|2025-09-02|P|copo|perto do Lux AI|E|-|aberto|1|
+1989ae7a9e121e1d|2025-08-11|A|fone|grama entre bloco E e estacionamento|EXT|achador|aberto|1|
+19890031dd1bdb88|2025-08-09|A|caneta|Grad 2|A|local|reivindicado|2|reivindicacao_fraca;duplicata
+1988fe4a3fe1c97d|2025-08-09|A|caneta|Grad 2|A|local|aberto|1|local_preciso
+1987653635858c30|2025-08-04|P|lancheira|sofa terreo bloco E|E|-|aberto|1|crosspost
+19868461a19f7f64|2025-08-02|P|mouse|Grad 1|A|-|aberto|1|
+198679ae75433834|2025-08-01|R|varios|corredores|?|informal|-|1|prazo_descarte;staff
+19861c41148c56ba|2025-07-31|P|mouse|um dos grads|A|-|aberto|1|multi_item
+1984920d89b2ab2f|2025-07-26|P|estojo|bloco D|EXT|-|aberto|1|telefone
+1984226363dd5868|2025-07-25|A|garrafa|copa bloco E|E|informal|aberto|1|ponto_informal
+19841fd630f4c3cc|2025-07-25|P|garrafa|CIn|?|-|aberto|1|telefone;local_vago
+1984162a38d7df0c|2025-07-25|A|outro|DA|?|?|aberto|1|
+198389ea35673e6b|2025-07-23|A|lancheira|banheiro fem corredor do hardware|A|local|aberto|1|
+198371cedb8e66d3|2025-07-23|P|pendrive|lab hardware|A|-|aberto|1|
+198334629429b1bc|2025-07-22|A|higiene|banheiro masc perto refeitorio predio vermelho|A|local|aberto|1|crosspost;sensivel
+1982e414dcd2c4ba|2025-07-21|P|casaco|?|?|-|aberto|1|local_vago
+1982d9f03ddda4ba|2025-07-21|P|fone|lab hardware C007|A|-|aberto|1|sem_assunto;item_parcial
+1981083d995713f3|2025-07-15|A|garrafa|E233|E|recepcao|aberto|1|local_por_aula
+1980acc57f79730d|2025-07-14|P|mouse|algum grad|A|-|aberto|1|local_vago
+197f4fd4c762fb30|2025-07-10|P|chaveiro|CIn|?|-|aberto|1|local_vago
+197f4cd2a64c7443|2025-07-10|P|casaco|4o andar predio branco|E|-|aberto|1|
+197f200b599a1d1d|2025-07-10|P|fone|Grad 3|A|-|aberto|2|ruido
+197f1b300e979927|2025-07-10|P|fone|?|?|-|aberto|1|local_vago
+197f166b03325458|2025-07-09|P|carregador|Grad 3|A|-|aberto|1|crosspost;pergunta
+197f0d7e2b8ea53f|2025-07-09|P|garrafa|Grad 3|A|-|encerrado|2|
+197ea85c5379bbb4|2025-07-08|A|garrafa|bloco E|E|setor|aberto|1|staff
+197e72ffb8d1ace7|2025-07-07|P|roupa|Grad 1|A|-|aberto|1|multi_item
+197e68d77ea361b3|2025-07-07|P|cracha|DA ou Grad 5|MULTI|-|aberto|1|sem_assunto;multi_local
+197e5c520810ab01|2025-07-07|P|outro|CIn|?|-|encerrado|2|crosspost
+197e525188e5c160|2025-07-07|P|carregador|E122|E|-|aberto|1|
+197e4fa4d4c9f8d6|2025-07-07|P|estojo|E132|E|-|aberto|1|
+197e4e30aaff6ba5|2025-07-07|A|fone|sala D005 (outro centro)|EXT|achador|aberto|1|sem_corpo;fora_cin
+197d5e98ed702e84|2025-07-04|A|mouse|Grad 5|A|?|aberto|1|staff;instrucao_oficial
+197c7aa7cdef3b9b|2025-07-01|P|garrafa|Grad 5 ou Grad 3|A|-|aberto|1|multi_local
+197c7425f2b40b5d|2025-07-01|A|fone|Grad 3|A|?|aberto|1|
+197c20f99f2e7775|2025-06-30|P|carregador|Grad 2 ou Grad 5|A|-|aberto|1|multi_local
+197b3c9f1d27d26d|2025-06-27|P|carregador|E132 predio branco|E|-|aberto|1|
+197b33bd6c9b358e|2025-06-27|A|remedio|bicicletario|EXT|recepcao|aberto|1|sensivel
+197aec8d332c3a38|2025-06-27|P|guarda-chuva|?|?|-|aberto|1|local_vago;anuncio_tardio
+197a9ae96f23cc49|2025-06-26|P|chaveiro|?|?|-|aberto|1|local_vago;item_parcial
+197a808065c88f88|2025-06-25|A|fone|banheiro fem bloco B|B|gerinfra|aberto|1|staff;item_parcial
+197a80401d08ad11|2025-06-25|P|cracha|RU ou estacionamento ou bloco E|MULTI|-|aberto|1|multi_local;fora_cin
+1978fd950ae1c175|2025-06-21|A|garrafa|mesas de madeira externas|EXT|?|aberto|1|
+19788d77322d334b|2025-06-19|P|garrafa|?|?|-|aberto|1|sem_corpo;local_vago
+197838424791cd56|2025-06-18|P|joia|caminho ate outro centro|EXT|-|aberto|1|fora_cin
+19780c82d927ddd4|2025-06-18|A|garrafa|mesas bloco E|E|setor|aberto|1|
+1978099d9a983fb4|2025-06-18|P|fone|Grad 5|A|-|aberto|1|
+1977e4c63d249a58|2025-06-17|?|garrafa|bloco D sala d004|EXT|?|aberto|1|ambiguo;assunto_contradiz
+1977b16258951c37|2025-06-16|A|lancheira|Grad 5|A|?|aberto|1|multi_item;crosspost
+1976ae5fefcc1c94|2025-06-13|P|guarda-chuva|sala D005 (outro centro)|EXT|-|aberto|1|fora_cin
+1976ad589c2346df|2025-06-13|P|garrafa|grads ou bloco E|MULTI|-|aberto|1|multi_local;crosspost
+19761ce1635c3b6e|2025-06-12|P|mouse|Grad 2|A|-|aberto|1|local_preciso
+19761b79441e7b08|2025-06-12|A|oculos|Grad 2|A|local|aberto|1|
+197609d05006aa87|2025-06-11|A|oculos|banheiro masc 2o andar|?|secgrad|aberto|1|staff
+1976026a17615257|2025-06-11|P|cracha|bloco vermelho|A|-|aberto|1|
+1976007ee21eaad8|2025-06-11|A|oculos|Grad 5|A|local|aberto|1|local_preciso
+197563de6da802bb|2025-06-09|P|mouse|Grad 4|A|-|aberto|1|telefone;crosspost
+1975597189d3d88e|2025-06-09|P|fone|Grad 5|A|-|aberto|1|
+197542b48e96cc04|2025-06-09|A|carregador|Grad 5|A|setor|aberto|1|
+1974c3614a79d427|2025-06-07|A|mouse|Grad 5|A|?|aberto|1|duplicata
+1974c2b72df6a100|2025-06-07|P|mouse|Grad 4|A|-|aberto|1|
+1974ae641e3d0e7c|2025-06-07|?|fone|?|?|?|aberto|1|ambiguo;sem_corpo
+1974a36726d3decb|2025-06-07|P|carregador|um dos grads|A|-|aberto|1|telefone;local_por_aula
+19745c6928fcfbe1|2025-06-06|P|joia|CIn|?|-|aberto|1|sem_corpo;local_vago
+197426cf3e6b2985|2025-06-05|P|carregador|1o andar predio branco|E|-|aberto|2|telefone;complemento
+19740b33de5d5365|2025-06-05|A|mouse|Grad 5|A|?|aberto|1|
+19740a6412c3eef6|2025-06-05|P|fone|Grad 1 ou Grad 3|A|-|aberto|1|multi_local
+1973d5879e8f4158|2025-06-04|?|garrafa|E131|E|?|aberto|1|sem_corpo;ambiguo
+1973d1796431d483|2025-06-04|P|garrafa|mesinha da entrada principal|?|-|aberto|1|sem_assunto
+1973d05142771a43|2025-06-04|P|cracha|Grad 5|A|-|aberto|1|sem_assunto
+1973cde296dae90b|2025-06-04|P|acessorio|outro centro|EXT|-|aberto|1|fora_cin
+1973b72b20ffbe4b|2025-06-04|P|carregador|CIn|?|-|encerrado|2|local_vago
+1973b1733e39b5de|2025-06-04|A|celular|?|?|setor|aberto|1|staff;local_vago
+19735fff950da24d|2025-06-03|P|pendrive|um dos grads|A|-|encerrado|2|
+19735a764bfb2b61|2025-06-03|P|fone|Grad 5 ou lab pos|A|-|encerrado|2|multi_local
+1973260028c437ed|2025-06-02|A|roupa|banheiro bloco A|A|local|reivindicado|6|ruido
+19731f6eddda3dc5|2025-06-02|P|carregador|copa bloco E|E|-|aberto|1|crosspost
+1972360ef7f00870|2025-05-30|A|garrafa|SecGrad|E|secgrad|aberto|1|multi_item;staff
+1971bba9e1ab7c27|2025-05-29|A|garrafa|Grad 5|A|local|aberto|1|
+1971babd757d0212|2025-05-29|A|garrafa|Grad 5|A|local|aberto|1|
+1971b8441377e3e5|2025-05-29|P|remedio|cantina|?|-|aberto|1|sensivel
+197191eca1564978|2025-05-28|A|copo|E132|E|secgrad|aberto|1|staff
+1971902ddfe12a85|2025-05-28|P|chave|?|?|-|aberto|1|local_vago
+197188143df9330b|2025-05-28|A|garrafa|um dos grads|A|?|aberto|1|sem_corpo
+1971703674c34fe2|2025-05-28|A|guarda-chuva|E112|E|?|aberto|1|assunto_contradiz;local_por_aula
+197161f9d60413b1|2025-05-28|P|estojo|predio vermelho|A|-|aberto|1|
+1971422943f1913d|2025-05-27|P|carregador|mezanino bloco E|E|-|aberto|1|
+1971405deab50463|2025-05-27|?|garrafa|sala 132|E|?|aberto|1|sem_corpo;ambiguo
+197136d3144b5f5a|2025-05-27|P|lancheira|E122 ou anfiteatro|MULTI|-|aberto|1|multi_local;pergunta
+19712f77bb7cbad3|2025-05-27|P|fone|Grad 5|A|-|aberto|1|local_preciso
+197120158d91b7b9|2025-05-27|A|garrafa|Grad 5|A|?|aberto|1|assunto_contradiz
+1971201515a62828|2025-05-27|A|mouse|Grad 4|A|achador|aberto|1|
+197115092d0408d4|2025-05-27|P|carregador|Grad 1|A|-|aberto|1|local_preciso
+1970c6ff9bf6d951|2025-05-26|A|documento|?|?|setor|aberto|1|terceiro_nomeado;staff;local_vago
+1970c56be3c0b602|2025-05-25|A|roupa|bloco A|A|achador|aberto|1|sem_corpo;crosspost
+196fdd9e92546dbf|2025-05-23|A|garrafa|E113|E|informal|aberto|1|mudou_de_bloco;crosspost
+196f9a8327b77c4f|2025-05-22|P|garrafa|E112|E|-|aberto|1|
+196f9a83428a1e7f|2025-05-22|P|guarda-chuva|mesas perto do helpdesk|?|setor|reivindicado|2|staff
+196f968b6615cf5b|2025-05-22|P|lancheira|Grad 5|A|-|aberto|1|
+196f888c64a85eb2|2025-05-22|A|carregador|Grad 4|A|achador|aberto|1|
+196f7ee90c95d57a|2025-05-22|A|caderno|Grad 4|A|local|aberto|1|multi_item;anuncio_tardio
+196f491ad9c3cd20|2025-05-21|P|garrafa|?|?|-|aberto|1|fwd;remetente_externo;staff
+196f48c463f042bc|2025-05-21|P|outro|?|?|-|aberto|1|local_vago
+196f2c56466c4221|2025-05-20|A|carregador|lab hardware|A|?|aberto|1|anuncio_tardio
+196ee2a7e4afeeb2|2025-05-20|P|fone|CIn|?|-|aberto|1|local_vago
+196d96df43dc1ca4|2025-05-16|A|?|?|?|achador|aberto|1|objeto_so_na_foto;local_vago
+196d0dd17b948374|2025-05-14|A|?|sala de aula|?|local|aberto|1|resposta_orfa;atualiza_custodia;crosspost
+196cf3ec581a665a|2025-05-14|A|chave|estacionamento|EXT|local|aberto|1|
+196cf3eb638bffd0|2025-05-14|A|cracha|Grad 5|A|setor|aberto|1|terceiro_nomeado;staff
+196cac7eef5bce75|2025-05-13|P|garrafa|copa bloco A|A|-|aberto|1|nome_dono;crosspost
+196c68f37451af0a|2025-05-12|A|oculos|lab pos-graduacao|A|secgrad|aberto|1|staff;duplicata_cruzada
+196c5a097d4132ea|2025-05-12|P|oculos|lab pos-graduacao|A|secgrad|encerrado|2|staff;duplicata_cruzada
+196b79af57d0d8b5|2025-05-09|A|casaco|area externa bloco E|E|secgrad|aberto|1|staff
+196b4efa50a9d94b|2025-05-08|P|carteira|E233 ou DA|MULTI|-|aberto|1|multi_local
+196b0c4dce06fc3c|2025-05-08|P|chave|?|?|-|aberto|1|local_vago;duplicata_cruzada
+196b03efb37f5051|2025-05-08|A|chave|mesas de madeira|EXT|setor|aberto|1|duplicata_cruzada
+196af70c7c08459f|2025-05-08|P|fone|Grad 5|A|-|aberto|1|item_parcial
+196acb502afeb9f5|2025-05-07|P|chave|bloco B|B|-|aberto|1|duplicata
+196ac32ddee784e7|2025-05-07|A|cartao|Grad 5|A|achador|aberto|1|terceiro_nomeado
+196ac32c21ad922d|2025-05-07|P|chave|bloco B|B|-|aberto|1|
+196a74bac710aeca|2025-05-06|A|higiene|E233|E|secgrad|aberto|1|sensivel;staff
+196a0c59a00a0caf|2025-05-02|A|eletronico|4o andar bloco E|E|?|aberto|1|multi_item;staff;instrucao_oficial
