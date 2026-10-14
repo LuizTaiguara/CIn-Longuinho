@@ -45,6 +45,9 @@ Não carregue os documentos de `docs/` inteiros, leia só a seção de que a tar
    - "Remover" é ocultar do catálogo, nunca `DELETE`.
 5. **Regras de visibilidade ficam no servidor.**
    - Quarentena e itens ocultos nunca saem da API.
+   - Exceção única: a mensagem retida que **abre** uma thread aparece em "Meus anúncios" só
+     para o próprio autor (sessão do CIn igual ao remetente), para ele dizer se é perda ou
+     achado (US-15). Ninguém mais a vê. Decisão do PO em 14/10/2026.
    - O front não filtra por conta própria.
 6. **Sem LLM no produto.**
    - Classificação é feita por parser determinístico (regex + palavras-chave).

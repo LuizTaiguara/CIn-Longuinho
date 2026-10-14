@@ -279,8 +279,12 @@ de achados e perdidos e, em caso afirmativo, se comunica um achado ou uma perda 
 a erro.
 
 O corpus levantado contém casos ilustrativos: mensagens sobre assuntos não relacionados que
-mencionam objetos; e mensagens genuinamente ambíguas, como *"alguém viu um fone preto perto do
-laboratório?"*, que pode comunicar tanto uma perda quanto um achado.
+mencionam objetos; e mensagens genuinamente ambíguas, como o assunto *"[PERDIDO]"* com o corpo
+*"Mouse deixado no Grad02"*, que pode comunicar tanto uma perda quanto um achado.
+
+> **Revisão de 14/10/2026:** o exemplo original era *"alguém viu um fone preto perto do
+> laboratório?"*. O PO decidiu que essa pergunta é uma perda, já que quem pergunta está
+> procurando, e ela deixou de ser exemplo de ambiguidade.
 
 Como o sistema não dispõe de curador — conforme ADR-001 — um item publicado incorretamente
 permanecerá incorreto indefinidamente.

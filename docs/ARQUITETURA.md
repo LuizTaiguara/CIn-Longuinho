@@ -303,7 +303,9 @@ banca não depende de rede nem de credencial.
 Com linguagens distintas nos dois lados, o site não pode importar a camada de acesso a dados —
 ela precisa ser exposta como interface de rede. As regras de visibilidade ficam **no lado
 servidor**, não replicadas no cliente: itens em quarentena e itens removidos nunca aparecem em
-nenhuma consulta, e o endereço de e-mail não é campo de resposta em endpoint algum.
+nenhuma consulta, e o endereço de e-mail não é campo de resposta em endpoint algum. A exceção
+única é `GET /eu/itens`, que devolve ao autor as mensagens dele que abriram uma thread e foram
+retidas, para que ele as classifique (US-15).
 
 ## 2.4 Tecnologias
 
@@ -432,9 +434,15 @@ sabe se é achado OU perdido?   ──não──→  QUARENTENA
                 PUBLICA
 ```
 
-A segunda pergunta existe por causa de casos reais do corpus como *"Alguém viu um fone preto
-perto do lab?"* — que pode ser perda ou achado. Chutar a direção põe o item na aba errada, e
-quem procura não encontra: **erro silencioso e caro**.
+A segunda pergunta existe por causa de casos reais do corpus como o assunto *"[PERDIDO]"* com
+o corpo *"Mouse deixado no Grad02"*, que pode ser perda ou achado. Chutar a direção põe o item
+na aba errada, e quem procura não encontra: **erro silencioso e caro**. Uma pergunta como
+*"alguém viu um fone preto?"* não é ambígua: quem pergunta está procurando, e o item é
+publicado como perdido (decisão do PO em 14/10/2026).
+
+Quem anunciou pela lista e teve a mensagem retida vê essa mensagem em "Meus anúncios" e pode
+dizer se é perda ou achado (US-15). O autor vira curador do próprio anúncio, e a quarentena
+se esvazia sem criar o papel de curador que o R6 proíbe.
 
 **Extração fraca não retém o item.** "Encontrei esse carregador no Grad 05" é anúncio legítimo,
 apenas magro. **Campo vazio é honesto; campo errado não é.**
@@ -541,7 +549,7 @@ fato levantado em campo, não a uma preferência técnica.**
 | Não há dono do processo, e não haverá após dezembro | Repositório compartilhado; worker e site falham independentemente | ADR-001 |
 | A lista de e-mail já existe e funciona, com satisfação alta | Inscrever-se no canal preexistente em vez de criar outro | ADR-002 |
 | A conta institucional ainda não existe; o grupo precisa trabalhar já | Fonte de dados isolada atrás de interface, com implementação local | ADR-003 |
-| O corpus tem mensagens ambíguas quanto à direção ("alguém viu um fone?") | Quarentena com portão de duas perguntas | ADR-004 |
+| O corpus tem mensagens ambíguas quanto à direção ("[PERDIDO] Mouse deixado no Grad02") | Quarentena com portão de duas perguntas | ADR-004 |
 | Encaminhamentos, reenvios e respostas de confirmação são comuns | A thread como unidade de registro | ADR-005 |
 | Não haverá responsável diário para revisar itens | Correção pelo próprio autor, sem painel administrativo | ADR-006 |
 | Toda a comunidade já tem conta Google do CIn | Login institucional para o autor, sem contas próprias | ADR-010 |

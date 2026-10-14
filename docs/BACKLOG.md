@@ -107,7 +107,8 @@ Mesmo que os demais campos estejam vazios
 | Falha | Comportamento esperado |
 |---|---|
 | Mensagem claramente fora de contexto (ex.: discussão sobre comida na copa) | Quarentena. Não publica. |
-| Texto ambíguo: "alguém viu um fone preto?" | Quarentena — pode ser perda ou achado, e publicar na categoria errada torna o item inencontrável. |
+| Pergunta "alguém viu um fone preto?" | **Publica como perdido.** Quem pergunta se alguém viu está procurando. Decisão do PO em 14/10/2026. |
+| Texto ambíguo: assunto "[PERDIDO]", corpo "Mouse deixado no Grad02" | Quarentena — pode ser perda ou achado, e publicar na categoria errada torna o item inencontrável. O autor pode resolver em "Meus anúncios" (US-15). |
 | Mensagem curta mas válida: "encontrei esse carregador no Grad 05" | **Publica.** Extração fraca não é motivo para reter. Campo vazio é honesto; campo errado não é. |
 | Classificador indisponível ou com erro | Mensagem permanece não classificada e é reavaliada no próximo ciclo. Não publica por omissão. |
 
@@ -295,6 +296,16 @@ Quando acesso "Meus anúncios"
 Então vejo todos os itens em que sou o autor
 E isso inclui os que anunciei por e-mail na lista, antes de conhecer o site
 
+Dado que anunciei pela lista e minha mensagem ficou retida em quarentena
+Quando acesso "Meus anúncios"
+Então vejo essa mensagem marcada como "não entrou no catálogo", com o motivo da retenção
+E ela não aparece no catálogo nem em "Meus anúncios" de nenhuma outra pessoa
+
+Dado que estou numa mensagem minha que ficou retida
+Quando indico "é um perdido" ou "é um achado"
+Então a mensagem vira item, passa pela extração e aparece no catálogo
+E a classificação fica registrada como evento, com a fonte "classificação pelo autor"
+
 Dado que estou em um anúncio meu
 Quando corrijo a descrição, o local ou a localização atual
 Então a alteração aparece no catálogo
@@ -331,6 +342,9 @@ E o aviso não contém nenhuma credencial
 | Ex-aluno sem conta ativa no CIn | Mesmo caso: canal de contato (US-09). |
 | Sessão expira no meio da edição | Volta ao login e retorna ao mesmo item sem perder o que foi digitado. |
 | Autor edita item já encerrado | Permitido. A situação não retrocede automaticamente. |
+| Autor nunca classifica a mensagem retida | Ela continua na quarentena, sem nenhum efeito no catálogo. |
+| Mensagem retida é uma resposta na thread de outra pessoa | Não aparece em "Meus anúncios". Só a mensagem que abre a thread é anúncio. |
+| Alguém tenta ver a mensagem retida de outra pessoa pela API | 403. Mensagem retida é a exceção mais sensível à invariante 5 e deve ser coberta por teste. |
 | Aviso enviado para a lista em vez de para o autor | **Defeito grave** de privacidade. Deve ser coberto por teste. |
 | Recibo enviado várias vezes para a mesma conversa | **Defeito.** Deve haver verificação por conversa antes do envio. |
 
@@ -341,6 +355,9 @@ E o aviso não contém nenhuma credencial
 > 2. **O autor pode encerrar a partir de `aberto`**, pelo site ou por mensagem na thread. É a
 >    exceção única à invariante 2: quem declara o próprio desfecho não precisa passar por
 >    `reivindicado`. Mensagem de terceiro nunca pula etapa (US-10).
+> 3. **A mensagem retida aparece para o autor em "Meus anúncios", e ele resolve** dizendo se é
+>    perda ou achado. É a exceção única à invariante 5. Isso aumenta o esforço desta história,
+>    e a estimativa precisa ser revista no refinamento.
 
 ---
 
@@ -380,7 +397,17 @@ Dado que deixei um campo obrigatório vazio
 Quando tento enviar
 Então vejo qual campo falta, junto ao próprio campo
 E o que já preenchi é preservado
+
+Dado que estou no formulário de cadastro
+Quando olho perto do botão de envio
+Então vejo um aviso discreto, em texto pequeno e sem caixa de confirmação
+E ele diz que o anúncio também vai para a lista achados-perdidos e que as respostas chegam no
+meu e-mail, que fica visível para os membros da lista (US-07)
 ```
+
+> **Decidido pelo PO em 14/10/2026:** avisar sobre o `Reply-To`, de forma discreta. Não há
+> exposição nova em relação a postar direto na lista, mas o site promete não expor o e-mail
+> (invariante 1), e quem escolheu o site poderia achar que a promessa vale também para a lista.
 
 ### Casos de falha
 
