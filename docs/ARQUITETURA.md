@@ -2,7 +2,7 @@
 
 **Centro de Informática — UFPE**
 Disciplina: Integração e Evolução de Sistemas de Informação (CIN0139) · 2026.2
-Versão: 02/10/2026
+Versão: 02/10/2026 · revisado em 13/10/2026 (ADR-010, login com a conta do CIn)
 
 ---
 
@@ -130,8 +130,8 @@ dependem as decisões de evolução.
 
 | Sistema | Natureza | Responsabilidade |
 |---|---|---|
-| **Worker de ingestão** | Processo agendado, roda e termina | Ler mensagens novas, classificar, extrair dados, gravar, enviar recibos |
-| **Site / catálogo** | Aplicação web, fica de pé | Buscar e exibir itens, aceitar cadastro, aceitar correção por token |
+| **Worker de ingestão** | Processo agendado, roda e termina | Ler mensagens novas, classificar, extrair dados, gravar, enviar o aviso de publicação ao autor |
+| **Site / catálogo** | Aplicação web, fica de pé | Buscar e exibir itens, aceitar cadastro e a gestão do item pelo autor logado com a conta do CIn |
 | **Repositório** | Banco de dados relacional | Fonte de verdade, append-only, único ponto de integração entre os dois |
 
 O nome **"worker de ingestão"** é deliberado — não "agente". É um ETL agendado, sem autonomia
@@ -142,6 +142,7 @@ decisória: não escolhe o que fazer, executa um pipeline fixo.
 | Sistema | Papel | Controle do projeto |
 |---|---|---|
 | **Gmail / Google Groups** (`achados-perdidos@cin.ufpe.br`) | Canal de mensagens preexistente da comunidade | Nenhum. É Google Workspace institucional, administrado pela Gerência de Infraestrutura |
+| **Login Google** (OAuth, só contas `@cin.ufpe.br`) | Identidade de quem anunciou, para gerir o próprio item (ADR-010) | Configuração do app OAuth apenas. Contas, senhas e recuperação são do Google Workspace do CIn |
 | **Serviço de hospedagem** | Execução do worker e do site | Configuração apenas |
 
 A lista institucional **não foi criada pelo projeto**. Ela já existia, com assinantes humanos
@@ -218,9 +219,9 @@ inferência que o e-mail isolado não permitia. Três medidas, em ordem de impor
 1. **Preventiva: o endereço de quem anunciou não é publicado.** O catálogo mostra item, local
    e data, com um botão de contato que encaminha a mensagem sem revelar o endereço. O campo
    não existe em nenhuma resposta da API.
-2. **Autosserviço:** quem publicou remove o próprio item pelo token do recibo.
+2. **Autosserviço:** quem publicou remove o próprio item entrando com a conta do CIn (ADR-010).
 3. **Pedido humano:** canal de contato para quem aparece num item sem tê-lo publicado — o caso
-   do documento com nome de terceiro, que nunca teve token porque nunca publicou nada. Sem
+   do documento com nome de terceiro, que não é autor do item e por isso não pode removê-lo nem logado. Sem
    automação: alguém do grupo remove à mão, são poucos casos.
 
 Remoção é **ocultar do catálogo, não apagar a linha**. O registro permanece para auditoria.
@@ -386,11 +387,12 @@ que pode quebrar depois que o grupo se dispersar.
 
 **Alternativa descartada:** interface autenticada para revisar, corrigir e publicar itens.
 
-**Motivo:** exigiria autenticação — que o sistema inteiro evita — e, pior, **um responsável
-diário que o projeto não tem**. Um painel sem alguém que o abra é uma tela que ninguém usa.
+**Motivo:** exigiria **um responsável diário que o projeto não tem**. Um painel sem alguém que o abra é uma tela que ninguém usa.
 
-**A solução adotada:** quem publicou corrige e encerra o próprio item por um link com token,
-enviado no recibo, sem login. **O mesmo token que edita também encerra**, o que transforma
+**A solução adotada:** quem publicou corrige e encerra o próprio item entrando com a conta
+Google do CIn (ADR-010). Até 13/10/2026 o mecanismo era um link com token no recibo. Ele foi
+substituído porque o login institucional não cria conta nem senha para o projeto manter e
+elimina o risco de link encaminhado. **O mesmo acesso que edita também encerra**, o que transforma
 correção em captura de desfecho: a pessoa vem corrigir um erro e, de graça, registra o
 desfecho que hoje ninguém registra.
 
@@ -459,8 +461,9 @@ Uma arquitetura que não declara o que sacrificou não foi escolhida, foi herdad
 - **Desempenho e escalabilidade** — ~10 itens/mês e população fixa; escalar é problema que não
   existe
 - **Tempo real** — cinco minutos de latência é folga confortável
-- **Segurança forte** — sem login nem papéis; o dado já é público por natureza, pois já circula
-  numa lista aberta
+- **Segurança forte** — sem papéis nem contas próprias; o único login é o da conta do CIn, para
+  o autor gerir o próprio item; o dado já é público por natureza, pois já circula numa lista
+  aberta
 - **Completude do catálogo** — itens duvidosos ficam de fora
 
 ## 3.4 O trade-off central
@@ -492,11 +495,11 @@ desonestidade que a quarentena evita no catálogo.
 
 | Decisão | O papel humano que ela elimina |
 |---|---|
-| Correção por token, sem painel | O responsável diário |
+| Correção pelo próprio autor, sem painel | O responsável diário |
 | Situação inferida automaticamente | O operador que atualizaria status à mão |
 | Site funciona com o worker parado | O plantão para reiniciar processos |
 | Quarentena retém o duvidoso | O curador que revisaria o que entra |
-| Sem autenticação nem papéis | A gestão de contas e acessos |
+| Login delegado à conta Google do CIn, sem papéis | A gestão de contas, senhas e recuperação de acesso |
 | Sem expiração por tempo | Quem decidiria o prazo de guarda |
 
 **O sistema degrada em silêncio, não em público.** Isso foi deliberado, e é o que torna "roda
@@ -528,7 +531,8 @@ fato levantado em campo, não a uma preferência técnica.**
 | A conta institucional ainda não existe; o grupo precisa trabalhar já | Fonte de dados isolada atrás de interface, com implementação local | ADR-003 |
 | O corpus tem mensagens ambíguas quanto à direção ("alguém viu um fone?") | Quarentena com portão de duas perguntas | ADR-004 |
 | Encaminhamentos, reenvios e respostas de confirmação são comuns | A thread como unidade de registro | ADR-005 |
-| Não haverá responsável diário para revisar itens | Correção por token, sem painel administrativo | ADR-006 |
+| Não haverá responsável diário para revisar itens | Correção pelo próprio autor, sem painel administrativo | ADR-006 |
+| Toda a comunidade já tem conta Google do CIn | Login institucional para o autor, sem contas próprias | ADR-010 |
 | A negociação hoje é direta entre as pessoas | `From` do sistema, `Reply-To` da pessoa | ADR-007 |
 | Front em JavaScript e worker em Python | Camada de dados exposta como interface de rede | ADR-008 |
 | O sistema lê texto de qualquer pessoa da comunidade | Parser determinístico e NER, nunca LLM | ADR-009 |

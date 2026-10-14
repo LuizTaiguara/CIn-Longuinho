@@ -68,13 +68,13 @@
 
   <!-- REIVINDICADO -> ENCERRADO -->
   <path d="M 872 318 L 980 318" fill="none" stroke="#231F20" stroke-width="2.5" marker-end="url(#arrowSolid3)"/>
-  <text x="926" y="288" text-anchor="middle" font-family="Mulish, Segoe UI, system-ui, sans-serif" font-size="15" fill="#231F20">do autor (token)</text>
+  <text x="926" y="288" text-anchor="middle" font-family="Mulish, Segoe UI, system-ui, sans-serif" font-size="15" fill="#231F20">do autor (logado)</text>
   <text x="926" y="270" text-anchor="middle" font-family="Mulish, Segoe UI, system-ui, sans-serif" font-size="15" fill="#231F20">ou confirmação</text>
   <text x="926" y="252" text-anchor="middle" font-family="Mulish, Segoe UI, system-ui, sans-serif" font-size="15" fill="#231F20">detecção (worker)</text>
 
   <!-- ABERTO -> ENCERRADO (curve below) -->
   <path d="M 392 370 C 392 462, 1104 462, 1104 370" fill="none" stroke="#231F20" stroke-width="2.5" marker-end="url(#arrowSolid3)"/>
-  <text x="748" y="452" text-anchor="middle" font-family="Mulish, Segoe UI, system-ui, sans-serif" font-size="15" fill="#231F20">confirmação do autor (token)</text>
+  <text x="748" y="452" text-anchor="middle" font-family="Mulish, Segoe UI, system-ui, sans-serif" font-size="15" fill="#231F20">confirmação do autor (logado)</text>
 
   <!-- REIVINDICADO note -->
   <rect x="604" y="134" width="300" height="76" rx="8" fill="#FFFFFF" stroke="#DB1E2F" stroke-width="2"/>

@@ -90,7 +90,7 @@
   <path d="M 678 560 L 150 560" fill="none" stroke="#231F20" stroke-width="2.5" marker-end="url(#arrowSolid4)"/>
   <circle cx="740" cy="560" r="14" fill="#231F20"/>
   <text x="740" y="565" text-anchor="middle" font-family="Mulish, Segoe UI, system-ui, sans-serif" font-size="15" font-weight="700" fill="#FFFFFF">7</text>
-  <text x="414" y="550" text-anchor="middle" font-family="Mulish, Segoe UI, system-ui, sans-serif" font-size="16" fill="#231F20">envia recibo com link e token</text>
+  <text x="414" y="550" text-anchor="middle" font-family="Mulish, Segoe UI, system-ui, sans-serif" font-size="16" fill="#231F20">envia aviso com o link do item</text>
 
   <!-- time gap marker -->
   <path d="M 40 604 L 1360 604" fill="none" stroke="#C3BDB6" stroke-width="2" stroke-dasharray="4 6"/>
@@ -112,7 +112,7 @@
   <path d="M 150 736 L 960 736" fill="none" stroke="#231F20" stroke-width="2.5" marker-end="url(#arrowSolid4)"/>
   <circle cx="116" cy="736" r="14" fill="#231F20"/>
   <text x="116" y="741" text-anchor="middle" font-family="Mulish, Segoe UI, system-ui, sans-serif" font-size="15" font-weight="700" fill="#FFFFFF">9</text>
-  <text x="555" y="726" text-anchor="middle" font-family="Mulish, Segoe UI, system-ui, sans-serif" font-size="16" fill="#231F20">encerra o item pelo token</text>
+  <text x="555" y="726" text-anchor="middle" font-family="Mulish, Segoe UI, system-ui, sans-serif" font-size="16" fill="#231F20">entra com a conta do CIn e encerra</text>
 
   <!-- Legend -->
   <line x1="40" y1="768" x2="1360" y2="768" stroke="#C3BDB6" stroke-width="2"/>
