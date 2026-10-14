@@ -193,6 +193,11 @@ Quando aplico o filtro
 Então vejo apenas itens daquele local
 E isso inclui itens que citam aquele local entre outros ("Grad 5 ou lab de hardware")
 
+Dado que um item foi encerrado por declaração de terceiro (US-10)
+Quando ele aparece no catálogo
+Então mostra "encerrado segundo terceiro", e não apenas "encerrado"
+E continua aparecendo na busca, para quem procura poder conferir
+
 Dado que um item está reivindicado mas não confirmado
 Quando ele aparece no catálogo
 Então mostra a situação e há quanto tempo está nela
@@ -542,6 +547,7 @@ Dado que um item está aberto
 Quando alguém que não é o autor responde declarando o desfecho ("resolvido, ela achou")
 Então a situação passa direto a encerrado
 E a origem do encerramento é registrada como "terceiro", com confiança média
+E o catálogo mostra o item como "encerrado segundo terceiro"
 
 Dado que um item está aberto
 Quando alguém responde com uma reivindicação fraca ("acredito que pode ser minha")
@@ -558,7 +564,7 @@ E o evento é registrado no histórico
 | Falha | Comportamento esperado |
 |---|---|
 | Detecção equivocada de devolução | **Falha mais cara do sistema** — mente para quem procura. Mitigação: só avança com alta confiança; autor corrige entrando com a conta do CIn (US-15). |
-| Terceiro declara desfecho por engano ou em piada ("resolvido!") | O item é encerrado e não volta, porque a situação nunca retrocede. A fonte "terceiro" fica registrada. **Sugestão pendente com o PO:** o catálogo mostrar "encerrado segundo terceiro", para quem procura não descartar o item. |
+| Terceiro declara desfecho por engano ou em piada ("resolvido!") | O item é encerrado e não volta, porque a situação nunca retrocede. A fonte "terceiro" fica registrada, e o catálogo mostra **"encerrado segundo terceiro"**, para quem procura não descartar o item. Decisão do PO em 14/10/2026. |
 | Resposta ambígua ("achei!") | Não altera a situação. Registra o evento e mantém o estado anterior. |
 | Reivindicação sem retirada posterior | Item permanece visível no catálogo mostrando há quanto tempo está reivindicado. Não reabre nem encerra sozinho. |
 | Confirmação chega por fora da lista | Não é detectada. Encerramento depende do autor logado (US-15). Limitação conhecida. |
@@ -735,7 +741,7 @@ SecGrad). Hoje os itens desse lote continuam `aberto` no catálogo depois do des
 **Origem:** gabarito do corpus, casos 15 e 17. O corpus tem 12 anúncios repetidos pela mesma
 pessoa e 10 casos em que pessoas diferentes anunciam o mesmo objeto, cerca de 5% das threads.
 
-### Critérios de aceitação (rascunho, falta revisão do PO)
+### Critérios de aceitação (aprovados pelo PO em 14/10/2026)
 
 ```gherkin
 Dado que dois itens têm o mesmo objeto, um local em comum e datas próximas
@@ -765,7 +771,7 @@ E pode remover um deles (US-15)
 **Origem:** gabarito do corpus, caso 24. Há 13 anúncios cujo local é dado pela aula ou evento,
 e hoje o campo local fica vazio nesses casos.
 
-### Critérios de aceitação (rascunho, falta revisão do PO)
+### Critérios de aceitação (aprovados pelo PO em 14/10/2026)
 
 ```gherkin
 Dado que o texto cita uma disciplina ("na aula de Algoritmos") e não cita sala

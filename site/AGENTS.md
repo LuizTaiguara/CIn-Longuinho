@@ -17,6 +17,7 @@ Vale além do `AGENTS.md` da raiz. Front: Pedro e Rafael. UX: Klarissa.
 - **Não existe campo de e-mail para exibir.** O contato com quem anunciou é por botão que encaminha a mensagem.
 - **O estado aparece com honestidade:**
   - `reivindicado` mostra **há quanto tempo** ("reivindicado há 3 semanas, retirada não confirmada");
+  - item encerrado com a fonte "terceiro" mostra **"encerrado segundo terceiro"**, e não só "encerrado" (US-04, US-10);
   - o texto original do e-mail aparece no item **só para quem entrou** com a conta do CIn, e já vem
     com telefones e e-mails mascarados pela API. Se ele chegar a uma sessão anônima, o bug é da API;
   - item marcado "revisar" mostra o selo.

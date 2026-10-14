@@ -218,7 +218,8 @@ Três regras invioláveis:
    encerrado, o evento é registrado e o status não muda. **Exceção única:** uma declaração de
    desfecho leva de `aberto` direto a `encerrado`. Se vem do autor, pelo site (US-15) ou na
    thread (US-10, "Achei já, obrigado"), a fonte é "confirmação do autor". Se vem de
-   terceiro na thread ("resolvido, ela achou"), a fonte é "terceiro", com confiança média.
+   terceiro na thread ("resolvido, ela achou"), a fonte é "terceiro", com confiança média, e o
+   catálogo exibe "encerrado segundo terceiro".
    Exigir `reivindicado` antes registraria uma etapa que não aconteceu. Num **perdido**,
    `reivindicado` é alguém dizer que o objeto está com ele ("está aqui na SecGrad"). Uma
    reivindicação fraca ("acredito que pode ser minha") também conta. Decisões do PO em
