@@ -2,7 +2,7 @@
 
 **Disciplina:** IESI (CIN0139) · UFPE · 2026.2
 **PO:** Luiz Taiguara
-**Versão:** 01/10/2026
+**Versão:** 01/10/2026 · revisado em 13/10/2026 (login com a conta do CIn, ADR-010)
 
 ---
 
@@ -61,7 +61,7 @@ Então o ciclo deve encerrar sem erro e sem alterar o banco
 |---|---|
 | Credencial expirada ou revogada | Worker registra erro e encerra o ciclo. **Não** apaga estado nem marca mensagens como lidas. Próximo ciclo tenta de novo. |
 | API do Gmail indisponível | Ciclo falha silenciosamente e tenta no próximo. Nenhum dado é perdido porque o estado vive no banco. |
-| Mensagem sem corpo de texto (só anexo) | Registra a mensagem com corpo vazio e segue. Vai para quarentena na US-02. |
+| Mensagem sem corpo de texto (só anexo) | Registra a mensagem com corpo vazio e segue. A US-02 decide: com foto e objeto no assunto, é achado; sem isso, quarentena. |
 | Banco indisponível | Worker encerra sem consumir mensagens. Nada é marcado como processado. |
 | Duas execuções simultâneas do worker | A segunda detecta execução em andamento e encerra. Sem processamento duplicado. |
 
@@ -107,8 +107,11 @@ Mesmo que os demais campos estejam vazios
 | Falha | Comportamento esperado |
 |---|---|
 | Mensagem claramente fora de contexto (ex.: discussão sobre comida na copa) | Quarentena. Não publica. |
-| Texto ambíguo: "alguém viu um fone preto?" | Quarentena — pode ser perda ou achado, e publicar na categoria errada torna o item inencontrável. |
+| Pergunta "alguém viu um fone preto?" | **Publica como perdido.** Quem pergunta se alguém viu está procurando. Decisão do PO em 14/10/2026. |
+| Texto ambíguo: assunto "[PERDIDO]", corpo "Mouse deixado no Grad02" | Quarentena — pode ser perda ou achado, e publicar na categoria errada torna o item inencontrável. O autor pode resolver em "Meus anúncios" (US-15). |
 | Mensagem curta mas válida: "encontrei esse carregador no Grad 05" | **Publica.** Extração fraca não é motivo para reter. Campo vazio é honesto; campo errado não é. |
+| Sem texto no corpo, com foto, e o assunto nomeia o objeto ("Garrafa no Grad 5") | **Publica como achado.** Quem perdeu não anuncia só com uma foto. A regra vale só quando o corpo está vazio: com texto, decidem os verbos. Decisão do PO em 14/10/2026 (caso 10 do corpus). |
+| Relato de algo já resolvido: "esqueci, já fui buscar, estou registrando porque a portaria pediu" | **Vira item já encerrado**, com a fonte "confirmação do autor". Fica no histórico sem aparecer como aberto. Decisão do PO em 14/10/2026 (caso 8 do corpus). |
 | Classificador indisponível ou com erro | Mensagem permanece não classificada e é reavaliada no próximo ciclo. Não publica por omissão. |
 
 > **Nota:** a fila de quarentena é também o conjunto de teste do parser. Cada item retido é um
@@ -139,16 +142,17 @@ Então todos permanecem em um único item
 E a descrição preserva a enumeração do texto original
 
 Dado que a extração terminou
-Quando o item é exibido
+Quando o item é exibido para quem entrou com a conta do CIn
 Então o texto original da mensagem deve estar visível junto ao item
+E telefones e endereços de e-mail no texto aparecem mascarados
 ```
 
 ### Casos de falha
 
 | Falha | Comportamento esperado |
 |---|---|
-| Nenhum campo identificado | Item publica assim mesmo, com o texto original visível. Erro de extração tem custo baixo porque o leitor corrige mentalmente. |
-| Campo extraído incorretamente (ex.: "Grad" como marca) | Publica. O texto original permite ao leitor perceber o erro. Corrigível pela US-08. |
+| Nenhum campo identificado | Item publica assim mesmo. Quem entrou vê o texto original e corrige mentalmente. Quem não entrou vê o item com campos vazios e o convite para entrar e ler o anúncio completo. |
+| Campo extraído incorretamente (ex.: "Grad" como marca) | Publica. Quem entrou percebe o erro pelo texto original. Corrigível pelo autor (US-15). |
 | Texto com erro de digitação ("harware", "fsbor") | Extração funciona com o que conseguir. Não falha o item. |
 | Modelo de extração indisponível | Item publica só com classificação, sem campos extraídos. Reprocessável depois. |
 
@@ -166,18 +170,33 @@ Então o texto original da mensagem deve estar visível junto ao item
 
 ```gherkin
 Dado que existem itens publicados
-Quando acesso o catálogo
+Quando acesso o catálogo, mesmo sem entrar
 Então vejo os itens ordenados do mais recente para o mais antigo
-E cada item mostra descrição, local, data, situação e o texto original
+E cada item mostra descrição, local, data e situação
+
+Dado que entrei com a conta do CIn
+Quando abro um item
+Então vejo também o texto original da mensagem, com telefones e e-mails mascarados
 
 Dado que busco por um termo
-Quando o termo aparece na descrição ou no texto original de um item
+Quando o termo aparece na descrição ou nos campos extraídos de um item
 Então esse item aparece nos resultados
 E a busca ignora diferenças de acento e de maiúsculas
+
+Dado que não entrei com a conta do CIn
+Quando busco por um termo que só aparece no texto original de um item
+Então esse item não aparece nos resultados
+E assim a busca não revela o que o texto original contém
 
 Dado que filtro por local
 Quando aplico o filtro
 Então vejo apenas itens daquele local
+E isso inclui itens que citam aquele local entre outros ("Grad 5 ou lab de hardware")
+
+Dado que um item foi encerrado por declaração de terceiro (US-10)
+Quando ele aparece no catálogo
+Então mostra "encerrado segundo terceiro", e não apenas "encerrado"
+E continua aparecendo na busca, para quem procura poder conferir
 
 Dado que um item está reivindicado mas não confirmado
 Quando ele aparece no catálogo
@@ -223,18 +242,131 @@ Dado que quero falar com quem anunciou
 Quando uso o botão de contato
 Então minha mensagem é encaminhada sem que eu veja o endereço de destino
 
-Dado que o texto original contém um telefone ou endereço
+Dado que o texto original contém um telefone ou um endereço de e-mail
 Quando o item é exibido
-Então esses dados aparecem conforme o texto original
+Então esses dados aparecem mascarados
+E o mascaramento é feito no servidor, por regra determinística, antes de a API responder
+
+Dado que não entrei com a conta do CIn
+Quando abro um item
+Então o texto original não é exibido
+E não está presente na resposta da API nem no código-fonte da página
+```
+
+> **Decidido pelo PO em 14/10/2026:** como o catálogo é aberto na web e a lista é fechada ao
+> CIn, o texto original, que traz nome de terceiro em documento, telefone e nome gravado no
+> objeto, só aparece para quem entrou com a conta do CIn.
+
+### Casos de falha
+
+| Falha | Comportamento esperado |
+|---|---|
+| Texto original contém o e-mail no corpo da mensagem | Aparece mascarado, inclusive para quem entrou. Decisão do PO em 14/10/2026. |
+| Nome de terceiro no texto original (crachá, documento) | Visível só para quem entrou. A remoção segue possível pela US-09. |
+| Telefone em formato que a regra não reconhece | Escapa do mascaramento. Cada formato novo encontrado vira caso de teste da regra. |
+| Envio de contato falha | Mensagem de erro explicando que não foi possível enviar e sugerindo tentar mais tarde. |
+| Uso do botão de contato para spam | Fora de escopo nesta entrega. Registrar como risco. |
+
+---
+
+## US-15 · Entrar com a conta do CIn e gerir meus anúncios
+
+**Como** pessoa que anunciou um objeto,
+**quero** entrar com a minha conta do CIn e ver os meus anúncios,
+**para que** eu possa corrigi-los, encerrá-los ou removê-los sem depender de um link guardado
+nem de outra pessoa.
+
+**Estimativa:** 8
+**Substitui:** US-08, que foi para WON'T em 13/10/2026. Decisão no ADR-010.
+
+O token existia para evitar login. A justificativa era que login exige cadastro, senha,
+recuperação e alguém para manter. Com o login Google restrito a `@cin.ufpe.br`, quem mantém
+conta, senha e recuperação é o Google Workspace do CIn, e o R6 continua atendido. Em troca:
+- acaba o risco de link encaminhado;
+- ninguém perde acesso por apagar o e-mail;
+- quem anunciou pela lista já é dono do item ao entrar.
+
+### Critérios de aceitação
+
+```gherkin
+Dado que tenho uma conta @cin.ufpe.br
+Quando clico em "Entrar com a conta do CIn"
+Então sou autenticado pelo Google
+E o sistema não pede nem guarda senha
+
+Dado que tento entrar com uma conta de outro domínio
+Quando o Google devolve a identidade
+Então o acesso é recusado com uma mensagem explicando que só contas do CIn podem gerir anúncios
+E o catálogo continua acessível para leitura
+
+Dado que entrei com a minha conta
+Quando acesso "Meus anúncios"
+Então vejo todos os itens em que sou o autor
+E isso inclui os que anunciei por e-mail na lista, antes de conhecer o site
+
+Dado que anunciei pela lista e minha mensagem ficou retida em quarentena
+Quando acesso "Meus anúncios"
+Então vejo essa mensagem marcada como "não entrou no catálogo", com o motivo da retenção
+E ela não aparece no catálogo nem em "Meus anúncios" de nenhuma outra pessoa
+
+Dado que estou numa mensagem minha que ficou retida
+Quando indico "é um perdido" ou "é um achado"
+Então a mensagem vira item, passa pela extração e aparece no catálogo
+E a classificação fica registrada como evento, com a fonte "classificação pelo autor"
+
+Dado que estou em um anúncio meu
+Quando corrijo a descrição, o local ou a localização atual
+Então a alteração aparece no catálogo
+E fica registrada como evento, sem apagar o valor anterior
+
+Dado que estou em um anúncio meu, aberto ou reivindicado
+Quando declaro que o objeto foi devolvido
+Então a situação passa a "encerrado", mesmo que o anúncio ainda esteja "aberto"
+E a fonte do encerramento fica registrada como "confirmação do autor"
+
+Dado que estou em um anúncio meu
+Quando peço a remoção
+Então o item deixa de aparecer no catálogo
+E o registro bruto permanece no banco
+
+Dado que estou no anúncio de outra pessoa
+Quando abro a página do item
+Então não vejo as opções de corrigir, encerrar ou remover
+E a API recusa essas operações com 403 mesmo que alguém tente chamá-las diretamente
+
+Dado que um item foi publicado
+Quando o worker termina de processá-lo
+Então quem anunciou recebe um único aviso por conversa, por e-mail privado, com o link do item
+E o aviso explica que basta entrar com a conta do CIn para corrigir ou encerrar
+E o aviso não contém nenhuma credencial
 ```
 
 ### Casos de falha
 
 | Falha | Comportamento esperado |
 |---|---|
-| Texto original contém o e-mail no corpo da mensagem | Fica visível — faz parte do que a pessoa escolheu escrever publicamente. Removível pela US-09. |
-| Envio de contato falha | Mensagem de erro explicando que não foi possível enviar e sugerindo tentar mais tarde. |
-| Uso do botão de contato para spam | Fora de escopo nesta entrega. Registrar como risco. |
+| Login do Google indisponível | O catálogo segue funcionando para leitura. Só a gestão fica indisponível, com mensagem honesta. |
+| Pessoa anunciou com e-mail de fora do CIn | Não consegue gerir o item. A remoção segue possível pelo canal de contato (US-09). |
+| Ex-aluno sem conta ativa no CIn | Mesmo caso: canal de contato (US-09). |
+| Sessão expira no meio da edição | Volta ao login e retorna ao mesmo item sem perder o que foi digitado. |
+| Autor edita item já encerrado | Permitido. A situação não retrocede automaticamente. |
+| Autor nunca classifica a mensagem retida | Ela continua na quarentena, sem nenhum efeito no catálogo. |
+| Mensagem retida é uma resposta na thread de outra pessoa | Não aparece em "Meus anúncios". Só a mensagem que abre a thread é anúncio. |
+| Alguém tenta ver a mensagem retida de outra pessoa pela API | 403. Mensagem retida é a exceção mais sensível à invariante 5 e deve ser coberta por teste. |
+| Aviso enviado para a lista em vez de para o autor | **Defeito grave** de privacidade. Deve ser coberto por teste. |
+| Recibo enviado várias vezes para a mesma conversa | **Defeito.** Deve haver verificação por conversa antes do envio. |
+
+> **Decidido pelo PO em 14/10/2026:**
+> 1. **O catálogo fica aberto para leitura, sem login.** O login é exigido só para anunciar e
+>    para gerir os próprios anúncios. Quem não entrou vê só os campos extraídos. O texto
+>    original aparece apenas para quem entrou com a conta do CIn (ver US-04 e US-05).
+> 2. **O autor pode encerrar a partir de `aberto`**, pelo site ou por mensagem na thread. É a
+>    exceção à invariante 2: uma declaração de desfecho não precisa passar por `reivindicado`.
+>    Depois, o gabarito do corpus (caso 19) estendeu a exceção à declaração de terceiro na
+>    thread, com a fonte "terceiro" e confiança média (US-10).
+> 3. **A mensagem retida aparece para o autor em "Meus anúncios", e ele resolve** dizendo se é
+>    perda ou achado. É a exceção única à invariante 5. Isso aumenta o esforço desta história,
+>    e a estimativa precisa ser revista no refinamento.
 
 ---
 
@@ -251,7 +383,12 @@ Então esses dados aparecem conforme o texto original
 ### Critérios de aceitação
 
 ```gherkin
-Dado que encontrei um objeto
+Dado que não entrei com a minha conta do CIn
+Quando acesso o formulário de cadastro
+Então sou levado a entrar com a conta do CIn (US-15)
+E volto ao formulário depois de entrar
+
+Dado que encontrei um objeto e entrei com a minha conta
 Quando acesso o formulário de cadastro
 Então escolho o local em uma lista predefinida dos espaços do CIn
 E escrevo uma descrição breve
@@ -263,12 +400,23 @@ Quando envio o formulário
 Então o item é publicado imediatamente no catálogo
 E não passa por classificação automática, pois os dados já vêm estruturados
 E recebo a confirmação na tela com o link do item
+E o autor do item é o e-mail da conta com que entrei
 
 Dado que deixei um campo obrigatório vazio
 Quando tento enviar
 Então vejo qual campo falta, junto ao próprio campo
 E o que já preenchi é preservado
+
+Dado que estou no formulário de cadastro
+Quando olho perto do botão de envio
+Então vejo um aviso discreto, em texto pequeno e sem caixa de confirmação
+E ele diz que o anúncio também vai para a lista achados-perdidos e que as respostas chegam no
+meu e-mail, que fica visível para os membros da lista (US-07)
 ```
+
+> **Decidido pelo PO em 14/10/2026:** avisar sobre o `Reply-To`, de forma discreta. Não há
+> exposição nova em relação a postar direto na lista, mas o site promete não expor o e-mail
+> (invariante 1), e quem escolheu o site poderia achar que a promessa vale também para a lista.
 
 ### Casos de falha
 
@@ -321,49 +469,6 @@ E o envio fica pendente, sem bloquear o cadastro
 
 > **Risco:** esta história depende de autorização de terceiros. Se a permissão não sair até a
 > entrega, o sistema demonstra todas as demais funcionalidades. Ver decisão 3.
-
----
-
-## US-08 · Receber o recibo e poder corrigir o item
-
-**Como** pessoa que anunciou um objeto,
-**quero** receber um link permanente do meu anúncio,
-**para que** eu possa corrigi-lo, encerrá-lo ou removê-lo quando precisar.
-
-**Estimativa:** 5
-
-### Critérios de aceitação
-
-```gherkin
-Dado que um item foi publicado
-Quando a publicação é concluída
-Então quem anunciou recebe uma mensagem com o link do item
-E com um link de gestão contendo um token único
-E a mensagem explica que basta clicar quando o objeto for devolvido
-
-Dado que o item veio de uma conversa com várias mensagens
-Quando o recibo é enviado
-Então apenas um recibo é enviado por conversa
-
-Dado que acesso o link de gestão
-Quando ele é válido
-Então posso corrigir a descrição, o local e a localização atual
-E posso marcar o item como encerrado
-E posso solicitar a remoção do item
-
-Dado que o token é inválido ou expirado
-Quando acesso o link
-Então vejo uma mensagem explicando e um canal de contato
-```
-
-### Casos de falha
-
-| Falha | Comportamento esperado |
-|---|---|
-| Pessoa não recebeu o recibo (spam, filtro) | O item continua publicado. A remoção segue possível pelo canal de contato (US-09). |
-| Token vazado ou compartilhado | Permite editar só aquele item. Não dá acesso a nenhum outro nem a dados de terceiros. |
-| Recibo enviado várias vezes para a mesma conversa | **Defeito.** Deve haver verificação por conversa antes do envio. |
-| Pessoa edita o item depois de encerrado | Permitido. O estado não retrocede automaticamente, mas o autor pode corrigir. |
 
 ---
 
@@ -423,10 +528,30 @@ Quando alguém responde indicando que o objeto é seu
 Então a situação passa a reivindicado
 E o momento da mudança é registrado
 
+Dado que um item de perdido está aberto
+Quando alguém que não é o autor responde dizendo que o objeto está com ele ("está aqui", "está comigo")
+Então a situação passa a reivindicado
+E o momento da mudança é registrado
+
 Dado que um item está reivindicado
 Quando há confirmação de que o objeto foi recuperado
 Então a situação passa a encerrado
 E a origem do encerramento é registrada
+
+Dado que um item está aberto
+Quando o próprio autor do anúncio responde declarando o desfecho ("Encontraram", "Achei já, obrigado")
+Então a situação passa direto a encerrado
+E a origem do encerramento é registrada como "confirmação do autor"
+
+Dado que um item está aberto
+Quando alguém que não é o autor responde declarando o desfecho ("resolvido, ela achou")
+Então a situação passa direto a encerrado
+E a origem do encerramento é registrada como "terceiro", com confiança média
+E o catálogo mostra o item como "encerrado segundo terceiro"
+
+Dado que um item está aberto
+Quando alguém responde com uma reivindicação fraca ("acredito que pode ser minha")
+Então a situação passa a reivindicado
 
 Dado que um item já está encerrado
 Quando chega nova resposta na conversa
@@ -438,10 +563,11 @@ E o evento é registrado no histórico
 
 | Falha | Comportamento esperado |
 |---|---|
-| Detecção equivocada de devolução | **Falha mais cara do sistema** — mente para quem procura. Mitigação: só avança com alta confiança; autor corrige pelo token. |
+| Detecção equivocada de devolução | **Falha mais cara do sistema** — mente para quem procura. Mitigação: só avança com alta confiança; autor corrige entrando com a conta do CIn (US-15). |
+| Terceiro declara desfecho por engano ou em piada ("resolvido!") | O item é encerrado e não volta, porque a situação nunca retrocede. A fonte "terceiro" fica registrada, e o catálogo mostra **"encerrado segundo terceiro"**, para quem procura não descartar o item. Decisão do PO em 14/10/2026. |
 | Resposta ambígua ("achei!") | Não altera a situação. Registra o evento e mantém o estado anterior. |
 | Reivindicação sem retirada posterior | Item permanece visível no catálogo mostrando há quanto tempo está reivindicado. Não reabre nem encerra sozinho. |
-| Confirmação chega por fora da lista | Não é detectada. Encerramento depende do token (US-08). Limitação conhecida. |
+| Confirmação chega por fora da lista | Não é detectada. Encerramento depende do autor logado (US-15). Limitação conhecida. |
 
 ---
 
@@ -489,7 +615,7 @@ institucionalmente, sobe para SHOULD.
 ### Critérios de aceitação
 
 ```gherkin
-Dado que sou responsável autenticado
+Dado que sou responsável e entrei com a minha conta do CIn
 Quando acesso o painel
 Então vejo a fila de quarentena com o motivo da retenção
 E posso corrigir a classificação e publicar o item
@@ -498,7 +624,7 @@ E posso descartar o que não é achados e perdidos
 Dado que publico um item que estava em quarentena
 Quando a publicação ocorre
 Então ele entra no catálogo normalmente
-E recebe recibo como qualquer outro item
+E gera o aviso de publicação como qualquer outro item
 ```
 
 ### Casos de falha
@@ -506,7 +632,7 @@ E recebe recibo como qualquer outro item
 | Falha | Comportamento esperado |
 |---|---|
 | Ninguém acessa o painel | Quarentena cresce sem efeito negativo no catálogo. Nada é publicado errado. |
-| Credencial de acesso compartilhada | Risco aceito nesta escala. Sem auditoria por usuário. |
+| Quem é responsável | Definido por configuração, como uma lista de contas do CIn. Com o login individual (ADR-010), há auditoria por pessoa. |
 
 ---
 
@@ -518,8 +644,8 @@ E recebe recibo como qualquer outro item
 
 **Estimativa:** 3
 **Por que permanece COULD:** não é falta de interesse — é decisão adiada por falta de dado.
-Somar um segundo e-mail automático por ocorrência (além do recibo da US-08) exige antes medir
-a taxa real de confirmação obtida pela US-10 e pelo token. Reavaliar com dado em mãos.
+Somar um segundo e-mail automático por ocorrência (além do aviso da US-15) exige antes medir
+a taxa real de confirmação obtida pela US-10 e pelo encerramento do autor (US-15). Reavaliar com dado em mãos.
 
 ### Critérios de aceitação
 
@@ -535,7 +661,7 @@ E é enviada no máximo uma vez por item
 
 | Falha | Comportamento esperado |
 |---|---|
-| Percepção de spam | **Risco principal.** Soma-se ao recibo da US-08 — dois e-mails automáticos por ocorrência. Avaliar só depois de medir a taxa real de confirmação. |
+| Percepção de spam | **Risco principal.** Soma-se ao aviso da US-15 — dois e-mails automáticos por ocorrência. Avaliar só depois de medir a taxa real de confirmação. |
 | Lembrete enviado após devolução já ocorrida | Mensagem deve ser redigida como pergunta, nunca como cobrança. |
 
 ---
@@ -581,12 +707,97 @@ Então vejo os números disponíveis sem extrapolação
 > Responde ao comentário da secgrad por consulta ao banco, sem criar outro fluxo de e-mail —
 > custa bem menos que a US-13 e ataca a mesma lacuna.
 
+> **Linha de base (decisão do PO em 14/10/2026):** antes do sistema, só **8,6%** das threads
+> da lista registravam desfecho (37 de 429, de mai/2025 a out/2026,
+> `docs/corpus/ANALISE-CORPUS.md` §4.5). A página compara a fração de itens encerrados com
+> esse número, e declara que as duas medidas contam só desfechos registrados.
+
+---
+
+## US-16 · Refletir o descarte institucional no catálogo
+
+**Como** pessoa que procura um objeto,
+**quero** saber quando um setor avisou que descartou o que não foi retirado,
+**para que** eu não procure por algo que já não existe.
+
+**Estimativa:** a definir
+**Origem:** o corpus tem dois avisos de descarte com prazo, em ago/2025 e em dez/2025 (este da
+SecGrad). Hoje os itens desse lote continuam `aberto` no catálogo depois do descarte.
+
+> **Pendente com o PO:** o Luiz vai levantar com o CIn qual é a regra de descarte, quem decide
+> e com que frequência. Os critérios de aceitação só serão escritos depois disso. Qualquer
+> que seja a regra, a invariante 7 continua valendo: o sistema não inventa prazo, só registra
+> um descarte que a instituição declarou.
+
+---
+
+## US-17 · Sinalizar possíveis anúncios duplicados
+
+**Como** pessoa que procura ou que anunciou um objeto,
+**quero** ver quando dois anúncios parecem ser do mesmo objeto,
+**para que** eu não trate como dois casos o que é um só.
+
+**Estimativa:** a definir
+**Origem:** gabarito do corpus, casos 15 e 17. O corpus tem 12 anúncios repetidos pela mesma
+pessoa e 10 casos em que pessoas diferentes anunciam o mesmo objeto, cerca de 5% das threads.
+
+### Critérios de aceitação (aprovados pelo PO em 14/10/2026)
+
+```gherkin
+Dado que dois itens têm o mesmo objeto, um local em comum e datas próximas
+Quando aparecem no catálogo
+Então cada um mostra um aviso "talvez seja o mesmo objeto que", com link para o outro
+E nenhum dos dois é fundido nem ocultado automaticamente
+
+Dado que os dois itens têm o mesmo autor
+Quando ele acessa "Meus anúncios"
+Então vê o aviso de possível duplicata
+E pode remover um deles (US-15)
+```
+
+> A comparação é por campos extraídos e regra determinística, sem LLM (invariante 6). A
+> decisão 4 continua valendo: o sistema sinaliza, mas não decide sozinho que dois anúncios são
+> o mesmo objeto, porque fundir errado é pior que mostrar duas vezes.
+
+---
+
+## US-18 · Ligar "na aula de X" à sala da disciplina
+
+**Como** pessoa que perdeu algo durante uma aula,
+**quero** que um anúncio como "esqueci na aula de Programação" apareça no filtro da sala certa,
+**para que** quem procura pelo local encontre o item.
+
+**Estimativa:** a definir
+**Origem:** gabarito do corpus, caso 24. Há 13 anúncios cujo local é dado pela aula ou evento,
+e hoje o campo local fica vazio nesses casos.
+
+### Critérios de aceitação (aprovados pelo PO em 14/10/2026)
+
+```gherkin
+Dado que o texto cita uma disciplina ("na aula de Algoritmos") e não cita sala
+Quando a extração termina
+Então o local é preenchido com a sala em que a disciplina acontece no semestre
+E o item registra que o local veio da grade horária, e não do texto
+
+Dado que a disciplina não está na grade carregada
+Quando a extração termina
+Então o local continua vazio
+```
+
+> **Depende de levantamento (Luiz):** a grade horária do CIn com disciplina e sala por
+> semestre (SCRUM-64). O PO avalia que essa informação é fácil de obter. Sem a grade, a
+> história não começa.
+>
+> **Atenção à invariante 3:** a grade preenche o `local` (onde foi perdido), e não a
+> `localização` (onde o objeto está). A localização continua só por declaração explícita.
+
 ---
 
 # WON'T — fora desta entrega
 
 | Item | Motivo |
 |---|---|
+| **US-08 · Receber o recibo e poder corrigir o item** (link com token) | **Descontinuada em 13/10/2026, substituída pela US-15.** O token evitava login, mas o login com a conta Google do CIn não cria conta nem senha para o projeto manter. Ele também elimina o risco de link encaminhado e de acesso perdido. Ver ADR-010. O texto original da história está no histórico do git. |
 | Notificação ativa a quem perdeu | Exige cadastro prévio da perda, o que compete com o e-mail. Classificado como *would* pelo PO. |
 | Verificação automatizada de posse | Permanece presencial e social, como hoje. |
 | Interpretação de imagens | Fotos são armazenadas e exibidas, não analisadas. |
@@ -603,11 +814,11 @@ US-01 (ler)
        └─ US-03 (extrair)
             └─ US-04 (catálogo)  ← primeiro valor demonstrável
                  ├─ US-05 (privacidade)
-                 ├─ US-08 (recibo e correção)
+                 ├─ US-15 (login e gestão pelo autor)
                  │    └─ US-09 (remoção)
                  └─ US-10 (devolução automática)
 
-US-06 (cadastro) ──→ US-07 (publicar na lista) [depende de autorização externa]
+US-15 (login) ──→ US-06 (cadastro) ──→ US-07 (publicar na lista) [depende de autorização externa]
 
 US-11, US-12, US-13 ─ independentes, COULD
 ```
@@ -623,7 +834,7 @@ demonstrável.
 |---|---|---|---|
 | R1 | Permissão de postar não ser concedida | organizacional | US-07 em SHOULD; sistema opera em modo somente leitura sem bloquear nada |
 | R2 | Arquivamento do grupo estar desativado | externa | US-11 em COULD; catálogo nasce vazio e cresce |
-| R3 | Detecção equivocada de devolução | técnica | Só avança com alta confiança; correção pelo token |
+| R3 | Detecção equivocada de devolução | técnica | Só avança com alta confiança; correção pelo autor logado (US-15) |
 | R4 | Ausência de responsável após dezembro | organizacional | **Aceito pelo PO.** Sistema desenhado para operar sem supervisão |
 | R5 | Pedido de remoção sem destinatário | legal | Decorre de R4. Mitigação sugerida: alias institucional |
-| R6 | Volume insuficiente para demonstrar valor | produto | ~10 itens/mês; US-11 ajudaria se viável |
+| R6 | Volume insuficiente para demonstrar valor | produto | ~25 itens/mês segundo o corpus, mas quase zero em janeiro e julho: a demonstração não pode cair nas férias. US-11 ajudaria se viável |

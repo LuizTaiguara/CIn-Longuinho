@@ -26,10 +26,11 @@ motivo produz um documento argumentativo — que é o que a modelagem arquitetur
 | [ADR-003](#adr-003) | Isolamento da fonte de dados atrás de interface | aceito |
 | [ADR-004](#adr-004) | Retenção de mensagens não classificadas em quarentena | aceito |
 | [ADR-005](#adr-005) | A conversa como unidade de registro | aceito |
-| [ADR-006](#adr-006) | Correção por autosserviço, sem painel administrativo | aceito |
+| [ADR-006](#adr-006) | Correção por autosserviço, sem painel administrativo | aceito; credencial **substituída por ADR-010** |
 | [ADR-007](#adr-007) | Resposta direcionada a quem anunciou, não ao sistema | aceito |
 | [ADR-008](#adr-008) | Camada de acesso a dados exposta por interface de rede | aceito |
 | [ADR-009](#adr-009) | Tecnologias de implementação | aceito |
+| [ADR-010](#adr-010) | Autenticação do autor pela conta Google do CIn | aceito |
 
 ---
 <a id="adr-001"></a>
@@ -278,8 +279,12 @@ de achados e perdidos e, em caso afirmativo, se comunica um achado ou uma perda 
 a erro.
 
 O corpus levantado contém casos ilustrativos: mensagens sobre assuntos não relacionados que
-mencionam objetos; e mensagens genuinamente ambíguas, como *"alguém viu um fone preto perto do
-laboratório?"*, que pode comunicar tanto uma perda quanto um achado.
+mencionam objetos; e mensagens genuinamente ambíguas, como o assunto *"[PERDIDO]"* com o corpo
+*"Mouse deixado no Grad02"*, que pode comunicar tanto uma perda quanto um achado.
+
+> **Revisão de 14/10/2026:** o exemplo original era *"alguém viu um fone preto perto do
+> laboratório?"*. O PO decidiu que essa pergunta é uma perda, já que quem pergunta está
+> procurando, e ela deixou de ser exemplo de ambiguidade.
 
 Como o sistema não dispõe de curador — conforme ADR-001 — um item publicado incorretamente
 permanecerá incorreto indefinidamente.
@@ -411,7 +416,9 @@ seu custo é inferior ao risco de fusão indevida de registros.
 
 # ADR-006 · Correção por autosserviço, sem painel administrativo
 
-**Status:** aceito · **Data:** 01/10/2026
+**Status:** aceito · **Data:** 01/10/2026 · **Mecanismo de credencial substituído por
+[ADR-010](#adr-010) em 13/10/2026.** Continua valendo: autosserviço do autor, ausência de
+painel administrativo e canal humano para remoção a pedido de terceiros.
 
 ## Contexto e problema
 
@@ -716,6 +723,112 @@ permanece do lado do servidor.
 A adoção de banco em servidor viabiliza a busca textual adequada ao português sem
 desenvolvimento adicional, e elimina a contenção de escrita que a arquitetura de dois processos
 tornaria recorrente.
+
+---
+<a id="adr-010"></a>
+
+# ADR-010 · Autenticação do autor pela conta Google do CIn
+
+**Status:** aceito · **Data:** 13/10/2026 · **Substitui** o mecanismo de credencial do
+[ADR-006](#adr-006)
+
+## Contexto e problema
+
+O ADR-006 resolveu a correção por autosserviço com uma **credencial de uso único** enviada no
+recibo: um link com token. O motivo para evitar login era que ele exigiria cadastro, senha,
+recuperação de acesso e alguém para manter as contas, o que o R6 proíbe.
+
+Esse motivo vale para um sistema de contas próprio. Não vale para a conta institucional que
+toda a comunidade já tem. O domínio `@cin.ufpe.br` é Google Workspace: quem mantém conta, senha
+e recuperação é o Google e a administração do CIn, não o projeto.
+
+O token tem ainda custos próprios:
+- **Encaminhar o recibo é entregar o controle do item.** Um print ou um encaminhamento basta.
+- **Quem apaga o e-mail perde o acesso** e não tem como recuperar.
+- **O link precisa ser protegido** em logs, páginas e respostas da API.
+
+## Critérios de decisão
+
+- Não criar papel humano novo nem gestão de contas (R6)
+- Só o autor corrige, encerra e remove o próprio item
+- Não expor o e-mail de ninguém (invariante 1)
+- Funcionar também para quem anunciou pela lista, sem nunca ter visitado o site
+
+## Opções consideradas
+
+1. Link com token no recibo (ADR-006)
+2. **Login Google restrito ao domínio `@cin.ufpe.br`**
+3. Contas próprias com senha
+4. Link mágico por e-mail a cada acesso
+
+## Decisão
+
+O autor **entra com a conta Google do CIn**. O servidor aceita apenas identidades verificadas
+pelo Google cujo domínio seja `cin.ufpe.br`, e compara o e-mail da sessão com o e-mail de autor
+do item. Esse e-mail vem do remetente da thread ou da conta que cadastrou pelo site. Se forem
+iguais, a pessoa pode corrigir, encerrar e remover. Se não forem, a resposta é 403.
+
+O recibo continua existindo como **aviso de publicação e canal de divulgação** (decisão 9),
+com o link do item e a instrução para entrar com a conta do CIn. Ele não carrega credencial.
+
+O sistema não tem tabela de usuários nem de senhas. A identidade é obtida do Google a cada
+login. O e-mail do autor fica guardado no banco apenas para a comparação e **nunca sai em
+resposta da API**.
+
+**O catálogo continua aberto para leitura, sem login** (decisão do PO em 14/10/2026). O
+login é exigido para anunciar e para gerir os próprios anúncios. A sessão também passa a
+liberar o **texto original** de cada item, que quem não entrou não vê, porque ele traz nomes de
+terceiros e dados de contato que hoje só circulam dentro do CIn.
+
+## Prós e contras das opções
+
+**Link com token**
+Não exige nenhuma integração. Por outro lado, transfere o controle a quem receber o e-mail
+encaminhado e se perde com o e-mail apagado. Também exige proteger o link em todos os pontos
+por onde ele passa.
+
+**Login Google restrito ao domínio** *(escolhida)*
+Não cria conta, senha nem recuperação para o projeto manter. Elimina o risco de encaminhamento.
+Torna o autor de um anúncio feito pela lista dono do item sem nenhum passo extra. Abre
+espaço para uma tela de "meus anúncios".
+
+Em contrapartida:
+- **Exige um app OAuth no Google Cloud.** Com o projeto do CIn (pedido 5 à Gerinfra), o app
+  fica do tipo "Interno". Sem ele, serve um app "Externo" com escopo só de identidade e o
+  domínio filtrado no servidor.
+- **Exige gestão de sessão no site.**
+- **Exclui quem anuncia com e-mail de fora do CIn**, que no corpus é 1 caso em 441, e quem
+  perdeu a conta ao se formar. Para esses resta o canal de contato da US-09.
+
+**Contas próprias com senha**
+Recria exatamente o que o R6 proíbe: cadastro, senha, recuperação e alguém para atender.
+
+**Link mágico a cada acesso**
+Evita guardar credencial permanente, mas o sistema passa a mandar e-mail a cada acesso e
+continua vulnerável a encaminhamento. Não oferece nada que o login do Google não ofereça
+melhor.
+
+## Consequências
+
+- A **US-08** (recibo com token) vai para WON'T e é substituída pela **US-15** (entrar com a
+  conta do CIn e gerir meus anúncios), classificada como MUST.
+- O **cadastro pelo site (US-06)** passa a exigir login. Dele vêm o autor do item e o
+  `Reply-To` da US-07.
+- O **contrato da API** passa a declarar sessão em `POST /itens`, `PATCH /itens/{id}` e
+  `POST /itens/{id}/encerrar`, com 401 sem sessão e 403 para quem não é o autor, e ganha
+  `GET /eu/itens`.
+- O **client secret** do OAuth entra na configuração por variável de ambiente (invariante 9).
+- O sistema passa a depender do login do Google para a gestão de itens. Já dependia do Google
+  Workspace para ler a lista. Se o login estiver indisponível, **o catálogo continua
+  funcionando para leitura**, e só a gestão fica parada.
+- Quem aparece num anúncio sem tê-lo publicado continua sem poder removê-lo sozinho, mesmo
+  logado, porque não é o autor. O canal humano da US-09 permanece.
+- **O autor pode encerrar a partir de "aberto"** (decisão do PO em 14/10/2026), pelo site ou
+  por mensagem na thread. No mesmo dia, o gabarito do corpus estendeu essa exceção à
+  invariante 2 para a declaração de terceiro na thread, registrada com a fonte "terceiro" e
+  confiança média (US-10).
+- O texto original passa a sair da API só para sessão do CIn, com telefones e e-mails
+  mascarados (US-04 e US-05).
 
 ---
 

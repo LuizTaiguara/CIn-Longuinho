@@ -17,10 +17,14 @@ Vale além do `AGENTS.md` da raiz. Front: Pedro e Rafael. UX: Klarissa.
 - **Não existe campo de e-mail para exibir.** O contato com quem anunciou é por botão que encaminha a mensagem.
 - **O estado aparece com honestidade:**
   - `reivindicado` mostra **há quanto tempo** ("reivindicado há 3 semanas, retirada não confirmada");
-  - o texto original do e-mail fica sempre visível no item;
+  - item encerrado com a fonte "terceiro" mostra **"encerrado segundo terceiro"**, e não só "encerrado" (US-04, US-10);
+  - o texto original do e-mail aparece no item **só para quem entrou** com a conta do CIn, e já vem
+    com telefones e e-mails mascarados pela API. Se ele chegar a uma sessão anônima, o bug é da API;
   - item marcado "revisar" mostra o selo.
-- **Não há login, painel admin nem área do administrador.** O ator "administrador" não existe (R6).
-  - Correção e remoção são feitas por link com token, sem login.
+- **Não há painel admin nem área do administrador.** O ator "administrador" não existe (R6).
+  - O único login é **com a conta Google do CIn** (`@cin.ufpe.br`), para o autor gerir os próprios anúncios (US-15, ADR-010).
+  - Não existe conta própria, senha nem tela de cadastro de usuário.
+  - Autoria é verificada no servidor. O front só esconde botões; quem nega é a API, com 403.
 - **Textos, telas e fluxos seguem os wireframes da UX** (F-04).
   - Mudar o que o usuário vê é decisão de produto: veja a seção "Decisões de produto" na raiz.
   - Ainda pendente com o PO e a UI: abas separadas para achados e perdidos, ou lista única com filtro?
