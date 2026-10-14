@@ -193,7 +193,19 @@ aberto  →  reivindicado  →  encerrado
 ```
 
 **`localização`** — declarada no cadastro, alterada **somente** por declaração explícita:
-`no local` · `com quem achou` · `caixa do bloco A/E` · `devolvido`
+`no local` · `com quem achou` · `com um setor` (+ nome do setor) · `caixa do bloco A/E` ·
+`devolvido`
+
+`com um setor` foi incluído pelo PO em 14/10/2026. O corpus mostra que a SecGrad (E124), a
+Gerinfra (B021) e outros setores guardam justamente os objetos de maior valor, como celular,
+documento e chave. O nome do setor é texto, com sugestões, e não uma lista fechada que
+alguém precisaria manter (R6).
+
+**`local`** é onde o objeto foi achado ou perdido, e não onde está agora. É uma **lista**,
+porque 6% dos anúncios citam mais de um lugar ("Grad 5 ou lab de hardware"), e o filtro por
+qualquer um deles encontra o item. Ele segue a mesma regra da localização: só uma mensagem
+do **autor** da thread corrige o local. A correção de terceiro vira evento e não muda o campo.
+Decisões do PO em 14/10/2026.
 
 A assimetria é deliberada. O worker **infere situação** porque o vocabulário do corpus é
 pequeno e repetitivo ("Encontraram", "Já peguei", "é meu", "Achei já, obrigado"). O worker
@@ -203,13 +215,14 @@ errado manda alguém a um lugar onde o objeto não está.
 Três regras invioláveis:
 
 1. **Status nunca retrocede nem pula etapa.** Detectada uma reivindicação em item já
-   encerrado, o evento é registrado e o status não muda. **Exceção única:** o autor do
-   anúncio declara o desfecho, pelo site (US-15) ou por mensagem na thread (US-10, "Achei já,
-   obrigado"). Isso leva de `aberto` direto a `encerrado`, com a fonte "confirmação do autor".
-   Quem afirma o próprio desfecho é a pessoa mais autorizada a afirmá-lo, e exigir
-   `reivindicado` antes registraria uma etapa que não aconteceu. Mensagem de terceiro nunca
-   pula etapa. Num **perdido**, `reivindicado` é alguém dizer que o objeto está com ele
-   ("está aqui na SecGrad"). Decisões do PO em 14/10/2026.
+   encerrado, o evento é registrado e o status não muda. **Exceção única:** uma declaração de
+   desfecho leva de `aberto` direto a `encerrado`. Se vem do autor, pelo site (US-15) ou na
+   thread (US-10, "Achei já, obrigado"), a fonte é "confirmação do autor". Se vem de
+   terceiro na thread ("resolvido, ela achou"), a fonte é "terceiro", com confiança média.
+   Exigir `reivindicado` antes registraria uma etapa que não aconteceu. Num **perdido**,
+   `reivindicado` é alguém dizer que o objeto está com ele ("está aqui na SecGrad"). Uma
+   reivindicação fraca ("acredito que pode ser minha") também conta. Decisões do PO em
+   14/10/2026.
 2. **`reivindicado` ≠ `encerrado`.** Entre dizer "é meu" e retirar o objeto passa tempo, e
    esse intervalo é informação útil: o catálogo mostra *há quanto tempo* o item está
    reivindicado sem confirmação. "Há 2 horas" e "há 3 semanas" significam coisas diferentes.
@@ -478,7 +491,8 @@ Uma arquitetura que não declara o que sacrificou não foi escolhida, foi herdad
 
 **Sacrificados conscientemente**
 
-- **Desempenho e escalabilidade** — ~10 itens/mês e população fixa; escalar é problema que não
+- **Desempenho e escalabilidade** — ~25 itens/mês (pico de ~55, quase zero nas férias,
+  segundo o corpus) e população fixa; escalar é problema que não
   existe
 - **Tempo real** — cinco minutos de latência é folga confortável
 - **Segurança forte** — sem papéis nem contas próprias; o único login é o da conta do CIn, para

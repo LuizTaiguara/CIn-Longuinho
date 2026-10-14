@@ -61,7 +61,7 @@ Então o ciclo deve encerrar sem erro e sem alterar o banco
 |---|---|
 | Credencial expirada ou revogada | Worker registra erro e encerra o ciclo. **Não** apaga estado nem marca mensagens como lidas. Próximo ciclo tenta de novo. |
 | API do Gmail indisponível | Ciclo falha silenciosamente e tenta no próximo. Nenhum dado é perdido porque o estado vive no banco. |
-| Mensagem sem corpo de texto (só anexo) | Registra a mensagem com corpo vazio e segue. Vai para quarentena na US-02. |
+| Mensagem sem corpo de texto (só anexo) | Registra a mensagem com corpo vazio e segue. A US-02 decide: com foto e objeto no assunto, é achado; sem isso, quarentena. |
 | Banco indisponível | Worker encerra sem consumir mensagens. Nada é marcado como processado. |
 | Duas execuções simultâneas do worker | A segunda detecta execução em andamento e encerra. Sem processamento duplicado. |
 
@@ -110,6 +110,8 @@ Mesmo que os demais campos estejam vazios
 | Pergunta "alguém viu um fone preto?" | **Publica como perdido.** Quem pergunta se alguém viu está procurando. Decisão do PO em 14/10/2026. |
 | Texto ambíguo: assunto "[PERDIDO]", corpo "Mouse deixado no Grad02" | Quarentena — pode ser perda ou achado, e publicar na categoria errada torna o item inencontrável. O autor pode resolver em "Meus anúncios" (US-15). |
 | Mensagem curta mas válida: "encontrei esse carregador no Grad 05" | **Publica.** Extração fraca não é motivo para reter. Campo vazio é honesto; campo errado não é. |
+| Sem texto no corpo, com foto, e o assunto nomeia o objeto ("Garrafa no Grad 5") | **Publica como achado.** Quem perdeu não anuncia só com uma foto. A regra vale só quando o corpo está vazio: com texto, decidem os verbos. Decisão do PO em 14/10/2026 (caso 10 do corpus). |
+| Relato de algo já resolvido: "esqueci, já fui buscar, estou registrando porque a portaria pediu" | **Vira item já encerrado**, com a fonte "confirmação do autor". Fica no histórico sem aparecer como aberto. Decisão do PO em 14/10/2026 (caso 8 do corpus). |
 | Classificador indisponível ou com erro | Mensagem permanece não classificada e é reavaliada no próximo ciclo. Não publica por omissão. |
 
 > **Nota:** a fila de quarentena é também o conjunto de teste do parser. Cada item retido é um
@@ -189,6 +191,7 @@ E assim a busca não revela o que o texto original contém
 Dado que filtro por local
 Quando aplico o filtro
 Então vejo apenas itens daquele local
+E isso inclui itens que citam aquele local entre outros ("Grad 5 ou lab de hardware")
 
 Dado que um item está reivindicado mas não confirmado
 Quando ele aparece no catálogo
@@ -353,8 +356,9 @@ E o aviso não contém nenhuma credencial
 >    para gerir os próprios anúncios. Quem não entrou vê só os campos extraídos. O texto
 >    original aparece apenas para quem entrou com a conta do CIn (ver US-04 e US-05).
 > 2. **O autor pode encerrar a partir de `aberto`**, pelo site ou por mensagem na thread. É a
->    exceção única à invariante 2: quem declara o próprio desfecho não precisa passar por
->    `reivindicado`. Mensagem de terceiro nunca pula etapa (US-10).
+>    exceção à invariante 2: uma declaração de desfecho não precisa passar por `reivindicado`.
+>    Depois, o gabarito do corpus (caso 19) estendeu a exceção à declaração de terceiro na
+>    thread, com a fonte "terceiro" e confiança média (US-10).
 > 3. **A mensagem retida aparece para o autor em "Meus anúncios", e ele resolve** dizendo se é
 >    perda ou achado. É a exceção única à invariante 5. Isso aumenta o esforço desta história,
 >    e a estimativa precisa ser revista no refinamento.
@@ -535,9 +539,13 @@ Então a situação passa direto a encerrado
 E a origem do encerramento é registrada como "confirmação do autor"
 
 Dado que um item está aberto
-Quando alguém que não é o autor responde declarando o desfecho
-Então a situação não pula etapa
-E o evento é registrado no histórico
+Quando alguém que não é o autor responde declarando o desfecho ("resolvido, ela achou")
+Então a situação passa direto a encerrado
+E a origem do encerramento é registrada como "terceiro", com confiança média
+
+Dado que um item está aberto
+Quando alguém responde com uma reivindicação fraca ("acredito que pode ser minha")
+Então a situação passa a reivindicado
 
 Dado que um item já está encerrado
 Quando chega nova resposta na conversa
@@ -550,6 +558,7 @@ E o evento é registrado no histórico
 | Falha | Comportamento esperado |
 |---|---|
 | Detecção equivocada de devolução | **Falha mais cara do sistema** — mente para quem procura. Mitigação: só avança com alta confiança; autor corrige entrando com a conta do CIn (US-15). |
+| Terceiro declara desfecho por engano ou em piada ("resolvido!") | O item é encerrado e não volta, porque a situação nunca retrocede. A fonte "terceiro" fica registrada. **Sugestão pendente com o PO:** o catálogo mostrar "encerrado segundo terceiro", para quem procura não descartar o item. |
 | Resposta ambígua ("achei!") | Não altera a situação. Registra o evento e mantém o estado anterior. |
 | Reivindicação sem retirada posterior | Item permanece visível no catálogo mostrando há quanto tempo está reivindicado. Não reabre nem encerra sozinho. |
 | Confirmação chega por fora da lista | Não é detectada. Encerramento depende do autor logado (US-15). Limitação conhecida. |
@@ -692,6 +701,90 @@ Então vejo os números disponíveis sem extrapolação
 > Responde ao comentário da secgrad por consulta ao banco, sem criar outro fluxo de e-mail —
 > custa bem menos que a US-13 e ataca a mesma lacuna.
 
+> **Linha de base (decisão do PO em 14/10/2026):** antes do sistema, só **8,6%** das threads
+> da lista registravam desfecho (37 de 429, de mai/2025 a out/2026,
+> `docs/corpus/ANALISE-CORPUS.md` §4.5). A página compara a fração de itens encerrados com
+> esse número, e declara que as duas medidas contam só desfechos registrados.
+
+---
+
+## US-16 · Refletir o descarte institucional no catálogo
+
+**Como** pessoa que procura um objeto,
+**quero** saber quando um setor avisou que descartou o que não foi retirado,
+**para que** eu não procure por algo que já não existe.
+
+**Estimativa:** a definir
+**Origem:** o corpus tem dois avisos de descarte com prazo, em ago/2025 e em dez/2025 (este da
+SecGrad). Hoje os itens desse lote continuam `aberto` no catálogo depois do descarte.
+
+> **Pendente com o PO:** o Luiz vai levantar com o CIn qual é a regra de descarte, quem decide
+> e com que frequência. Os critérios de aceitação só serão escritos depois disso. Qualquer
+> que seja a regra, a invariante 7 continua valendo: o sistema não inventa prazo, só registra
+> um descarte que a instituição declarou.
+
+---
+
+## US-17 · Sinalizar possíveis anúncios duplicados
+
+**Como** pessoa que procura ou que anunciou um objeto,
+**quero** ver quando dois anúncios parecem ser do mesmo objeto,
+**para que** eu não trate como dois casos o que é um só.
+
+**Estimativa:** a definir
+**Origem:** gabarito do corpus, casos 15 e 17. O corpus tem 12 anúncios repetidos pela mesma
+pessoa e 10 casos em que pessoas diferentes anunciam o mesmo objeto, cerca de 5% das threads.
+
+### Critérios de aceitação (rascunho, falta revisão do PO)
+
+```gherkin
+Dado que dois itens têm o mesmo objeto, um local em comum e datas próximas
+Quando aparecem no catálogo
+Então cada um mostra um aviso "talvez seja o mesmo objeto que", com link para o outro
+E nenhum dos dois é fundido nem ocultado automaticamente
+
+Dado que os dois itens têm o mesmo autor
+Quando ele acessa "Meus anúncios"
+Então vê o aviso de possível duplicata
+E pode remover um deles (US-15)
+```
+
+> A comparação é por campos extraídos e regra determinística, sem LLM (invariante 6). A
+> decisão 4 continua valendo: o sistema sinaliza, mas não decide sozinho que dois anúncios são
+> o mesmo objeto, porque fundir errado é pior que mostrar duas vezes.
+
+---
+
+## US-18 · Ligar "na aula de X" à sala da disciplina
+
+**Como** pessoa que perdeu algo durante uma aula,
+**quero** que um anúncio como "esqueci na aula de Programação" apareça no filtro da sala certa,
+**para que** quem procura pelo local encontre o item.
+
+**Estimativa:** a definir
+**Origem:** gabarito do corpus, caso 24. Há 13 anúncios cujo local é dado pela aula ou evento,
+e hoje o campo local fica vazio nesses casos.
+
+### Critérios de aceitação (rascunho, falta revisão do PO)
+
+```gherkin
+Dado que o texto cita uma disciplina ("na aula de Algoritmos") e não cita sala
+Quando a extração termina
+Então o local é preenchido com a sala em que a disciplina acontece no semestre
+E o item registra que o local veio da grade horária, e não do texto
+
+Dado que a disciplina não está na grade carregada
+Quando a extração termina
+Então o local continua vazio
+```
+
+> **Depende de levantamento (Luiz):** a grade horária do CIn com disciplina e sala por
+> semestre (SCRUM-64). O PO avalia que essa informação é fácil de obter. Sem a grade, a
+> história não começa.
+>
+> **Atenção à invariante 3:** a grade preenche o `local` (onde foi perdido), e não a
+> `localização` (onde o objeto está). A localização continua só por declaração explícita.
+
 ---
 
 # WON'T — fora desta entrega
@@ -738,4 +831,4 @@ demonstrável.
 | R3 | Detecção equivocada de devolução | técnica | Só avança com alta confiança; correção pelo autor logado (US-15) |
 | R4 | Ausência de responsável após dezembro | organizacional | **Aceito pelo PO.** Sistema desenhado para operar sem supervisão |
 | R5 | Pedido de remoção sem destinatário | legal | Decorre de R4. Mitigação sugerida: alias institucional |
-| R6 | Volume insuficiente para demonstrar valor | produto | ~10 itens/mês; US-11 ajudaria se viável |
+| R6 | Volume insuficiente para demonstrar valor | produto | ~25 itens/mês segundo o corpus, mas quase zero em janeiro e julho: a demonstração não pode cair nas férias. US-11 ajudaria se viável |

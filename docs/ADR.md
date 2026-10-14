@@ -823,9 +823,10 @@ melhor.
   funcionando para leitura**, e só a gestão fica parada.
 - Quem aparece num anúncio sem tê-lo publicado continua sem poder removê-lo sozinho, mesmo
   logado, porque não é o autor. O canal humano da US-09 permanece.
-- **O autor pode encerrar a partir de "aberto"** (decisão do PO em 14/10/2026). É a exceção
-  única à invariante 2 e vale pelo site e por mensagem do autor na thread. Mensagem de
-  terceiro nunca pula etapa.
+- **O autor pode encerrar a partir de "aberto"** (decisão do PO em 14/10/2026), pelo site ou
+  por mensagem na thread. No mesmo dia, o gabarito do corpus estendeu essa exceção à
+  invariante 2 para a declaração de terceiro na thread, registrada com a fonte "terceiro" e
+  confiança média (US-10).
 - O texto original passa a sair da API só para sessão do CIn, com telefones e e-mails
   mascarados (US-04 e US-05).
 
