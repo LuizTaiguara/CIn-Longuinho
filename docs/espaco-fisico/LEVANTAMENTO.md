@@ -181,3 +181,11 @@ Tudo o que está registrado nesta seção fica no **térreo**.
 - [ ] Outros espaços do bloco vermelho: sala comum, sala de reunião, sala das ligas.
 - [ ] Áreas comuns: copas, corredores, banheiros.
 - [ ] Bloco branco.
+
+## Documentos a levantar
+
+- [ ] Grade horária do semestre, com disciplina e sala. É ela que permite ligar "esqueci na
+      aula de Programação" à sala certa (US-18, caso 24 do gabarito do corpus).
+- [ ] Regra de descarte dos setores que guardam objetos (SecGrad, Gerinfra): quem decide, com
+      que prazo e com que frequência (US-16).
+- [ ] Plantas dos blocos e lista oficial de salas, já pedidas à Gerinfra em 13/10 (pedido 8).
