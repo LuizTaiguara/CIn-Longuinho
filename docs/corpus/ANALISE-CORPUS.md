@@ -366,8 +366,8 @@ digitação), que a descrição da SCRUM-74 pedia.
 | 2 | `1a11d14208192e67` | Assunto "Bolsa perdida", corpo diz que há uma bolsa no banheiro e que ela está no local | Achado, localização `no local` | Aceito |
 | 3 | `19a07e69fb045ae6` | "[PERDIDO] Boné e garrafa", corpo "foi achado agora" | Achado, um item com dois objetos | Aceito |
 | 4 | `1a110dd1782434ee` | Quem achou anuncia um batom como "perdido no grad 4". Uma pessoa diz "é meu". Um terceiro corrige: "Grad 3" | Achado → reivindicado. A correção do local é decisão em aberto | Aceito. O local fica "Grad 4" e a correção do terceiro vira evento (P5) |
-| 5 | `1a0f91df0a9e6e4d` | Professor anuncia garrafas. Aluna diz "é minha", depois "fui lá e não encontrei" | Achado. A reivindicação não se confirma. Não avança para encerrado | Aceito |
-| 6 | `19a83201eb17d35e` | Nota de 2 reais achada, 14 respostas de piada | Achado de valor trivial. Nenhuma resposta muda a situação | Aceito |
+| 5 | `1a0f91df0a9e6e4d` | Professor anuncia garrafas. Aluna diz "é minha", depois "fui lá e não encontrei" | Achado. A reivindicação não se confirma. Não avança para encerrado | Aceito. Termina **reivindicado**; o desmentido vira evento |
+| 6 | `19a83201eb17d35e` | Nota de 2 reais achada, 14 respostas de piada | Achado de valor trivial. Nenhuma resposta muda a situação | Aceito. Fica **aberto**: "a nota é minha" em piada não reivindica |
 | 7 | `19a2611b68453a61` | Convite para pesquisa enviado para a lista | Não é achado nem perdido → quarentena | Aceito |
 | 8 | `1a05e3826a6c31e8` | "Esqueci, já fui buscar e estou registrando porque a portaria pediu" | Não é anúncio. Nasce encerrado ou não vira item? **PO** | **Vira item já encerrado**, com a fonte "confirmação do autor" |
 | 9 | `19b0e210c6ee699b` | SecGrad avisa que descarta o que não for retirado até uma data | Aviso de processo, não é item | Aceito. O descarte no catálogo virou COULD (US-16) |
@@ -379,7 +379,7 @@ digitação), que a descrição da SCRUM-74 pedia.
 | 15 | `19cd8ee4645433b3` e `19cd8ed96f48d9e3` | O mesmo celular anunciado por duas pessoas no mesmo minuto | Dois itens. Duplicata aceita pela decisão 4 | **Dois itens por enquanto.** A COULD US-17 sinaliza a possível duplicata |
 | 16 | `1997431ac10dcef4` e `1997771c7e257b74` | Perdeu fones. Um terceiro achou e deixou na SecGrad. A SecGrad anuncia em outra thread | Perdido → reivindicado na thread original. Achado separado | Aceito. O achado da SecGrad fica com a localização `com um setor · SecGrad` (P1) |
 | 17 | `19a37f625dd8edd6` e `19a3a4e88cdb6d3b` | A mesma pessoa anuncia o mesmo mouse duas vezes | Dois itens. Duplicata | **Dois itens por enquanto.** A COULD US-17 sinaliza a possível duplicata |
-| 18 | `19ce2ed8f4378fd3` | Perdeu a garrafa. A SecGrad diz que está lá. A SecGrad responde "Item devolvido" | Perdido → encerrado, fonte custodiante | Aceito: aberto → reivindicado ("está aqui") → encerrado |
+| 18 | `19ce2ed8f4378fd3` | Perdeu a garrafa. A SecGrad diz que está lá. A SecGrad responde "Item devolvido" | Perdido → encerrado, fonte custodiante | Aceito: aberto → reivindicado ("está aqui") → encerrado. A SecGrad conta como fonte **"terceiro"** |
 | 19 | `19dd9b6a354dc246` | Achado. A dona diz que não encontrou. Um terceiro diz "resolvido, ela achou" | Encerrado por terceiro: confiança média | **Encerra direto, fonte "terceiro", confiança média.** A invariante 2 foi estendida |
 | 20 | `1a08d70135f437bb` | Enviado para outra lista, depois encaminhado para esta. Depois: "Encontraram :)" | Perdido → encerrado. O encaminhamento não duplica | Aceito: encerrado direto, fonte "confirmação do autor" |
 | 21 | `199e7b21ed281f95` | "Vou deixar na portaria", depois "corrigindo, não pode, fale comigo" | Achado. A localização muda por declaração explícita do autor | Aceito |

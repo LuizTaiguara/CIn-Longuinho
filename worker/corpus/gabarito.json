@@ -114,7 +114,7 @@
     "caso": 5,
     "pasta": "casos/05-garrafas-reivindicacao-desmentida",
     "por_que": "Professor anuncia garrafas. Uma aluna diz \"é minha\", e o próprio autor responde que não há garrafa daquela cor. Tem conversa de professores no meio.",
-    "gabarito_po": "Aceito: \"A reivindicação não se confirma. Não avança para encerrado\"",
+    "gabarito_po": "Aceito. Situação final: reivindicado (PO, 14/10)",
     "threads": [
       {
         "thread_id": "1a0f91df0a9e6e4d",
@@ -130,7 +130,7 @@
         "esperado": {
           "destino": "item",
           "tipo": "achado",
-          "situacao": "PENDENTE_PO",
+          "situacao": "reivindicado",
           "fonte_encerramento": null,
           "localizacao": null,
           "local": [
@@ -138,7 +138,7 @@
           ],
           "objeto": "garrafas"
         },
-        "nota": "PENDENTE COM O PO: a regra de reivindicação (inclusive fraca) leva a reivindicado com \"Essa garrafa verde é minha\", e o desmentido do autor vira evento sem retroceder (invariante 2). O texto aceito diz só que não chega a encerrado. Falta o PO dizer se o esperado é aberto ou reivindicado."
+        "nota": "\"Essa garrafa verde é minha\" leva a reivindicado. O desmentido do autor vira evento e o status não retrocede (invariante 2). Decidido pelo PO em 14/10/2026."
       }
     ]
   },
@@ -178,7 +178,7 @@
           ],
           "objeto": "nota de 2 reais"
         },
-        "nota": "As respostas são piada. Atenção: \"oi amigo a nota é minha\" (mensagem 05) é uma reivindicação no texto, e o gabarito diz que a situação não muda. Há uma chave pix com e-mail no corpo, para testar o mascaramento."
+        "nota": "As respostas são piada. \"oi amigo a nota é minha\" (mensagem 05) é piada e não conta como reivindicação: o PO confirmou em 14/10 que o item fica aberto. O classificador precisa de defesa contra esse tipo de resposta. Há uma chave pix com e-mail no corpo, para testar o mascaramento."
       }
     ]
   },
@@ -543,7 +543,7 @@
           ],
           "objeto": "garrafa verde"
         },
-        "nota": "Quem encerra é a SecGrad, que guardava o objeto. O vocabulário documentado só tem \"confirmação do autor\" e \"terceiro\"; a proposta aceita dizia \"fonte custodiante\". Confirmar com o PO se a SecGrad conta como terceiro."
+        "nota": "Quem encerra é a SecGrad, que guardava o objeto. Conta como fonte \"terceiro\" e o catálogo mostra \"encerrado segundo terceiro\". Decidido pelo PO em 14/10/2026."
       }
     ]
   },

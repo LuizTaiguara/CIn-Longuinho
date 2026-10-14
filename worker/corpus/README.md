@@ -77,14 +77,12 @@ mensagem com nome de pessoa real.**
 
 A nota de cada thread explica o que torna o caso difícil.
 
-### Pendências com o PO
+### Decididos pelo PO em 14/10/2026
 
-- **Caso 5:** `situacao` está como `PENDENTE_PO`. A regra de reivindicação levaria a
-  `reivindicado`, mas o texto aceito diz só que o item "não avança para encerrado".
-- **Caso 6:** o gabarito diz que nenhuma resposta muda a situação. Só que a mensagem 05 traz
-  "a nota é minha" em tom de piada, e pela regra de reivindicação o item avançaria.
-- **Caso 18:** quem encerra é a SecGrad, que guardava o objeto. Está como `terceiro`, mas a
-  proposta aceita dizia "fonte custodiante".
+- **Caso 5:** termina `reivindicado`. O desmentido do autor vira evento e não faz o status voltar.
+- **Caso 6:** fica `aberto`. "A nota é minha" em tom de piada não conta como reivindicação, e o
+  classificador precisa de defesa contra isso.
+- **Caso 18:** a SecGrad conta como fonte `terceiro`, e o catálogo mostra "encerrado segundo terceiro".
 
 ## Onde estão os casos da descrição da SCRUM-74
 
