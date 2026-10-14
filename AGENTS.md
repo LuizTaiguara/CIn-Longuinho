@@ -92,6 +92,9 @@ Não carregue os documentos de `docs/` inteiros, leia só a seção de que a tar
 
 - **Nunca** faça commit ou push na `main`, nem merge, rebase ou force-push de branch alheia.
 - Você para no PR. Quem faz merge é humano, e nunca o autor do PR.
+  - Exceção: o PO faz merge dos próprios PRs. Ele é o revisor de `docs/`, `AGENTS.md` e `.agents/`,
+    e esperar outra pessoa travaria esses PRs. Se o PR do PO mexer em `shared/`, a revisão do
+    Miguel continua obrigatória. Decisão do PO em 14/10/2026.
 - Branch: `SCRUM-NN-descricao-curta`. A chave do Jira no nome liga a branch à task.
 - Exceção: o PR de treino do onboarding (preencher `docs/EQUIPE.md`) usa a branch `treino-<nome>` e não tem task.
 - Commit: `SCRUM-NN: verbo no imperativo em português`. Exemplo: `SCRUM-84: cria leitor de arquivos .eml`.
