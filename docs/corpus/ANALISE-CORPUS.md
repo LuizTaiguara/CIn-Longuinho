@@ -356,6 +356,10 @@ o gabarito em 14/10/2026: 22 propostas aceitas, 3 decididas entre opções (caso
 3 mudadas (casos 10, 15 e 17). As regras que saíram do gabarito estão no backlog (US-02,
 US-10, US-16 a US-18) e na invariante 2 do `AGENTS.md`.
 
+As mensagens desses casos, anonimizadas, estão em `worker/corpus/` como arquivos `.eml`, com o
+gabarito em `worker/corpus/gabarito.json`. Lá também está o caso 29 (sem assunto, com erros de
+digitação), que a descrição da SCRUM-74 pedia.
+
 | # | threadId | O que acontece (parafraseado) | Resposta esperada proposta | Gabarito do PO (14/10) |
 |---|---|---|---|---|
 | 1 | `199a9ead8208d070` | Assunto "[PERDIDO] Óculos", corpo "Encontrado no grad5" | Achado. O assunto não decide | Aceito |

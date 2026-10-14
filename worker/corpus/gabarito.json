@@ -1,0 +1,853 @@
+[
+  {
+    "caso": 1,
+    "pasta": "casos/01-assunto-perdido-corpo-achado",
+    "por_que": "O assunto diz [PERDIDO], mas o corpo diz \"Encontrado\". O sinal confiável é o verbo no corpo.",
+    "gabarito_po": "Aceito",
+    "threads": [
+      {
+        "thread_id": "199a9ead8208d070",
+        "arquivos": [
+          "01.eml"
+        ],
+        "mensagem_raiz": "<caso01.m01@corpus.achados.invalid>",
+        "esperado": {
+          "destino": "item",
+          "tipo": "achado",
+          "situacao": "aberto",
+          "fonte_encerramento": null,
+          "localizacao": null,
+          "local": [
+            "Grad 5"
+          ],
+          "objeto": "óculos escuros"
+        },
+        "nota": null
+      }
+    ]
+  },
+  {
+    "caso": 2,
+    "pasta": "casos/02-bolsa-no-local",
+    "por_que": "Assunto \"Bolsa perdida\" num achado. O corpo declara que o objeto ficou onde estava.",
+    "gabarito_po": "Aceito",
+    "threads": [
+      {
+        "thread_id": "1a11d14208192e67",
+        "arquivos": [
+          "01.eml"
+        ],
+        "mensagem_raiz": "<caso02.m01@corpus.achados.invalid>",
+        "esperado": {
+          "destino": "item",
+          "tipo": "achado",
+          "situacao": "aberto",
+          "fonte_encerramento": null,
+          "localizacao": "no local",
+          "local": [
+            "banheiro masculino do 2º andar do bloco E"
+          ],
+          "objeto": "bolsa"
+        },
+        "nota": null
+      }
+    ]
+  },
+  {
+    "caso": 3,
+    "pasta": "casos/03-bone-e-garrafa",
+    "por_que": "Assunto [PERDIDO] num achado, com dois objetos no mesmo anúncio.",
+    "gabarito_po": "Aceito",
+    "threads": [
+      {
+        "thread_id": "19a07e69fb045ae6",
+        "arquivos": [
+          "01.eml"
+        ],
+        "mensagem_raiz": "<caso03.m01@corpus.achados.invalid>",
+        "esperado": {
+          "destino": "item",
+          "tipo": "achado",
+          "situacao": "aberto",
+          "fonte_encerramento": null,
+          "localizacao": null,
+          "local": [
+            "E132"
+          ],
+          "objeto": "boné e garrafa"
+        },
+        "nota": "Um item só, com os dois objetos."
+      }
+    ]
+  },
+  {
+    "caso": 4,
+    "pasta": "casos/04-batom-correcao-de-local",
+    "por_que": "Achado anunciado como \"perdido no grad 4\", sem texto no corpo. Uma pessoa diz \"é meu\" e um terceiro corrige o local para \"Grad 3\".",
+    "gabarito_po": "Aceito. O local fica \"Grad 4\" e a correção do terceiro vira evento (P5)",
+    "threads": [
+      {
+        "thread_id": "1a110dd1782434ee",
+        "arquivos": [
+          "01.eml",
+          "02.eml",
+          "03.eml",
+          "04.eml"
+        ],
+        "mensagem_raiz": "<caso04.m01@corpus.achados.invalid>",
+        "esperado": {
+          "destino": "item",
+          "tipo": "achado",
+          "situacao": "reivindicado",
+          "fonte_encerramento": null,
+          "localizacao": null,
+          "local": [
+            "Grad 4"
+          ],
+          "objeto": "batom"
+        },
+        "nota": "Só o autor corrige o local. O \"Grad 3\" do terceiro vira evento e não muda o campo."
+      }
+    ]
+  },
+  {
+    "caso": 5,
+    "pasta": "casos/05-garrafas-reivindicacao-desmentida",
+    "por_que": "Professor anuncia garrafas. Uma aluna diz \"é minha\", e o próprio autor responde que não há garrafa daquela cor. Tem conversa de professores no meio.",
+    "gabarito_po": "Aceito: \"A reivindicação não se confirma. Não avança para encerrado\"",
+    "threads": [
+      {
+        "thread_id": "1a0f91df0a9e6e4d",
+        "arquivos": [
+          "01.eml",
+          "02.eml",
+          "03.eml",
+          "04.eml",
+          "05.eml",
+          "06.eml"
+        ],
+        "mensagem_raiz": "<caso05.m01@corpus.achados.invalid>",
+        "esperado": {
+          "destino": "item",
+          "tipo": "achado",
+          "situacao": "PENDENTE_PO",
+          "fonte_encerramento": null,
+          "localizacao": null,
+          "local": [
+            "E112"
+          ],
+          "objeto": "garrafas"
+        },
+        "nota": "PENDENTE COM O PO: a regra de reivindicação (inclusive fraca) leva a reivindicado com \"Essa garrafa verde é minha\", e o desmentido do autor vira evento sem retroceder (invariante 2). O texto aceito diz só que não chega a encerrado. Falta o PO dizer se o esperado é aberto ou reivindicado."
+      }
+    ]
+  },
+  {
+    "caso": 6,
+    "pasta": "casos/06-nota-de-2-reais-zoeira",
+    "por_que": "Achado de valor trivial com 13 respostas de piada, inclusive \"a nota é minha\" pedindo pix e uma \"carta\" longa. Testa ruído em volume.",
+    "gabarito_po": "Aceito: \"Nenhuma resposta muda a situação\"",
+    "threads": [
+      {
+        "thread_id": "19a83201eb17d35e",
+        "arquivos": [
+          "01.eml",
+          "02.eml",
+          "03.eml",
+          "04.eml",
+          "05.eml",
+          "06.eml",
+          "07.eml",
+          "08.eml",
+          "09.eml",
+          "10.eml",
+          "11.eml",
+          "12.eml",
+          "13.eml",
+          "14.eml"
+        ],
+        "mensagem_raiz": "<caso06.m01@corpus.achados.invalid>",
+        "esperado": {
+          "destino": "item",
+          "tipo": "achado",
+          "situacao": "aberto",
+          "fonte_encerramento": null,
+          "localizacao": "com quem achou",
+          "local": [
+            "mezanino do bloco A"
+          ],
+          "objeto": "nota de 2 reais"
+        },
+        "nota": "As respostas são piada. Atenção: \"oi amigo a nota é minha\" (mensagem 05) é uma reivindicação no texto, e o gabarito diz que a situação não muda. Há uma chave pix com e-mail no corpo, para testar o mascaramento."
+      }
+    ]
+  },
+  {
+    "caso": 7,
+    "pasta": "casos/07-pesquisa-fora-de-tema",
+    "por_que": "Convite para responder um formulário de pesquisa. Não é achado nem perdido.",
+    "gabarito_po": "Aceito",
+    "threads": [
+      {
+        "thread_id": "19a2611b68453a61",
+        "arquivos": [
+          "01.eml"
+        ],
+        "mensagem_raiz": "<caso07.m01@corpus.achados.invalid>",
+        "esperado": {
+          "destino": "quarentena",
+          "tipo_real": null
+        },
+        "nota": "Motivo: não é anúncio de achado ou perdido."
+      }
+    ]
+  },
+  {
+    "caso": 8,
+    "pasta": "casos/08-registro-de-algo-ja-resolvido",
+    "por_que": "A pessoa esqueceu, já foi buscar e registra porque a portaria pediu. Não é anúncio de algo em aberto.",
+    "gabarito_po": "Vira item já encerrado, com a fonte \"confirmação do autor\"",
+    "threads": [
+      {
+        "thread_id": "1a05e3826a6c31e8",
+        "arquivos": [
+          "01.eml"
+        ],
+        "mensagem_raiz": "<caso08.m01@corpus.achados.invalid>",
+        "esperado": {
+          "destino": "item",
+          "tipo": "perdido",
+          "situacao": "encerrado",
+          "fonte_encerramento": "confirmação do autor",
+          "localizacao": null,
+          "local": [
+            "sala 5 da área II"
+          ],
+          "objeto": "lousa LCD de mão"
+        },
+        "nota": "Fora do CIn (área II). Nasce encerrado."
+      }
+    ]
+  },
+  {
+    "caso": 9,
+    "pasta": "casos/09-aviso-de-descarte-secgrad",
+    "por_que": "A SecGrad avisa que descarta o que não for retirado até uma data. É aviso de processo, não anúncio. Foi enviado para a lista de alunos, com cópia para a portaria e a SecGrad.",
+    "gabarito_po": "Aceito. O descarte no catálogo virou COULD (US-16)",
+    "threads": [
+      {
+        "thread_id": "19b0e210c6ee699b",
+        "arquivos": [
+          "01.eml"
+        ],
+        "mensagem_raiz": "<caso09.m01@corpus.achados.invalid>",
+        "esperado": {
+          "destino": "quarentena",
+          "tipo_real": null
+        },
+        "nota": "Motivo: aviso de processo. A US-16 (COULD) trata do descarte."
+      }
+    ]
+  },
+  {
+    "caso": 10,
+    "pasta": "casos/10-sem-corpo-so-foto",
+    "por_que": "Só assunto e foto, sem texto no corpo.",
+    "gabarito_po": "Achado. Sem corpo, com foto e objeto no assunto: quem perdeu não anuncia assim",
+    "threads": [
+      {
+        "thread_id": "19e833083f3a48fa",
+        "arquivos": [
+          "01.eml"
+        ],
+        "mensagem_raiz": "<caso10.m01@corpus.achados.invalid>",
+        "esperado": {
+          "destino": "item",
+          "tipo": "achado",
+          "situacao": "aberto",
+          "fonte_encerramento": null,
+          "localizacao": null,
+          "local": [
+            "Grad 5"
+          ],
+          "objeto": "garrafa"
+        },
+        "nota": "Regra da US-02: sem corpo + foto + objeto no assunto = achado."
+      }
+    ]
+  },
+  {
+    "caso": 11,
+    "pasta": "casos/11-mouse-deixado-ambiguo",
+    "por_que": "Assunto só \"[PERDIDO]\", corpo \"Mouse deixado no Grad02\". Não dá para saber a direção pelo texto.",
+    "gabarito_po": "Aceito: quarentena. A direção real é perdido, e o autor resolve em \"Meus anúncios\"",
+    "threads": [
+      {
+        "thread_id": "1999fe00ab68fae7",
+        "arquivos": [
+          "01.eml"
+        ],
+        "mensagem_raiz": "<caso11.m01@corpus.achados.invalid>",
+        "esperado": {
+          "destino": "quarentena",
+          "tipo_real": "perdido"
+        },
+        "nota": "Motivo: direção ambígua. Pela exceção da invariante 5, aparece em \"Meus anúncios\" só para o autor classificar (US-15)."
+      }
+    ]
+  },
+  {
+    "caso": 12,
+    "pasta": "casos/12-casaco-levado-para-casa",
+    "por_que": "Quem achou levou o casaco para casa por engano. O objeto está com quem achou, e o e-mail do autor aparece no corpo.",
+    "gabarito_po": "Aceito",
+    "threads": [
+      {
+        "thread_id": "19dc56af5351c01a",
+        "arquivos": [
+          "01.eml"
+        ],
+        "mensagem_raiz": "<caso12.m01@corpus.achados.invalid>",
+        "esperado": {
+          "destino": "item",
+          "tipo": "achado",
+          "situacao": "aberto",
+          "fonte_encerramento": null,
+          "localizacao": "com quem achou",
+          "local": [
+            "anfiteatro do bloco A"
+          ],
+          "objeto": "casaco"
+        },
+        "nota": "O e-mail no corpo precisa ser mascarado no texto original (US-05)."
+      }
+    ]
+  },
+  {
+    "caso": 13,
+    "pasta": "casos/13-cracha-e-vem-no-onibus",
+    "por_que": "\"Perderam um crachá e um VEM\" é anúncio de achado, fora do CIn, com documento de terceiro.",
+    "gabarito_po": "Aceito",
+    "threads": [
+      {
+        "thread_id": "19d97cca767f8d77",
+        "arquivos": [
+          "01.eml"
+        ],
+        "mensagem_raiz": "<caso13.m01@corpus.achados.invalid>",
+        "esperado": {
+          "destino": "item",
+          "tipo": "achado",
+          "situacao": "aberto",
+          "fonte_encerramento": null,
+          "localizacao": null,
+          "local": [
+            "ônibus Rui Barbosa"
+          ],
+          "objeto": "crachá e cartão VEM"
+        },
+        "nota": "Fora do CIn. \"Perderam\" (terceira pessoa) é achado."
+      }
+    ]
+  },
+  {
+    "caso": 14,
+    "pasta": "casos/14-cracha-com-nome-de-terceiro",
+    "por_que": "O corpo traz o nome completo do dono do crachá.",
+    "gabarito_po": "Aceito. O texto original só aparece para quem entrou (P3)",
+    "threads": [
+      {
+        "thread_id": "1a048670b60f400a",
+        "arquivos": [
+          "01.eml"
+        ],
+        "mensagem_raiz": "<caso14.m01@corpus.achados.invalid>",
+        "esperado": {
+          "destino": "item",
+          "tipo": "achado",
+          "situacao": "aberto",
+          "fonte_encerramento": null,
+          "localizacao": null,
+          "local": [
+            "Grad 2"
+          ],
+          "objeto": "crachá"
+        },
+        "nota": "Nome de terceiro no texto. \"Vou deixar na portaria\" não está no vocabulário de localização e a portaria não guarda objetos, então a localização fica vazia."
+      }
+    ]
+  },
+  {
+    "caso": 15,
+    "pasta": "casos/15-celular-anunciado-duas-vezes",
+    "por_que": "O mesmo celular anunciado por duas pessoas, com um minuto de diferença.",
+    "gabarito_po": "Dois itens por enquanto. A COULD US-17 sinaliza a possível duplicata",
+    "threads": [
+      {
+        "thread_id": "19cd8ed96f48d9e3",
+        "arquivos": [
+          "a-01.eml"
+        ],
+        "mensagem_raiz": "<caso15a.m01@corpus.achados.invalid>",
+        "esperado": {
+          "destino": "item",
+          "tipo": "achado",
+          "situacao": "aberto",
+          "fonte_encerramento": null,
+          "localizacao": null,
+          "local": [
+            "bloco E"
+          ],
+          "objeto": "celular"
+        },
+        "nota": "Primeiro anúncio. \"Recepção do bloco E\" não está no vocabulário de localização."
+      },
+      {
+        "thread_id": "19cd8ee4645433b3",
+        "arquivos": [
+          "b-01.eml"
+        ],
+        "mensagem_raiz": "<caso15b.m01@corpus.achados.invalid>",
+        "esperado": {
+          "destino": "item",
+          "tipo": "achado",
+          "situacao": "aberto",
+          "fonte_encerramento": null,
+          "localizacao": null,
+          "local": [
+            "mesinha ao lado da sala E121"
+          ],
+          "objeto": "celular"
+        },
+        "nota": "Segundo anúncio do mesmo objeto. Fica como item separado."
+      }
+    ]
+  },
+  {
+    "caso": 16,
+    "pasta": "casos/16-fones-perdidos-e-achados-pela-secgrad",
+    "por_que": "Perdeu os fones. Um terceiro achou e deixou na SecGrad, e a SecGrad abriu outra thread anunciando o mesmo fone.",
+    "gabarito_po": "Aceito. O achado da SecGrad fica com a localização \"com um setor · SecGrad\" (P1)",
+    "threads": [
+      {
+        "thread_id": "1997431ac10dcef4",
+        "arquivos": [
+          "a-01.eml",
+          "a-02.eml",
+          "a-03.eml",
+          "a-04.eml",
+          "a-05.eml"
+        ],
+        "mensagem_raiz": "<caso16a.m01@corpus.achados.invalid>",
+        "esperado": {
+          "destino": "item",
+          "tipo": "perdido",
+          "situacao": "reivindicado",
+          "fonte_encerramento": null,
+          "localizacao": null,
+          "local": [
+            "1º andar do bloco E"
+          ],
+          "objeto": "fones de ouvido com case"
+        },
+        "nota": "\"Achei eles aqui\" de terceiro num perdido leva a reivindicado. Ninguém declara a retirada."
+      },
+      {
+        "thread_id": "1997771c7e257b74",
+        "arquivos": [
+          "b-01.eml"
+        ],
+        "mensagem_raiz": "<caso16b.m01@corpus.achados.invalid>",
+        "esperado": {
+          "destino": "item",
+          "tipo": "achado",
+          "situacao": "aberto",
+          "fonte_encerramento": null,
+          "localizacao": "com um setor",
+          "local": [],
+          "objeto": "fone de ouvido",
+          "setor": "SecGrad"
+        },
+        "nota": "O anúncio da SecGrad é um item separado. O local onde foi achado não aparece no texto."
+      }
+    ]
+  },
+  {
+    "caso": 17,
+    "pasta": "casos/17-mouse-anunciado-duas-vezes-pela-mesma-pessoa",
+    "por_que": "A mesma pessoa anuncia o mesmo mouse duas vezes, em threads separadas. A assinatura tem telefone.",
+    "gabarito_po": "Dois itens por enquanto. A COULD US-17 sinaliza a possível duplicata",
+    "threads": [
+      {
+        "thread_id": "19a37f625dd8edd6",
+        "arquivos": [
+          "a-01.eml"
+        ],
+        "mensagem_raiz": "<caso17a.m01@corpus.achados.invalid>",
+        "esperado": {
+          "destino": "item",
+          "tipo": "perdido",
+          "situacao": "aberto",
+          "fonte_encerramento": null,
+          "localizacao": null,
+          "local": [
+            "Grad 5"
+          ],
+          "objeto": "mouse Logitech G305 preto"
+        },
+        "nota": "O telefone da assinatura precisa ser mascarado (US-05)."
+      },
+      {
+        "thread_id": "19a3a4e88cdb6d3b",
+        "arquivos": [
+          "b-01.eml"
+        ],
+        "mensagem_raiz": "<caso17b.m01@corpus.achados.invalid>",
+        "esperado": {
+          "destino": "item",
+          "tipo": "perdido",
+          "situacao": "aberto",
+          "fonte_encerramento": null,
+          "localizacao": null,
+          "local": [
+            "Grad 5"
+          ],
+          "objeto": "mouse Logitech G305 preto"
+        },
+        "nota": "Segundo anúncio, mesmo autor. Fica como item separado."
+      }
+    ]
+  },
+  {
+    "caso": 18,
+    "pasta": "casos/18-garrafa-devolvida-pela-secgrad",
+    "por_que": "Perdeu a garrafa. A SecGrad responde que está lá e, depois, \"Item devolvido\".",
+    "gabarito_po": "Aceito: aberto → reivindicado (\"está aqui\") → encerrado. A proposta aceita fala em \"fonte custodiante\"",
+    "threads": [
+      {
+        "thread_id": "19ce2ed8f4378fd3",
+        "arquivos": [
+          "01.eml",
+          "02.eml",
+          "03.eml"
+        ],
+        "mensagem_raiz": "<caso18.m01@corpus.achados.invalid>",
+        "esperado": {
+          "destino": "item",
+          "tipo": "perdido",
+          "situacao": "encerrado",
+          "fonte_encerramento": "terceiro",
+          "localizacao": null,
+          "local": [
+            "E122"
+          ],
+          "objeto": "garrafa verde"
+        },
+        "nota": "Quem encerra é a SecGrad, que guardava o objeto. O vocabulário documentado só tem \"confirmação do autor\" e \"terceiro\"; a proposta aceita dizia \"fonte custodiante\". Confirmar com o PO se a SecGrad conta como terceiro."
+      }
+    ]
+  },
+  {
+    "caso": 19,
+    "pasta": "casos/19-encerrado-por-terceiro",
+    "por_que": "Achado sem texto no corpo. A dona diz que foi lá e não achou. Um terceiro diz \"foi resolvido, ela achou\".",
+    "gabarito_po": "Encerra direto, fonte \"terceiro\", confiança média. A invariante 2 foi estendida",
+    "threads": [
+      {
+        "thread_id": "19dd9b6a354dc246",
+        "arquivos": [
+          "01.eml",
+          "02.eml",
+          "03.eml"
+        ],
+        "mensagem_raiz": "<caso19.m01@corpus.achados.invalid>",
+        "esperado": {
+          "destino": "item",
+          "tipo": "achado",
+          "situacao": "encerrado",
+          "fonte_encerramento": "terceiro",
+          "localizacao": null,
+          "local": [
+            "Grad 5"
+          ],
+          "objeto": "fone preto",
+          "confianca_encerramento": "média"
+        },
+        "nota": "aberto → encerrado direto. O catálogo mostra \"encerrado segundo terceiro\". A assinatura do terceiro vem depois da citação."
+      }
+    ]
+  },
+  {
+    "caso": 20,
+    "pasta": "casos/20-encaminhado-de-outra-lista",
+    "por_que": "O anúncio foi primeiro para as listas de alunos e depois encaminhado para esta. A autora responde \"Encontraram :)\".",
+    "gabarito_po": "Aceito: encerrado direto, fonte \"confirmação do autor\"",
+    "threads": [
+      {
+        "thread_id": "1a08d70135f437bb",
+        "arquivos": [
+          "01.eml",
+          "02.eml",
+          "03.eml"
+        ],
+        "mensagem_raiz": "<caso20.m01@corpus.achados.invalid>",
+        "esperado": {
+          "destino": "item",
+          "tipo": "perdido",
+          "situacao": "encerrado",
+          "fonte_encerramento": "confirmação do autor",
+          "localizacao": null,
+          "local": [
+            "última sala do 2º andar do bloco E"
+          ],
+          "objeto": "garrafa azul"
+        },
+        "nota": "A mensagem 01 não foi endereçada à lista de achados; o encaminhamento não cria segundo item. A aula de ACSO é pista para a COULD US-18."
+      }
+    ]
+  },
+  {
+    "caso": 21,
+    "pasta": "casos/21-correcao-de-localizacao-pelo-autor",
+    "por_que": "\"Vou deixar na portaria\", e três minutos depois o autor corrige: \"não pode, fale comigo\".",
+    "gabarito_po": "Aceito",
+    "threads": [
+      {
+        "thread_id": "199e7b21ed281f95",
+        "arquivos": [
+          "01.eml",
+          "02.eml"
+        ],
+        "mensagem_raiz": "<caso21.m01@corpus.achados.invalid>",
+        "esperado": {
+          "destino": "item",
+          "tipo": "achado",
+          "situacao": "aberto",
+          "fonte_encerramento": null,
+          "localizacao": "com quem achou",
+          "local": [
+            "mezanino do bloco E"
+          ],
+          "objeto": "fone"
+        },
+        "nota": "A localização muda por declaração explícita do próprio autor."
+      }
+    ]
+  },
+  {
+    "caso": 22,
+    "pasta": "casos/22-lado-esquerdo-do-airpods",
+    "por_que": "Perdeu só um lado do fone, e cita dois lugares.",
+    "gabarito_po": "Aceito",
+    "threads": [
+      {
+        "thread_id": "1a0d5a7f86366ff4",
+        "arquivos": [
+          "01.eml"
+        ],
+        "mensagem_raiz": "<caso22.m01@corpus.achados.invalid>",
+        "esperado": {
+          "destino": "item",
+          "tipo": "perdido",
+          "situacao": "aberto",
+          "fonte_encerramento": null,
+          "localizacao": null,
+          "local": [
+            "E131",
+            "mezanino"
+          ],
+          "objeto": "AirPods Pro 2, lado esquerdo"
+        },
+        "nota": "Item parcial, dois locais."
+      }
+    ]
+  },
+  {
+    "caso": 23,
+    "pasta": "casos/23-dois-pendrives-tres-locais",
+    "por_que": "Dois objetos e três locais possíveis no mesmo anúncio.",
+    "gabarito_po": "Aceito. Lista com três locais (P4)",
+    "threads": [
+      {
+        "thread_id": "1a0335d360fdb8ae",
+        "arquivos": [
+          "01.eml"
+        ],
+        "mensagem_raiz": "<caso23.m01@corpus.achados.invalid>",
+        "esperado": {
+          "destino": "item",
+          "tipo": "perdido",
+          "situacao": "aberto",
+          "fonte_encerramento": null,
+          "localizacao": null,
+          "local": [
+            "E132",
+            "Grad 5",
+            "Grad 1"
+          ],
+          "objeto": "2 pendrives"
+        },
+        "nota": "Um item só, local é lista."
+      }
+    ]
+  },
+  {
+    "caso": 24,
+    "pasta": "casos/24-esqueci-na-aula",
+    "por_que": "O local é dado pela aula (\"aula de Programação\"), não pela sala.",
+    "gabarito_po": "Aceito. A COULD US-18 liga a aula à sala pela grade horária",
+    "threads": [
+      {
+        "thread_id": "19d97fa6f853cbbc",
+        "arquivos": [
+          "01.eml"
+        ],
+        "mensagem_raiz": "<caso24.m01@corpus.achados.invalid>",
+        "esperado": {
+          "destino": "item",
+          "tipo": "perdido",
+          "situacao": "aberto",
+          "fonte_encerramento": null,
+          "localizacao": null,
+          "local": [],
+          "objeto": "mouse"
+        },
+        "nota": "Local vazio é honesto. A aula é pista para a US-18."
+      }
+    ]
+  },
+  {
+    "caso": 25,
+    "pasta": "casos/25-pedido-de-descadastro",
+    "por_que": "Anúncio só no assunto, sem corpo, fora do CIn. A única resposta é alguém pedindo para sair da lista.",
+    "gabarito_po": "Aceito: a resposta é ruído e não muda o estado",
+    "threads": [
+      {
+        "thread_id": "19995a5b465111bb",
+        "arquivos": [
+          "01.eml",
+          "02.eml"
+        ],
+        "mensagem_raiz": "<caso25.m01@corpus.achados.invalid>",
+        "esperado": {
+          "destino": "item",
+          "tipo": "perdido",
+          "situacao": "aberto",
+          "fonte_encerramento": null,
+          "localizacao": null,
+          "local": [
+            "sala D003 do CCEN"
+          ],
+          "objeto": "garrafa cinza"
+        },
+        "nota": "Fora do CIn. O assunto traz o nome do dono, que é o próprio autor."
+      }
+    ]
+  },
+  {
+    "caso": 26,
+    "pasta": "casos/26-reivindicacao-fraca",
+    "por_que": "\"Acredito que posso ser minha\" é uma reivindicação com dúvida.",
+    "gabarito_po": "Avança para reivindicado",
+    "threads": [
+      {
+        "thread_id": "19b097e35b1544f6",
+        "arquivos": [
+          "01.eml",
+          "02.eml"
+        ],
+        "mensagem_raiz": "<caso26.m01@corpus.achados.invalid>",
+        "esperado": {
+          "destino": "item",
+          "tipo": "achado",
+          "situacao": "reivindicado",
+          "fonte_encerramento": null,
+          "localizacao": null,
+          "local": [
+            "laboratório de hardware 07"
+          ],
+          "objeto": "caneta digital"
+        },
+        "nota": null
+      }
+    ]
+  },
+  {
+    "caso": 27,
+    "pasta": "casos/27-resposta-sem-a-mensagem-original",
+    "por_que": "Só existe a resposta (\"Errata\"). A mensagem original não chegou à caixa; o texto dela aparece apenas citado.",
+    "gabarito_po": "Aceito",
+    "threads": [
+      {
+        "thread_id": "196d0dd17b948374",
+        "arquivos": [
+          "01.eml"
+        ],
+        "mensagem_raiz": "<caso27.m01@corpus.achados.invalid>",
+        "esperado": {
+          "destino": "quarentena",
+          "tipo_real": "achado"
+        },
+        "nota": "Motivo: thread incompleta. O In-Reply-To aponta para uma mensagem que não está no corpus."
+      }
+    ]
+  },
+  {
+    "caso": 28,
+    "pasta": "casos/28-mochila-reforcos-e-zoeira",
+    "por_que": "Perdido com dois encaminhamentos de reforço e respostas de piada que citam o nome do autor.",
+    "gabarito_po": "Aceito",
+    "threads": [
+      {
+        "thread_id": "19e3b47f06134368",
+        "arquivos": [
+          "01.eml",
+          "02.eml",
+          "03.eml",
+          "04.eml",
+          "05.eml"
+        ],
+        "mensagem_raiz": "<caso28.m01@corpus.achados.invalid>",
+        "esperado": {
+          "destino": "item",
+          "tipo": "perdido",
+          "situacao": "aberto",
+          "fonte_encerramento": null,
+          "localizacao": null,
+          "local": [
+            "E132"
+          ],
+          "objeto": "mochila azul"
+        },
+        "nota": "Os reforços e as piadas não mudam a situação. A mensagem 01 foi só para a lista de alunos."
+      }
+    ]
+  },
+  {
+    "caso": 29,
+    "pasta": "casos/29-sem-assunto-com-erros-de-digitacao",
+    "por_que": "Sem assunto, com erros de digitação (\"ligntning\", \"harware\", \"fsbor\"). Caso pedido na descrição da SCRUM-74.",
+    "gabarito_po": "Da descrição da SCRUM-74: \"extração funciona com o que der, não falha o item\". Não estava entre os 28 casos.",
+    "threads": [
+      {
+        "thread_id": "1a01f260d6d043db",
+        "arquivos": [
+          "01.eml"
+        ],
+        "mensagem_raiz": "<caso29.m01@corpus.achados.invalid>",
+        "esperado": {
+          "destino": "item",
+          "tipo": "perdido",
+          "situacao": "aberto",
+          "fonte_encerramento": null,
+          "localizacao": null,
+          "local": [
+            "laboratório de hardware"
+          ],
+          "objeto": "carregador"
+        },
+        "nota": "A mensagem não tem o cabeçalho Subject. Campo extraído errado ou vazio não derruba o item."
+      }
+    ]
+  }
+]
