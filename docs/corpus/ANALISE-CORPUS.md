@@ -340,7 +340,7 @@ mais que um terceiro qualquer.
 
 | Componente | O que o corpus pede | Depende do PO? |
 |---|---|---|
-| Classificação (US-02) | Verbo no corpo > assunto. Assunto e corpo divergentes sem verbo claro → quarentena. Thread sem corpo → quarentena. | Não. Já é coerente com a decisão 8 |
+| Classificação (US-02) | Verbo no corpo > assunto. Assunto e corpo divergentes sem verbo claro → quarentena. Thread sem corpo → quarentena, exceto se tiver foto e o objeto no assunto, que é achado (gabarito, caso 10). "Alguém viu…?" é perdido. | Decidido em 14/10 |
 | Situação (worker) | Vocabulário da §3. "Item devolvido" da SecGrad como sinal forte. Respostas de terceiros não encerram sozinhas. | Peso por remetente: sim |
 | Extração (US-03) | Objeto: garrafa, fone, carregador, mouse cobrem 55%. Item parcial ("lado esquerdo", "só a caixinha") é atributo, não outro objeto. | Não |
 | Schema (F-02) | Local múltiplo. Valor "fora do CIn". Custódia em setor. Evento de descarte institucional. | **Sim** |
@@ -351,54 +351,54 @@ mais que um terceiro qualquer.
 
 ## 6. Casos para o corpus de teste (SCRUM-74)
 
-Sugestão de casos difíceis. A **resposta esperada é uma proposta**: quem fecha o gabarito é o PO.
+Casos difíceis para o corpus de teste. A coluna "proposta" foi a sugestão inicial. O PO fechou
+o gabarito em 14/10/2026: 22 propostas aceitas, 3 decididas entre opções (casos 8, 19 e 26) e
+3 mudadas (casos 10, 15 e 17). As regras que saíram do gabarito estão no backlog (US-02,
+US-10, US-16 a US-18) e na invariante 2 do `AGENTS.md`.
 
-| # | threadId | O que acontece (parafraseado) | Resposta esperada proposta |
-|---|---|---|---|
-| 1 | `199a9ead8208d070` | Assunto "[PERDIDO] Óculos", corpo "Encontrado no grad5" | Achado. O assunto não decide |
-| 2 | `1a11d14208192e67` | Assunto "Bolsa perdida", corpo diz que há uma bolsa no banheiro e que ela está no local | Achado, localização `no local` |
-| 3 | `19a07e69fb045ae6` | "[PERDIDO] Boné e garrafa", corpo "foi achado agora" | Achado, um item com dois objetos |
-| 4 | `1a110dd1782434ee` | Quem achou anuncia um batom como "perdido no grad 4". Uma pessoa diz "é meu". Um terceiro corrige: "Grad 3" | Achado → reivindicado. A correção do local é decisão em aberto |
-| 5 | `1a0f91df0a9e6e4d` | Professor anuncia garrafas. Aluna diz "é minha", depois "fui lá e não encontrei" | Achado. A reivindicação não se confirma. Não avança para encerrado |
-| 6 | `19a83201eb17d35e` | Nota de 2 reais achada, 14 respostas de piada | Achado de valor trivial. Nenhuma resposta muda a situação |
-| 7 | `19a2611b68453a61` | Convite para pesquisa enviado para a lista | Não é achado nem perdido → quarentena |
-| 8 | `1a05e3826a6c31e8` | "Esqueci, já fui buscar e estou registrando porque a portaria pediu" | Não é anúncio. Nasce encerrado ou não vira item? **PO** |
-| 9 | `19b0e210c6ee699b` | SecGrad avisa que descarta o que não for retirado até uma data | Aviso de processo, não é item |
-| 10 | `19e833083f3a48fa` | Assunto "Garrafa no Grad 5", sem corpo, só foto | Direção desconhecida → quarentena |
-| 11 | `1999fe00ab68fae7` | Assunto "[PERDIDO]", corpo "Mouse deixado no Grad02" | Ambíguo → quarentena |
-| 12 | `19dc56af5351c01a` | "Levei para casa um casaco achando que era o meu" | Achado, `com quem achou` |
-| 13 | `19d97cca767f8d77` | "Perderam um crachá e um VEM no ônibus" | Achado, fora do CIn, documento de terceiro |
-| 14 | `1a048670b60f400a` | "Encontrei o crachá de [nome], vou deixar na portaria" | Achado, com nome de terceiro no texto → privacidade |
-| 15 | `19cd8ee4645433b3` e `19cd8ed96f48d9e3` | O mesmo celular anunciado por duas pessoas no mesmo minuto | Dois itens. Duplicata aceita pela decisão 4 |
-| 16 | `1997431ac10dcef4` e `1997771c7e257b74` | Perdeu fones. Um terceiro achou e deixou na SecGrad. A SecGrad anuncia em outra thread | Perdido → reivindicado na thread original. Achado separado |
-| 17 | `19a37f625dd8edd6` e `19a3a4e88cdb6d3b` | A mesma pessoa anuncia o mesmo mouse duas vezes | Dois itens. Duplicata |
-| 18 | `19ce2ed8f4378fd3` | Perdeu a garrafa. A SecGrad diz que está lá. A SecGrad responde "Item devolvido" | Perdido → encerrado, fonte custodiante |
-| 19 | `19dd9b6a354dc246` | Achado. A dona diz que não encontrou. Um terceiro diz "resolvido, ela achou" | Encerrado por terceiro: confiança média |
-| 20 | `1a08d70135f437bb` | Enviado para outra lista, depois encaminhado para esta. Depois: "Encontraram :)" | Perdido → encerrado. O encaminhamento não duplica |
-| 21 | `199e7b21ed281f95` | "Vou deixar na portaria", depois "corrigindo, não pode, fale comigo" | Achado. A localização muda por declaração explícita do autor |
-| 22 | `1a0d5a7f86366ff4` | "Perdi o lado esquerdo do AirPods" | Perdido, item parcial |
-| 23 | `1a0335d360fdb8ae` | "2 pendrives", três locais possíveis | Um item, local múltiplo |
-| 24 | `19d97fa6f853cbbc` | "Esqueci na aula de Programação" | Perdido, local vazio |
-| 25 | `19995a5b465111bb` | Resposta: "como faço para não receber mais e-mails?" | Ruído. Não muda o estado |
-| 26 | `19b097e35b1544f6` | "Acredito que pode ser minha" | Reivindicação fraca. Avança ou não? **PO** |
-| 27 | `196d0dd17b948374` | Só uma resposta ("errata: deixei na sala de aula"), sem a mensagem original | Thread incompleta → quarentena |
-| 28 | `19e3b47f06134368` | Mochila perdida, dois reforços e zoeira de colegas | Perdido. Continua aberto |
+| # | threadId | O que acontece (parafraseado) | Resposta esperada proposta | Gabarito do PO (14/10) |
+|---|---|---|---|---|
+| 1 | `199a9ead8208d070` | Assunto "[PERDIDO] Óculos", corpo "Encontrado no grad5" | Achado. O assunto não decide | Aceito |
+| 2 | `1a11d14208192e67` | Assunto "Bolsa perdida", corpo diz que há uma bolsa no banheiro e que ela está no local | Achado, localização `no local` | Aceito |
+| 3 | `19a07e69fb045ae6` | "[PERDIDO] Boné e garrafa", corpo "foi achado agora" | Achado, um item com dois objetos | Aceito |
+| 4 | `1a110dd1782434ee` | Quem achou anuncia um batom como "perdido no grad 4". Uma pessoa diz "é meu". Um terceiro corrige: "Grad 3" | Achado → reivindicado. A correção do local é decisão em aberto | Aceito. O local fica "Grad 4" e a correção do terceiro vira evento (P5) |
+| 5 | `1a0f91df0a9e6e4d` | Professor anuncia garrafas. Aluna diz "é minha", depois "fui lá e não encontrei" | Achado. A reivindicação não se confirma. Não avança para encerrado | Aceito |
+| 6 | `19a83201eb17d35e` | Nota de 2 reais achada, 14 respostas de piada | Achado de valor trivial. Nenhuma resposta muda a situação | Aceito |
+| 7 | `19a2611b68453a61` | Convite para pesquisa enviado para a lista | Não é achado nem perdido → quarentena | Aceito |
+| 8 | `1a05e3826a6c31e8` | "Esqueci, já fui buscar e estou registrando porque a portaria pediu" | Não é anúncio. Nasce encerrado ou não vira item? **PO** | **Vira item já encerrado**, com a fonte "confirmação do autor" |
+| 9 | `19b0e210c6ee699b` | SecGrad avisa que descarta o que não for retirado até uma data | Aviso de processo, não é item | Aceito. O descarte no catálogo virou COULD (US-16) |
+| 10 | `19e833083f3a48fa` | Assunto "Garrafa no Grad 5", sem corpo, só foto | Direção desconhecida → quarentena | **Achado.** Sem corpo, com foto e objeto no assunto: quem perdeu não anuncia assim |
+| 11 | `1999fe00ab68fae7` | Assunto "[PERDIDO]", corpo "Mouse deixado no Grad02" | Ambíguo → quarentena | Aceito: quarentena. A direção real é **perdido**, e o autor resolve em "Meus anúncios" |
+| 12 | `19dc56af5351c01a` | "Levei para casa um casaco achando que era o meu" | Achado, `com quem achou` | Aceito |
+| 13 | `19d97cca767f8d77` | "Perderam um crachá e um VEM no ônibus" | Achado, fora do CIn, documento de terceiro | Aceito |
+| 14 | `1a048670b60f400a` | "Encontrei o crachá de [nome], vou deixar na portaria" | Achado, com nome de terceiro no texto → privacidade | Aceito. O texto original só aparece para quem entrou (P3) |
+| 15 | `19cd8ee4645433b3` e `19cd8ed96f48d9e3` | O mesmo celular anunciado por duas pessoas no mesmo minuto | Dois itens. Duplicata aceita pela decisão 4 | **Dois itens por enquanto.** A COULD US-17 sinaliza a possível duplicata |
+| 16 | `1997431ac10dcef4` e `1997771c7e257b74` | Perdeu fones. Um terceiro achou e deixou na SecGrad. A SecGrad anuncia em outra thread | Perdido → reivindicado na thread original. Achado separado | Aceito. O achado da SecGrad fica com a localização `com um setor · SecGrad` (P1) |
+| 17 | `19a37f625dd8edd6` e `19a3a4e88cdb6d3b` | A mesma pessoa anuncia o mesmo mouse duas vezes | Dois itens. Duplicata | **Dois itens por enquanto.** A COULD US-17 sinaliza a possível duplicata |
+| 18 | `19ce2ed8f4378fd3` | Perdeu a garrafa. A SecGrad diz que está lá. A SecGrad responde "Item devolvido" | Perdido → encerrado, fonte custodiante | Aceito: aberto → reivindicado ("está aqui") → encerrado |
+| 19 | `19dd9b6a354dc246` | Achado. A dona diz que não encontrou. Um terceiro diz "resolvido, ela achou" | Encerrado por terceiro: confiança média | **Encerra direto, fonte "terceiro", confiança média.** A invariante 2 foi estendida |
+| 20 | `1a08d70135f437bb` | Enviado para outra lista, depois encaminhado para esta. Depois: "Encontraram :)" | Perdido → encerrado. O encaminhamento não duplica | Aceito: encerrado direto, fonte "confirmação do autor" |
+| 21 | `199e7b21ed281f95` | "Vou deixar na portaria", depois "corrigindo, não pode, fale comigo" | Achado. A localização muda por declaração explícita do autor | Aceito |
+| 22 | `1a0d5a7f86366ff4` | "Perdi o lado esquerdo do AirPods" | Perdido, item parcial | Aceito |
+| 23 | `1a0335d360fdb8ae` | "2 pendrives", três locais possíveis | Um item, local múltiplo | Aceito. Lista com três locais (P4) |
+| 24 | `19d97fa6f853cbbc` | "Esqueci na aula de Programação" | Perdido, local vazio | Aceito. A COULD US-18 liga a aula à sala pela grade horária |
+| 25 | `19995a5b465111bb` | Resposta: "como faço para não receber mais e-mails?" | Ruído. Não muda o estado | Aceito |
+| 26 | `19b097e35b1544f6` | "Acredito que pode ser minha" | Reivindicação fraca. Avança ou não? **PO** | **Avança para reivindicado** |
+| 27 | `196d0dd17b948374` | Só uma resposta ("errata: deixei na sala de aula"), sem a mensagem original | Thread incompleta → quarentena | Aceito |
+| 28 | `19e3b47f06134368` | Mochila perdida, dois reforços e zoeira de colegas | Perdido. Continua aberto | Aceito |
 
 ---
 
 ## 7. Perguntas para o PO
 
-1. **Custódia em setor (§4.2).** `localização` ganha um valor para "com um setor"
-   (SecGrad, Gerinfra, outro)? Hoje os objetos de maior valor caem fora do vocabulário.
-2. **Descarte institucional (§4.3).** Quando a SecGrad ou a Gerinfra avisam que vão descartar,
-   o catálogo reflete isso? Se sim, como? Um evento, sem mexer na regra de "sem expiração"?
-3. **Texto original e dado de terceiro (§3).** O texto original visível (decisão 6) vai exibir
-   nome de terceiro, telefone e nome gravado no objeto. O texto é exibido como está (critério
-   atual da US-05) ou esses padrões são mascarados?
-4. **Local múltiplo (§4.7).** Um campo com vários locais, ou um local principal com o texto
-   original ao lado?
-5. **Correção de local por mensagem seguinte (caso 4).** A invariante 3 proíbe inferir
-   `localização`. Ela vale também para o *local onde foi achado*?
-6. **Linha de base de desfecho (§4.5).** Adotar 8,6% como métrica de antes do sistema, para
-   comparar depois?
-7. **Volume real (§4.1).** Atualizar a estimativa de ~10 por mês para ~25, com pico de ~55?
+Respondidas pelo PO em 14/10/2026. O registro no backlog e na arquitetura está no PR #2.
+
+| # | Pergunta | Resposta |
+|---|---|---|
+| 1 | Custódia em setor (§4.2) | `localização` ganha o valor **`com um setor`**, com o nome do setor em texto e sugestões (SecGrad E124, Gerinfra B021) |
+| 2 | Descarte institucional (§4.3) | Vira **COULD (US-16)**. O PO vai levantar a regra de descarte com o CIn antes de escrever os critérios |
+| 3 | Texto original e dado de terceiro (§3) | O texto original aparece **só para quem entrou** com a conta do CIn. Telefones e e-mails são mascarados para todos. A busca de quem não entrou não consulta o texto original |
+| 4 | Local múltiplo (§4.7) | O `local` é uma **lista**, e o filtro por qualquer um deles encontra o item |
+| 5 | Correção de local por mensagem seguinte | **Só o autor da thread corrige** o local. A correção de terceiro vira evento |
+| 6 | Linha de base de desfecho (§4.5) | **Adotada: 8,6%**, registrada na US-14 |
+| 7 | Volume real (§4.1) | Atualizado para **~25 por mês**, com pico de ~55 e quase zero nas férias |
