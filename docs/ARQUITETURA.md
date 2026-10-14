@@ -203,7 +203,13 @@ errado manda alguém a um lugar onde o objeto não está.
 Três regras invioláveis:
 
 1. **Status nunca retrocede nem pula etapa.** Detectada uma reivindicação em item já
-   encerrado, o evento é registrado e o status não muda.
+   encerrado, o evento é registrado e o status não muda. **Exceção única:** o autor do
+   anúncio declara o desfecho, pelo site (US-15) ou por mensagem na thread (US-10, "Achei já,
+   obrigado"). Isso leva de `aberto` direto a `encerrado`, com a fonte "confirmação do autor".
+   Quem afirma o próprio desfecho é a pessoa mais autorizada a afirmá-lo, e exigir
+   `reivindicado` antes registraria uma etapa que não aconteceu. Mensagem de terceiro nunca
+   pula etapa. Num **perdido**, `reivindicado` é alguém dizer que o objeto está com ele
+   ("está aqui na SecGrad"). Decisões do PO em 14/10/2026.
 2. **`reivindicado` ≠ `encerrado`.** Entre dizer "é meu" e retirar o objeto passa tempo, e
    esse intervalo é informação útil: o catálogo mostra *há quanto tempo* o item está
    reivindicado sem confirmação. "Há 2 horas" e "há 3 semanas" significam coisas diferentes.
@@ -214,13 +220,19 @@ Três regras invioláveis:
 
 O catálogo expõe as mesmas pessoas que o e-mail já expunha, mas muda **permanência, busca e
 agregação**. Num catálogo é possível ver que a mesma pessoa perdeu seis coisas no semestre —
-inferência que o e-mail isolado não permitia. Três medidas, em ordem de importância:
+inferência que o e-mail isolado não permitia. Além disso, a lista é fechada à comunidade do
+CIn e o catálogo é aberto na web. Quatro medidas, em ordem de importância:
 
 1. **Preventiva: o endereço de quem anunciou não é publicado.** O catálogo mostra item, local
    e data, com um botão de contato que encaminha a mensagem sem revelar o endereço. O campo
    não existe em nenhuma resposta da API.
-2. **Autosserviço:** quem publicou remove o próprio item entrando com a conta do CIn (ADR-010).
-3. **Pedido humano:** canal de contato para quem aparece num item sem tê-lo publicado — o caso
+2. **O texto original fica dentro do CIn.** Quem não entrou vê só os campos extraídos. O texto
+   original sai da API apenas para sessão `@cin.ufpe.br`, e sempre com telefones e e-mails
+   mascarados por regra determinística no servidor. A busca de quem não entrou não consulta o
+   texto original, para que um termo buscado não revele o conteúdo. Decisão do PO em
+   14/10/2026.
+3. **Autosserviço:** quem publicou remove o próprio item entrando com a conta do CIn (ADR-010).
+4. **Pedido humano:** canal de contato para quem aparece num item sem tê-lo publicado — o caso
    do documento com nome de terceiro, que não é autor do item e por isso não pode removê-lo nem logado. Sem
    automação: alguém do grupo remove à mão, são poucos casos.
 

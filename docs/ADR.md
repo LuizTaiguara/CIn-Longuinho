@@ -771,8 +771,10 @@ O sistema não tem tabela de usuários nem de senhas. A identidade é obtida do 
 login. O e-mail do autor fica guardado no banco apenas para a comparação e **nunca sai em
 resposta da API**.
 
-**O catálogo continua público para leitura.** Restringi-lo à comunidade do CIn é uma
-possibilidade aberta por esta decisão, mas é uma decisão de produto separada, pendente com o PO.
+**O catálogo continua aberto para leitura, sem login** (decisão do PO em 14/10/2026). O
+login é exigido para anunciar e para gerir os próprios anúncios. A sessão também passa a
+liberar o **texto original** de cada item, que quem não entrou não vê, porque ele traz nomes de
+terceiros e dados de contato que hoje só circulam dentro do CIn.
 
 ## Prós e contras das opções
 
@@ -817,8 +819,11 @@ melhor.
   funcionando para leitura**, e só a gestão fica parada.
 - Quem aparece num anúncio sem tê-lo publicado continua sem poder removê-lo sozinho, mesmo
   logado, porque não é o autor. O canal humano da US-09 permanece.
-- Fica em aberto, com o PO: **encerrar a partir de "aberto"** pula a etapa "reivindicado" e
-  esbarra na invariante 2.
+- **O autor pode encerrar a partir de "aberto"** (decisão do PO em 14/10/2026). É a exceção
+  única à invariante 2 e vale pelo site e por mensagem do autor na thread. Mensagem de
+  terceiro nunca pula etapa.
+- O texto original passa a sair da API só para sessão do CIn, com telefones e e-mails
+  mascarados (US-04 e US-05).
 
 ---
 

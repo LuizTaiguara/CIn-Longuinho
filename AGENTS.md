@@ -34,6 +34,9 @@ Não carregue os documentos de `docs/` inteiros, leia só a seção de que a tar
    - Fonte: US-05 e ARQUITETURA §2.2.
 2. **`situação` só avança: `aberto → reivindicado → encerrado`.**
    - Nunca retrocede e nunca pula etapa.
+   - Exceção única: o **autor** do anúncio declara o desfecho, pelo site ou por mensagem
+     na thread. Isso leva de `aberto` direto a `encerrado`, com a fonte "confirmação do autor".
+     Mensagem de qualquer outra pessoa nunca pula etapa. Decisão do PO em 14/10/2026.
    - Se aparecer um evento fora de ordem, ele é registrado e o status não muda.
 3. **O worker nunca infere `localização`.**
    - A localização só muda por declaração explícita.

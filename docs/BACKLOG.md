@@ -139,16 +139,17 @@ Então todos permanecem em um único item
 E a descrição preserva a enumeração do texto original
 
 Dado que a extração terminou
-Quando o item é exibido
+Quando o item é exibido para quem entrou com a conta do CIn
 Então o texto original da mensagem deve estar visível junto ao item
+E telefones e endereços de e-mail no texto aparecem mascarados
 ```
 
 ### Casos de falha
 
 | Falha | Comportamento esperado |
 |---|---|
-| Nenhum campo identificado | Item publica assim mesmo, com o texto original visível. Erro de extração tem custo baixo porque o leitor corrige mentalmente. |
-| Campo extraído incorretamente (ex.: "Grad" como marca) | Publica. O texto original permite ao leitor perceber o erro. Corrigível pelo autor (US-15). |
+| Nenhum campo identificado | Item publica assim mesmo. Quem entrou vê o texto original e corrige mentalmente. Quem não entrou vê o item com campos vazios e o convite para entrar e ler o anúncio completo. |
+| Campo extraído incorretamente (ex.: "Grad" como marca) | Publica. Quem entrou percebe o erro pelo texto original. Corrigível pelo autor (US-15). |
 | Texto com erro de digitação ("harware", "fsbor") | Extração funciona com o que conseguir. Não falha o item. |
 | Modelo de extração indisponível | Item publica só com classificação, sem campos extraídos. Reprocessável depois. |
 
@@ -166,14 +167,23 @@ Então o texto original da mensagem deve estar visível junto ao item
 
 ```gherkin
 Dado que existem itens publicados
-Quando acesso o catálogo
+Quando acesso o catálogo, mesmo sem entrar
 Então vejo os itens ordenados do mais recente para o mais antigo
-E cada item mostra descrição, local, data, situação e o texto original
+E cada item mostra descrição, local, data e situação
+
+Dado que entrei com a conta do CIn
+Quando abro um item
+Então vejo também o texto original da mensagem, com telefones e e-mails mascarados
 
 Dado que busco por um termo
-Quando o termo aparece na descrição ou no texto original de um item
+Quando o termo aparece na descrição ou nos campos extraídos de um item
 Então esse item aparece nos resultados
 E a busca ignora diferenças de acento e de maiúsculas
+
+Dado que não entrei com a conta do CIn
+Quando busco por um termo que só aparece no texto original de um item
+Então esse item não aparece nos resultados
+E assim a busca não revela o que o texto original contém
 
 Dado que filtro por local
 Quando aplico o filtro
@@ -223,16 +233,28 @@ Dado que quero falar com quem anunciou
 Quando uso o botão de contato
 Então minha mensagem é encaminhada sem que eu veja o endereço de destino
 
-Dado que o texto original contém um telefone ou endereço
+Dado que o texto original contém um telefone ou um endereço de e-mail
 Quando o item é exibido
-Então esses dados aparecem conforme o texto original
+Então esses dados aparecem mascarados
+E o mascaramento é feito no servidor, por regra determinística, antes de a API responder
+
+Dado que não entrei com a conta do CIn
+Quando abro um item
+Então o texto original não é exibido
+E não está presente na resposta da API nem no código-fonte da página
 ```
+
+> **Decidido pelo PO em 14/10/2026:** como o catálogo é aberto na web e a lista é fechada ao
+> CIn, o texto original, que traz nome de terceiro em documento, telefone e nome gravado no
+> objeto, só aparece para quem entrou com a conta do CIn.
 
 ### Casos de falha
 
 | Falha | Comportamento esperado |
 |---|---|
-| Texto original contém o e-mail no corpo da mensagem | Fica visível — faz parte do que a pessoa escolheu escrever publicamente. Removível pela US-09. |
+| Texto original contém o e-mail no corpo da mensagem | Aparece mascarado, inclusive para quem entrou. Decisão do PO em 14/10/2026. |
+| Nome de terceiro no texto original (crachá, documento) | Visível só para quem entrou. A remoção segue possível pela US-09. |
+| Telefone em formato que a regra não reconhece | Escapa do mascaramento. Cada formato novo encontrado vira caso de teste da regra. |
 | Envio de contato falha | Mensagem de erro explicando que não foi possível enviar e sugerindo tentar mais tarde. |
 | Uso do botão de contato para spam | Fora de escopo nesta entrega. Registrar como risco. |
 
@@ -278,9 +300,9 @@ Quando corrijo a descrição, o local ou a localização atual
 Então a alteração aparece no catálogo
 E fica registrada como evento, sem apagar o valor anterior
 
-Dado que estou em um anúncio meu
+Dado que estou em um anúncio meu, aberto ou reivindicado
 Quando declaro que o objeto foi devolvido
-Então a situação passa a "encerrado"
+Então a situação passa a "encerrado", mesmo que o anúncio ainda esteja "aberto"
 E a fonte do encerramento fica registrada como "confirmação do autor"
 
 Dado que estou em um anúncio meu
@@ -312,11 +334,13 @@ E o aviso não contém nenhuma credencial
 | Aviso enviado para a lista em vez de para o autor | **Defeito grave** de privacidade. Deve ser coberto por teste. |
 | Recibo enviado várias vezes para a mesma conversa | **Defeito.** Deve haver verificação por conversa antes do envio. |
 
-> **Em aberto com o PO:**
-> 1. O catálogo continua público ou passa a ser restrito à comunidade do CIn? O login torna a
->    restrição possível, e ela reduziria a exposição de nomes de terceiros e do texto original
->    (decisão 10).
-> 2. Encerrar a partir de `aberto` pula `reivindicado` e esbarra na invariante 2.
+> **Decidido pelo PO em 14/10/2026:**
+> 1. **O catálogo fica aberto para leitura, sem login.** O login é exigido só para anunciar e
+>    para gerir os próprios anúncios. Quem não entrou vê só os campos extraídos. O texto
+>    original aparece apenas para quem entrou com a conta do CIn (ver US-04 e US-05).
+> 2. **O autor pode encerrar a partir de `aberto`**, pelo site ou por mensagem na thread. É a
+>    exceção única à invariante 2: quem declara o próprio desfecho não precisa passar por
+>    `reivindicado`. Mensagem de terceiro nunca pula etapa (US-10).
 
 ---
 
@@ -468,10 +492,25 @@ Quando alguém responde indicando que o objeto é seu
 Então a situação passa a reivindicado
 E o momento da mudança é registrado
 
+Dado que um item de perdido está aberto
+Quando alguém que não é o autor responde dizendo que o objeto está com ele ("está aqui", "está comigo")
+Então a situação passa a reivindicado
+E o momento da mudança é registrado
+
 Dado que um item está reivindicado
 Quando há confirmação de que o objeto foi recuperado
 Então a situação passa a encerrado
 E a origem do encerramento é registrada
+
+Dado que um item está aberto
+Quando o próprio autor do anúncio responde declarando o desfecho ("Encontraram", "Achei já, obrigado")
+Então a situação passa direto a encerrado
+E a origem do encerramento é registrada como "confirmação do autor"
+
+Dado que um item está aberto
+Quando alguém que não é o autor responde declarando o desfecho
+Então a situação não pula etapa
+E o evento é registrado no histórico
 
 Dado que um item já está encerrado
 Quando chega nova resposta na conversa
