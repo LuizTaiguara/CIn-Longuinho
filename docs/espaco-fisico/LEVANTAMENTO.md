@@ -15,6 +15,9 @@ consegue desenhar o dropdown do cadastro com valores reais.
 fica o professor, olhando para as bancadas. As fotos das Grads foram tiradas dessa posição, então
 a esquerda da foto é a esquerda da convenção.
 
+> As fotos não ficam no repositório, que é público, porque mostram alunos identificáveis.
+> Elas ficam com a equipe. Peça ao Luiz.
+
 ---
 
 ## Resumo dos locais
@@ -56,8 +59,6 @@ Tudo o que está registrado nesta seção fica no **térreo**.
 
 ### Grad 1
 
-![Grad 1, vista da frente da sala](fotos/bloco-vermelho-grad1-01.jpeg)
-
 - **Nomes de uso:** "Grad 1", "Grad01". As pessoas usam os dois para a mesma sala.
 - **Tipo:** laboratório de computadores, com bancadas em fileiras.
 - **Disposição:**
@@ -67,8 +68,6 @@ Tudo o que está registrado nesta seção fica no **térreo**.
 - **Como reconhecer:** a parede direita é escura, uma lousa ou painel que ocupa a parede inteira.
 
 ### Grad 2
-
-![Grad 2, vista da frente da sala](fotos/bloco-vermelho-grad2-01.jpeg)
 
 - **Tipo:** laboratório de computadores, com bancadas em fileiras.
 - **Disposição:**
@@ -80,8 +79,6 @@ Tudo o que está registrado nesta seção fica no **térreo**.
 
 ### Grad 3
 
-![Grad 3, vista da frente da sala](fotos/bloco-vermelho-grad3-01.jpeg)
-
 - **Tipo:** laboratório de computadores, com bancadas em fileiras.
 - **Disposição:**
   - lado esquerdo: 5 fileiras, com 5 computadores cada;
@@ -92,8 +89,6 @@ Tudo o que está registrado nesta seção fica no **térreo**.
 
 ### Grad 4
 
-![Grad 4, vista da frente da sala](fotos/bloco-vermelho-grad4-01.jpeg)
-
 - **Tipo:** laboratório de computadores, com bancadas em fileiras.
 - **Disposição:**
   - lado esquerdo: 6 fileiras, com 4 computadores cada;
@@ -103,8 +98,6 @@ Tudo o que está registrado nesta seção fica no **térreo**.
   sol vermelho e um pássaro. A porta fica no fundo, à direita.
 
 ### Grad 5
-
-![Grad 5, vista da frente da sala](fotos/bloco-vermelho-grad5-01.jpeg)
 
 - **Tipo:** laboratório de computadores, com bancadas em fileiras. É a maior das Grads.
 - **Disposição:**
@@ -117,8 +110,6 @@ Tudo o que está registrado nesta seção fica no **térreo**.
 
 ### Laboratório de hardware
 
-![Laboratório de hardware, vista da frente da sala](fotos/bloco-vermelho-lab-hardware-01.jpeg)
-
 - **Nomes de uso:** "lab de hardware".
 - **Tipo:** laboratório com computadores e bancadas de trabalho.
 - **Disposição:**
@@ -130,8 +121,6 @@ Tudo o que está registrado nesta seção fica no **térreo**.
   armários de metal e estantes com equipamentos e componentes. A porta fica no fundo, à direita.
 
 ### Laboratório de pós-graduação
-
-![Laboratório de pós-graduação](fotos/bloco-vermelho-lab-pos-01.jpeg)
 
 - **Nomes de uso:** "lab de pós-graduação", "lab da pós".
 - **Tipo:** sala de trabalho aberta, **sem a estrutura das Grads**. Não tem frente de sala nem
@@ -147,8 +136,6 @@ Tudo o que está registrado nesta seção fica no **térreo**.
   computador é fixo.
 
 ### Anfiteatro
-
-![Anfiteatro, vista da frente](fotos/bloco-vermelho-anfiteatro-01.jpeg)
 
 - **Nomes de uso:** "anfiteatro".
 - **Tipo:** auditório, com plateia de cadeiras fixas em degraus, voltada para a frente.
