@@ -3,7 +3,7 @@
 | Pessoa | Papel | Jira (displayName) | GitHub |
 |---|---|---|---|
 | Luiz Taiguara | PO — decisões de produto, aceite das histórias | `ltog` | `LuizTaiguara` |
-| Miguel | Backend; revisor de `shared/` e do contrato | `luiz miguel` (não é o Luiz!) | _preencher_ |
+| Miguel | Backend; revisor de `shared/` e do contrato | `luiz miguel` (não é o Luiz!) | `oliveiraluizmiguel57-blip` |
 | Cleyton | Backend (worker) | Cleyton junior da silva cardoso | _preencher_ |
 | Samuel | Backend (worker) | Samuel Renan Mendes | _preencher_ |
 | Pedro | Front (site) | Pedro Henrique Cabral Galdino dos Santos | _preencher_ |
