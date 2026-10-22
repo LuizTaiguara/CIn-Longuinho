@@ -31,6 +31,10 @@ Vale além do `AGENTS.md` da raiz. **Revisor obrigatório: Miguel.**
 
 - **Nenhum endpoint tem campo de e-mail de quem anunciou.** Nem opcional, nem "só para debug".
 - **Nenhum endpoint de leitura retorna** item em quarentena ou oculto.
+  - Exceção única: `GET /eu/itens` devolve ao autor a mensagem retida que **abriu** uma thread
+    dele, marcada como fora do catálogo e com o motivo, para ele dizer se é perda ou achado (US-15).
+  - O servidor compara a sessão com o remetente. Ninguém mais vê essa mensagem.
+  - Decisão do PO em 14/10/2026. Ver ARQUITETURA §2.3 e invariante 5 da raiz.
 - **`situacao`:** `aberto`, `reivindicado` ou `encerrado`. Nenhum outro valor.
 - **`localizacao`:** `no local`, `com quem achou`, `caixa do bloco A/E` ou `devolvido`. Só muda por declaração.
 - **Não existe endpoint de `DELETE` para item.** Existe ocultar.
