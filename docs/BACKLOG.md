@@ -2,7 +2,8 @@
 
 **Disciplina:** IESI (CIN0139) · UFPE · 2026.2
 **PO:** Luiz Taiguara
-**Versão:** 01/10/2026 · revisado em 13/10/2026 (login com a conta do CIn, ADR-010)
+**Versão:** 01/10/2026 · revisado em 13/10/2026 (login com a conta do CIn, ADR-010) e em 22/10/2026 (sem conta
+institucional, ADR-011)
 
 ---
 
@@ -36,6 +37,11 @@ e não depende de ninguém olhando. Ver `docs/ARQUITETURA.md` e `docs/ADR.md`.
 
 **Estimativa:** 5
 
+**Fonte (ADR-011):** a Gerinfra negou a conta institucional em 22/10/2026. Um filtro na caixa
+`@cin.ufpe.br` de um integrante da lista encaminha as mensagens para uma conta Gmail do projeto,
+e o worker lê essa conta. Se o CIn bloquear o encaminhamento para fora, a demonstração roda com
+o corpus local e a questão volta ao PO.
+
 ### Critérios de aceitação
 
 ```gherkin
@@ -64,6 +70,7 @@ Então o ciclo deve encerrar sem erro e sem alterar o banco
 | Mensagem sem corpo de texto (só anexo) | Registra a mensagem com corpo vazio e segue. A US-02 decide: com foto e objeto no assunto, é achado; sem isso, quarentena. |
 | Banco indisponível | Worker encerra sem consumir mensagens. Nada é marcado como processado. |
 | Duas execuções simultâneas do worker | A segunda detecta execução em andamento e encerra. Sem processamento duplicado. |
+| Encaminhamento desfeito (filtro removido ou caixa de origem desativada) | Nenhuma mensagem nova chega, e o worker não distingue isso de uma lista quieta. O site continua no ar com o que já tem. Retomar é refazer o filtro em qualquer caixa inscrita na lista (ver o doc de passagem). Risco R7. |
 
 ---
 
@@ -336,7 +343,8 @@ E a API recusa essas operações com 403 mesmo que alguém tente chamá-las dire
 
 Dado que um item foi publicado
 Quando o worker termina de processá-lo
-Então quem anunciou recebe um único aviso por conversa, por e-mail privado, com o link do item
+Então quem anunciou recebe um único aviso por conversa, por e-mail privado enviado pela conta
+do projeto (ADR-011), com o link do item
 E o aviso explica que basta entrar com a conta do CIn para corrigir ou encerrar
 E o aviso não contém nenhuma credencial
 ```
@@ -407,16 +415,17 @@ Quando tento enviar
 Então vejo qual campo falta, junto ao próprio campo
 E o que já preenchi é preservado
 
-Dado que estou no formulário de cadastro
-Quando olho perto do botão de envio
-Então vejo um aviso discreto, em texto pequeno e sem caixa de confirmação
-E ele diz que o anúncio também vai para a lista achados-perdidos e que as respostas chegam no
-meu e-mail, que fica visível para os membros da lista (US-07)
+Dado que o item foi publicado
+Quando vejo a confirmação
+Então o site abre o e-mail pronto para a lista, saindo da minha conta (US-07)
 ```
 
-> **Decidido pelo PO em 14/10/2026:** avisar sobre o `Reply-To`, de forma discreta. Não há
-> exposição nova em relação a postar direto na lista, mas o site promete não expor o e-mail
-> (invariante 1), e quem escolheu o site poderia achar que a promessa vale também para a lista.
+> **Decidido pelo PO em 22/10/2026:** sai o aviso sobre o `Reply-To`, decidido em 14/10. Com a
+> US-07 no formato de e-mail pronto (ADR-011), a pessoa envia da própria conta e vê o
+> destinatário antes de enviar. Não há mais conta do sistema nem `Reply-To`.
+>
+> **Entrega junto com a US-07:** o cadastro pelo site não vai ao ar sem o e-mail pronto, para
+> que quem só usa e-mail continue vendo esses anúncios.
 
 ### Casos de falha
 
@@ -435,40 +444,47 @@ meu e-mail, que fica visível para os membros da lista (US-07)
 **quero** receber por e-mail os achados cadastrados pelo site,
 **para que** quem só usa e-mail continue sabendo de tudo.
 
-**Estimativa:** 5
-**Dependência externa:** permissão de postar no grupo `achados-perdidos@cin.ufpe.br`.
+**Estimativa:** 5 (a rever no refinamento: o formato ficou mais simples)
+
+**Formato decidido pelo PO em 22/10/2026 (ADR-011):** o sistema não posta na lista. O site abre
+um e-mail pronto, e a própria pessoa o envia da conta dela. Não há conta do sistema, permissão de
+postar nem `Reply-To`: as respostas chegam à pessoa porque foi ela quem enviou. Entrega junto com
+a US-06.
 
 ### Critérios de aceitação
 
 ```gherkin
-Dado que um item foi cadastrado pelo site
-Quando o envio é executado
-Então uma mensagem é enviada à lista com assunto padronizado
-E o remetente é a conta do sistema
-E o campo Responder-Para é o endereço de quem cadastrou
-E o corpo contém descrição, local, data e link do item no catálogo
+Dado que acabei de cadastrar um item pelo site
+Quando vejo a confirmação
+Então o site abre um e-mail pronto para achados-perdidos@cin.ufpe.br, saindo da minha conta do CIn
+E o assunto é padronizado
+E o corpo traz descrição, local, onde deixei o objeto, o link do item no catálogo e um código do item
+E eu posso revisar o texto antes de enviar
 
-Dado que alguém responde a essa mensagem
-Quando a resposta é enviada
-Então ela chega diretamente a quem cadastrou, sem passar pelo sistema
+Dado que enviei o e-mail
+Quando alguém responde a ele
+Então a resposta chega a mim, como em qualquer e-mail que mando para a lista
 
-Dado que a permissão de postar ainda não foi concedida
-Quando um item é cadastrado pelo site
-Então ele é publicado no catálogo normalmente
-E o envio fica pendente, sem bloquear o cadastro
+Dado que o worker lê na lista o e-mail que enviei
+Quando encontra o código do item
+Então liga a thread ao item já publicado
+E não cria item novo nem passa a mensagem pela classificação
+
+Dado que fechei o e-mail sem enviar
+Quando acesso "Meus anúncios"
+Então o item continua no catálogo
+E aparece marcado como "ainda não foi para a lista", com um botão para abrir o e-mail de novo
+E a marcação some quando o worker ligar o e-mail ao item
 ```
 
 ### Casos de falha
 
 | Falha | Comportamento esperado |
 |---|---|
-| **Permissão não concedida** | Sistema opera em modo somente leitura. O cadastro funciona, o catálogo funciona, só o envio não acontece. Nenhuma funcionalidade é bloqueada. |
-| Envio falha por erro temporário | Reenviar no próximo ciclo, no máximo três tentativas. Depois, registrar como não enviado. |
-| Mensagem enviada é relida pelo worker | Deve ser reconhecida como originada no sistema e **não** gerar item duplicado. |
-| Conta do sistema sem permissão no momento do envio | Falha registrada, item permanece publicado no catálogo. |
-
-> **Risco:** esta história depende de autorização de terceiros. Se a permissão não sair até a
-> entrega, o sistema demonstra todas as demais funcionalidades. Ver decisão 3.
+| Navegador sem programa de e-mail configurado | O link abre a tela de escrever do Gmail, já que toda conta do CIn é Google. Se nem isso abrir, a confirmação mostra o texto para copiar. |
+| Pessoa apaga ou altera o código ao revisar | O worker não reconhece o código, e a mensagem segue o fluxo normal de classificação. Pode surgir um item duplicado, que a US-17 sinaliza. |
+| Pessoa envia o e-mail duas vezes | As duas threads se ligam ao mesmo item pelo código. Nenhum item novo é criado. |
+| Lista atrasa ou modera a mensagem | O item já está no catálogo. A marcação some quando o worker ler o e-mail. |
 
 ---
 
@@ -479,6 +495,9 @@ E o envio fica pendente, sem bloquear o cadastro
 **para que** meu nome não fique indexado publicamente.
 
 **Estimativa:** 2
+
+**Canal (ADR-011):** sem alias institucional, o contato do rodapé é um endereço `+remocao` da
+conta Gmail do projeto. Quem atende é quem estiver com a conta, conforme o doc de passagem.
 
 ### Critérios de aceitação
 
@@ -572,35 +591,6 @@ E o evento é registrado no histórico
 ---
 
 # COULD
-
-## US-11 · Importar o histórico da lista
-
-**Como** comunidade,
-**quero** que o catálogo contenha também os anúncios anteriores à implantação,
-**para que** o sistema nasça útil em vez de vazio.
-
-**Estimativa:** 5
-**Dependência externa:** arquivamento do grupo precisa estar ativo.
-
-### Critérios de aceitação
-
-```gherkin
-Dado que existe histórico acessível
-Quando a importação é executada
-Então as mensagens anteriores passam pelo mesmo fluxo de classificação e extração
-E itens antigos são marcados como importados
-E a ordenação por data os coloca corretamente no catálogo
-```
-
-### Casos de falha
-
-| Falha | Comportamento esperado |
-|---|---|
-| Arquivamento desativado | Funcionalidade não é entregue. Sistema opera só com mensagens novas. |
-| Mensagens antigas com formato diferente | Vão para quarentena como qualquer outra. |
-| Importação parcial interrompida | Reexecutável sem duplicar — o controle de processados vale para o histórico também. |
-
----
 
 ## US-12 · Painel de curadoria
 
@@ -798,6 +788,7 @@ Então o local continua vazio
 | Item | Motivo |
 |---|---|
 | **US-08 · Receber o recibo e poder corrigir o item** (link com token) | **Descontinuada em 13/10/2026, substituída pela US-15.** O token evitava login, mas o login com a conta Google do CIn não cria conta nem senha para o projeto manter. Ele também elimina o risco de link encaminhado e de acesso perdido. Ver ADR-010. O texto original da história está no histórico do git. |
+| **US-11 · Importar o histórico da lista** | **Decidido pelo PO em 22/10/2026.** O Takeout do grupo dependia da Gerinfra, que negou os pedidos. Importar da caixa pessoal publicaria nomes de terceiros de anos atrás e, sem expiração por tempo (invariante 7), deixaria os anúncios antigos `aberto` para sempre. O corpus segue só como base de teste. |
 | Notificação ativa a quem perdeu | Exige cadastro prévio da perda, o que compete com o e-mail. Classificado como *would* pelo PO. |
 | Verificação automatizada de posse | Permanece presencial e social, como hoje. |
 | Interpretação de imagens | Fotos são armazenadas e exibidas, não analisadas. |
@@ -818,9 +809,9 @@ US-01 (ler)
                  │    └─ US-09 (remoção)
                  └─ US-10 (devolução automática)
 
-US-15 (login) ──→ US-06 (cadastro) ──→ US-07 (publicar na lista) [depende de autorização externa]
+US-15 (login) ──→ US-06 (cadastro) + US-07 (e-mail pronto para a lista) [entregues juntas]
 
-US-11, US-12, US-13 ─ independentes, COULD
+US-12, US-13 ─ independentes, COULD
 ```
 
 **Caminho crítico:** US-01 → US-02 → US-03 → US-04. Com essas quatro, existe produto
@@ -832,9 +823,11 @@ demonstrável.
 
 | # | Risco | Natureza | Mitigação |
 |---|---|---|---|
-| R1 | Permissão de postar não ser concedida | organizacional | US-07 em SHOULD; sistema opera em modo somente leitura sem bloquear nada |
-| R2 | Arquivamento do grupo estar desativado | externa | US-11 em COULD; catálogo nasce vazio e cresce |
+| R1 | ~~Permissão de postar não ser concedida~~ | organizacional | **Extinto em 22/10/2026.** A US-07 não posta mais em nome do sistema: a pessoa envia da própria conta (ADR-011) |
+| R2 | Arquivamento do grupo estar desativado | externa | **Materializado em 22/10/2026:** a Gerinfra negou os pedidos. US-11 em WON'T; o catálogo nasce vazio e cresce |
 | R3 | Detecção equivocada de devolução | técnica | Só avança com alta confiança; correção pelo autor logado (US-15) |
 | R4 | Ausência de responsável após dezembro | organizacional | **Aceito pelo PO.** Sistema desenhado para operar sem supervisão |
-| R5 | Pedido de remoção sem destinatário | legal | Decorre de R4. Mitigação sugerida: alias institucional |
-| R6 | Volume insuficiente para demonstrar valor | produto | ~25 itens/mês segundo o corpus, mas quase zero em janeiro e julho: a demonstração não pode cair nas férias. US-11 ajudaria se viável |
+| R5 | Pedido de remoção sem destinatário | legal | Decorre de R4. O alias institucional foi negado. O contato é o endereço `+remocao` da conta do projeto, que passa junto com a conta (ADR-011) |
+| R6 | Volume insuficiente para demonstrar valor | produto | ~25 itens/mês segundo o corpus, mas quase zero em janeiro e julho: a demonstração não pode cair nas férias. A US-11, que ajudaria, foi para WON'T |
+| R7 | A leitura depende de um filtro de encaminhamento na caixa de um integrante | organizacional | **Aceito pelo PO em 22/10/2026.** Um doc de passagem, sem credenciais, explica como transferir a conta do projeto e refazer o filtro em qualquer caixa inscrita na lista. Fere o R6 em parte: o catálogo para de receber se ninguém assumir, mas retomar é barato |
+| R8 | O CIn bloquear o encaminhamento para fora ou o login por app externo | externa | Testar os dois antes de construir em cima. Se o encaminhamento falhar, a demonstração usa o corpus local e a questão volta ao PO. Se o login falhar, a US-15 fica bloqueada e a questão também volta ao PO |

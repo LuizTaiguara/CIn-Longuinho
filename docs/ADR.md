@@ -22,15 +22,16 @@ motivo produz um documento argumentativo — que é o que a modelagem arquitetur
 | # | Decisão | Status |
 |---|---|---|
 | [ADR-001](#adr-001) | Estilo arquitetural orientado a dados compartilhados | aceito |
-| [ADR-002](#adr-002) | Integração por consumo de canal de mensagens preexistente | aceito |
+| [ADR-002](#adr-002) | Integração por consumo de canal de mensagens preexistente | aceito; assinatura **substituída por encaminhamento (ADR-011)** |
 | [ADR-003](#adr-003) | Isolamento da fonte de dados atrás de interface | aceito |
 | [ADR-004](#adr-004) | Retenção de mensagens não classificadas em quarentena | aceito |
 | [ADR-005](#adr-005) | A conversa como unidade de registro | aceito |
 | [ADR-006](#adr-006) | Correção por autosserviço, sem painel administrativo | aceito; credencial **substituída por ADR-010** |
-| [ADR-007](#adr-007) | Resposta direcionada a quem anunciou, não ao sistema | aceito |
+| [ADR-007](#adr-007) | Resposta direcionada a quem anunciou, não ao sistema | **substituído por ADR-011** |
 | [ADR-008](#adr-008) | Camada de acesso a dados exposta por interface de rede | aceito |
 | [ADR-009](#adr-009) | Tecnologias de implementação | aceito |
 | [ADR-010](#adr-010) | Autenticação do autor pela conta Google do CIn | aceito |
+| [ADR-011](#adr-011) | Operar sem conta institucional: leitura por encaminhamento e anúncio pela conta de quem anuncia | aceito |
 
 ---
 <a id="adr-001"></a>
@@ -116,7 +117,8 @@ desacoplamento → repositório compartilhado como mecanismo mais simples dispon
 
 # ADR-002 · Integração por consumo de canal de mensagens preexistente
 
-**Status:** aceito · **Data:** 01/10/2026
+**Status:** aceito · **Data:** 01/10/2026 · **Assinatura por conta de projeto substituída por**
+[ADR-011](#adr-011), em 22/10/2026
 
 ## Contexto e problema
 
@@ -501,7 +503,7 @@ institucional redirecionável, que sobreviveria às pessoas.
 
 # ADR-007 · Resposta direcionada a quem anunciou, não ao sistema
 
-**Status:** aceito · **Data:** 01/10/2026
+**Status:** substituído por [ADR-011](#adr-011) em 22/10/2026 · **Data:** 01/10/2026
 
 ## Contexto e problema
 
@@ -795,7 +797,8 @@ espaço para uma tela de "meus anúncios".
 Em contrapartida:
 - **Exige um app OAuth no Google Cloud.** Com o projeto do CIn (pedido 5 à Gerinfra), o app
   fica do tipo "Interno". Sem ele, serve um app "Externo" com escopo só de identidade e o
-  domínio filtrado no servidor.
+  domínio filtrado no servidor. O pedido foi negado em 22/10/2026, e vale o app "Externo"
+  (ADR-011).
 - **Exige gestão de sessão no site.**
 - **Exclui quem anuncia com e-mail de fora do CIn**, que no corpus é 1 caso em 441, e quem
   perdeu a conta ao se formar. Para esses resta o canal de contato da US-09.
@@ -812,8 +815,8 @@ melhor.
 
 - A **US-08** (recibo com token) vai para WON'T e é substituída pela **US-15** (entrar com a
   conta do CIn e gerir meus anúncios), classificada como MUST.
-- O **cadastro pelo site (US-06)** passa a exigir login. Dele vêm o autor do item e o
-  `Reply-To` da US-07.
+- O **cadastro pelo site (US-06)** passa a exigir login. Dele vem o autor do item. O
+  `Reply-To` da US-07 deixou de existir com o ADR-011.
 - O **contrato da API** passa a declarar sessão em `POST /itens`, `PATCH /itens/{id}` e
   `POST /itens/{id}/encerrar`, com 401 sem sessão e 403 para quem não é o autor, e ganha
   `GET /eu/itens`.
@@ -829,6 +832,125 @@ melhor.
   confiança média (US-10).
 - O texto original passa a sair da API só para sessão do CIn, com telefones e e-mails
   mascarados (US-04 e US-05).
+
+---
+<a id="adr-011"></a>
+
+# ADR-011 · Operar sem conta institucional: leitura por encaminhamento e anúncio pela conta de quem anuncia
+
+**Status:** aceito · **Data:** 22/10/2026 · **Decidido por:** PO · **Substitui** o
+[ADR-007](#adr-007) e o mecanismo de assinatura do [ADR-002](#adr-002)
+
+## Contexto e problema
+
+Em 13/10/2026 o projeto pediu formalmente à Gerinfra conta institucional, inscrição no grupo,
+permissão de postar, preservação do `Reply-To`, API do Gmail com projeto no Google Cloud do
+CIn, alias de contato e Takeout do histórico. Em 22/10/2026 a Gerência de Sistemas negou: "a
+política atual não permite a concessão de permissões parciais para [...] criação/gerenciamento
+de contas, autenticações personalizadas e liberações para uso de APIs". O PO decidiu não
+insistir na conta institucional.
+
+Quatro coisas dependiam dela:
+- **ler a lista**, por uma conta de projeto inscrita no grupo (ADR-002);
+- **publicar na lista** o que foi cadastrado no site, com remetente do sistema e `Reply-To` da
+  pessoa (ADR-007, US-07);
+- **enviar o aviso privado** ao autor depois da publicação (US-15);
+- **o alias de contato** para pedidos de remoção (US-09).
+
+## Critérios de decisão
+
+- Não depender de autorização institucional
+- Não mudar o comportamento de quem só usa e-mail (ADR-002)
+- As respostas continuam indo direto a quem anunciou (ADR-007)
+- Retomar o sistema depois de um abandono deve custar pouco (R6)
+
+## Opções consideradas
+
+Para a leitura:
+1. O worker lê direto a caixa `@cin.ufpe.br` de um integrante, pela API do Gmail
+2. **Um filtro na caixa `@cin.ufpe.br` de um integrante encaminha a lista para uma conta Gmail
+   do projeto**
+3. Só o corpus local
+
+Para o anúncio feito no site:
+4. A conta Gmail do projeto posta na lista, com `Reply-To` da pessoa
+5. **O site abre um e-mail pronto, que a pessoa envia da própria conta**
+6. O cadastro pelo site não vai para a lista
+
+## Decisão
+
+**Leitura.** Um filtro na caixa de um integrante inscrito na lista encaminha as mensagens de
+`achados-perdidos@cin.ufpe.br` para uma conta Gmail do projeto, fora do domínio do CIn. O worker
+lê essa conta. Para o pipeline, nada muda: é outra implementação da interface de leitura
+(ADR-003).
+
+**Anúncio feito no site.** O sistema não posta na lista. Depois do cadastro, o site abre um
+e-mail pronto, saindo da conta da pessoa, com o link e um código do item. Quando o worker lê
+esse e-mail na lista, reconhece o código e liga a thread ao item já publicado, sem classificar
+nem criar item novo.
+
+**Envio privado e contato.** A conta Gmail do projeto envia o aviso de publicação ao autor
+(US-15) e recebe os pedidos de remoção num endereço `+remocao` (US-09).
+
+**Login.** O ADR-010 continua valendo, com o app OAuth "Externo" num projeto Google Cloud da
+equipe, só com escopos de identidade e o domínio filtrado no servidor.
+
+**Plano B.** Se o CIn bloquear o encaminhamento para fora, a demonstração roda com o corpus
+local, e a questão volta ao PO com o resultado do teste.
+
+## Prós e contras das opções
+
+**Ler direto a caixa do integrante**
+Dispensa conta nova. Por outro lado, é justamente o uso de API que a Gerência de Sistemas disse
+não liberar, e o administrador do domínio pode bloquear o app a qualquer momento. A credencial
+também seria a de uma pessoa, com acesso à caixa inteira dela.
+
+**Encaminhamento para a conta do projeto** *(escolhida)*
+A conta do projeto fica fora do controle do administrador do CIn. A caixa do integrante só
+precisa de um filtro, sem credencial compartilhada. Retomar o sistema é refazer o filtro em
+qualquer caixa inscrita na lista.
+
+Em contrapartida:
+- **Depende da caixa de uma pessoa**, e isso fere o R6 em parte.
+- **A falha é silenciosa.** Se o filtro sumir, o worker não distingue isso de uma lista quieta.
+  É o risco que o ADR-002 apontou para o redirecionamento, agora num nível que qualquer membro
+  da lista desfaz e refaz.
+
+**Só o corpus local**
+Não tem risco externo nenhum, mas o catálogo nunca recebe um anúncio real. Fica como plano B.
+
+**A conta do projeto posta na lista**
+Mantém a US-07 como estava. Porém, um remetente de fora do domínio tende a ser barrado ou
+moderado pelo grupo, e nada garante que o `Reply-To` seja respeitado.
+
+**E-mail pronto enviado pela pessoa** *(escolhida)*
+Não exige permissão nenhuma. O remetente é a pessoa, e as respostas chegam a ela sem
+`Reply-To`. Para a lista, o e-mail é igual a um anúncio feito à mão, que era o que a delegação
+de identidade do ADR-007 buscava, agora sem delegação.
+
+Em contrapartida, depende de a pessoa clicar em enviar, e ela pode editar o código. O item pode
+ficar só no catálogo, e por isso "Meus anúncios" mostra o que ainda não foi para a lista.
+
+**Não publicar na lista**
+Quebra a paridade: quem só usa e-mail deixa de ver os anúncios feitos pelo site.
+
+## Consequências
+
+- **US-07:** muda de formato e é entregue junto com a US-06. O risco R1 deixa de existir.
+- **ADR-007:** fica substituído. Não há conta do sistema enviando para a lista, e sai o aviso
+  discreto sobre o `Reply-To` da US-06.
+- **Worker:** ganha uma regra. Uma mensagem com o código de um item cadastrado pelo site é
+  ligada a esse item, sem passar pela classificação.
+- **US-11:** vai para WON'T. O Takeout do grupo foi negado. Importar da caixa pessoal publicaria
+  nomes de terceiros de anos atrás e, sem expiração por tempo (invariante 7), deixaria os
+  anúncios antigos `aberto` para sempre.
+- **US-09:** o alias foi negado. O contato passa a ser o endereço `+remocao` da conta do
+  projeto, e a limitação de ARQUITETURA §3.7 continua.
+- **R6:** a conta do projeto e o filtro passam a ter dono. Um doc de passagem, sem credenciais,
+  explica como transferir a conta e como refazer o filtro. Se ninguém assumir, o catálogo para
+  de receber anúncios, e o site segue no ar com o que já tem.
+- **Credenciais:** as da conta do projeto entram só por variável de ambiente (invariante 9).
+- **ADR-003:** absorve a mudança. Trocar a origem é configurar outra implementação de leitura.
 
 ---
 
