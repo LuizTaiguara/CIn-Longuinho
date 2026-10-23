@@ -17,6 +17,10 @@
 
 PR é obrigatório, e **ninguém faz merge do próprio**. A revisão sai em até 24h.
 
+A exceção é o PO: ele faz merge dos próprios PRs, porque é o revisor de `docs/`, `AGENTS.md` e
+`.agents/`. Se o PR dele mexer em `shared/`, a revisão do Miguel continua obrigatória. Decisão do
+PO em 14/10/2026.
+
 | O PR mexe em… | Revisor |
 |---|---|
 | `worker/` | Cleyton ↔ Samuel (um revisa o outro) |
