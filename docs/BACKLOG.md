@@ -39,8 +39,10 @@ e não depende de ninguém olhando. Ver `docs/ARQUITETURA.md` e `docs/ADR.md`.
 
 **Fonte (ADR-011):** a Gerinfra negou a conta institucional em 22/10/2026. Um filtro na caixa
 `@cin.ufpe.br` de um integrante da lista encaminha as mensagens para uma conta Gmail do projeto,
-e o worker lê essa conta. Se o CIn bloquear o encaminhamento para fora, a demonstração roda com
-o corpus local e a questão volta ao PO.
+e o worker lê essa conta. O encaminhamento para fora foi testado em 22/10/2026 e funciona. Falta
+conferir os cabeçalhos (`From`, `Message-ID`, `References`) no primeiro anúncio real
+encaminhado. Se o CIn passar a bloquear, a demonstração roda com o corpus local e a questão
+volta ao PO.
 
 ### Critérios de aceitação
 
@@ -830,4 +832,4 @@ demonstrável.
 | R5 | Pedido de remoção sem destinatário | legal | Decorre de R4. O alias institucional foi negado. O contato é o endereço `+remocao` da conta do projeto, que passa junto com a conta (ADR-011) |
 | R6 | Volume insuficiente para demonstrar valor | produto | ~25 itens/mês segundo o corpus, mas quase zero em janeiro e julho: a demonstração não pode cair nas férias. A US-11, que ajudaria, foi para WON'T |
 | R7 | A leitura depende de um filtro de encaminhamento na caixa de um integrante | organizacional | **Aceito pelo PO em 22/10/2026.** Um doc de passagem, sem credenciais, explica como transferir a conta do projeto e refazer o filtro em qualquer caixa inscrita na lista. Fere o R6 em parte: o catálogo para de receber se ninguém assumir, mas retomar é barato |
-| R8 | O CIn bloquear o encaminhamento para fora ou o login por app externo | externa | Testar os dois antes de construir em cima. Se o encaminhamento falhar, a demonstração usa o corpus local e a questão volta ao PO. Se o login falhar, a US-15 fica bloqueada e a questão também volta ao PO |
+| R8 | O CIn bloquear o encaminhamento para fora ou o login por app externo | externa | **Encaminhamento testado em 22/10/2026: funciona.** Se o CIn passar a bloquear, a demonstração usa o corpus local e a questão volta ao PO. **Login ainda não testado:** se falhar, a US-15 fica bloqueada e a questão também volta ao PO |

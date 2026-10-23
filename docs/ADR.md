@@ -898,6 +898,10 @@ equipe, só com escopos de identidade e o domínio filtrado no servidor.
 **Plano B.** Se o CIn bloquear o encaminhamento para fora, a demonstração roda com o corpus
 local, e a questão volta ao PO com o resultado do teste.
 
+**Teste (22/10/2026):** o encaminhamento da caixa `@cin.ufpe.br` para a conta Gmail do projeto
+funciona. Falta conferir, no primeiro anúncio real encaminhado, se o remetente original e os
+cabeçalhos de conversa chegam preservados.
+
 ## Prós e contras das opções
 
 **Ler direto a caixa do integrante**
