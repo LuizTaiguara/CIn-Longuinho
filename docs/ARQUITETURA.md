@@ -299,15 +299,16 @@ resto do sistema não sabe de onde a mensagem veio nem para onde vai.
 
 | Ponta | Implementações previstas |
 |---|---|
-| Leitura | Gmail · arquivos locais · formulário do site |
-| Envio | lista institucional · não enviar · gravar em arquivo para inspeção |
+| Leitura | Gmail do projeto, por encaminhamento (ADR-011) · arquivos locais · formulário do site |
+| Envio | Gmail do projeto, só o aviso privado ao autor · não enviar · gravar em arquivo para inspeção |
 
 Três justificativas que se somam: **(a)** o §3.5 do documento de discovery já previa isso em
 setembro, antes de existir código, de modo que implementar é coerência de método; **(b)**
 destrava o trabalho do backend imediatamente, sem credencial e sem internet, com um conjunto
 de mensagens fixo e repetível; **(c)** é o argumento de evolução mais forte do projeto — a
-migração da caixa pessoal para a conta institucional não toca nenhuma linha fora da
-implementação do Gmail.
+troca de origem não toca nenhuma linha fora da implementação do Gmail. Isso foi posto à prova
+em 22/10/2026, quando a conta institucional foi negada e a leitura passou para o Gmail do
+projeto, por encaminhamento (ADR-011).
 
 **Efeito colateral valioso:** o sistema inteiro roda sem Google nenhum, então a demonstração na
 banca não depende de rede nem de credencial.
@@ -375,7 +376,8 @@ dependência de recurso específico do provedor — um script que roda e termina
 cron de VM ou em agendador de nuvem.
 
 Deliberadamente **não se pediu VM à Gerência de Infraestrutura**: a fila de pedidos já tem três
-itens, e se for preciso priorizar, que seja a permissão de postar na lista.
+itens, e se for preciso priorizar, que seja a permissão de postar na lista. Em 22/10/2026 a
+Gerinfra negou o pacote inteiro (ADR-011).
 
 ---
 
@@ -465,17 +467,21 @@ A quarentena tem ainda um efeito colateral útil: é o conjunto de teste do pars
 retido é um caso que o pipeline não resolveu, e revisar a fila mostra quais palavras-chave
 faltam nas regras.
 
-### Por que o sistema envia em nome próprio, respondendo para a pessoa
+### Por que o anúncio feito no site sai da conta da própria pessoa
 
-`From:` conta do sistema · `Reply-To:` a pessoa que cadastrou.
+O site não posta na lista. Depois do cadastro, ele abre um e-mail pronto, e a pessoa o envia
+da própria conta (ADR-011). As respostas chegam a ela porque foi ela quem enviou, sem
+`Reply-To` e sem conta do sistema no meio. Para quem lê a lista, o anúncio é igual a qualquer
+outro.
 
-**Alternativa descartada:** centralizar as respostas no sistema. Mudaria o comportamento de
-quem nem é usuário do site — alguém que só lê a lista passaria a responder para um robô — e a
-entrega física continuaria invisível de qualquer jeito. A negociação segue direta entre as
-pessoas, como hoje.
-
-Também foi descartada a *domain-wide delegation* no Google Workspace: custo político alto para
-ganho marginal sobre `Reply-To`.
+**Alternativas descartadas:**
+- **Conta do sistema com `Reply-To` da pessoa** (ADR-007): dependia da conta e da permissão de
+  postar, que a Gerinfra negou em 22/10/2026.
+- **Centralizar as respostas no sistema:** mudaria o comportamento de quem nem é usuário do
+  site. Quem só lê a lista passaria a responder para um robô, e a entrega física continuaria
+  invisível de qualquer jeito.
+- **Domain-wide delegation no Google Workspace:** custo político alto. O e-mail pronto chega ao
+  mesmo resultado, a mensagem sair da conta da pessoa, sem delegação nenhuma.
 
 ## 3.3 Atributos de qualidade: o que a arquitetura otimiza e o que sacrifica
 
@@ -484,8 +490,8 @@ Uma arquitetura que não declara o que sacrificou não foi escolhida, foi herdad
 **Priorizados**
 
 - **Manutenibilidade sem mantenedor** — todas as decisões convergem para isto
-- **Tolerância a falhas parciais** — o site vive sem o worker; o sistema opera sem permissão de
-  postar
+- **Tolerância a falhas parciais** — o site vive sem o worker; o sistema opera sem nenhuma
+  permissão institucional
 - **Modificabilidade da fonte de dados** — trocar Gmail por arquivos ou formulário é trocar uma
   implementação
 - **Corretude sobre completude** — a quarentena prefere o catálogo menor ao catálogo errado
@@ -546,9 +552,11 @@ Permanece em aberto, por decisão consciente: **quem responde a um pedido de rem
 pessoal depois que o grupo se dispersar.** Sem responsável e sem data de desligamento, o pedido
 fica sem destinatário.
 
-Mitigação de baixo custo, a ser avaliada: solicitar à Gerência de Infraestrutura, junto com a
-conta do sistema, um alias institucional redirecionável a quem for responsável na época. O
-endereço sobrevive às pessoas, ao contrário de um e-mail pessoal que morre na formatura.
+A mitigação pensada era um alias institucional redirecionável a quem fosse responsável na
+época, mas a Gerinfra negou o pedido em 22/10/2026. O contato passou a ser um endereço
+`+remocao` da conta Gmail do projeto, que passa de mão junto com a conta (ADR-011). Ele não
+sobrevive às pessoas como o alias sobreviveria: se ninguém assumir a conta, o pedido fica sem
+leitor.
 
 Registrar a limitação sem resolvê-la é preferível a fingir que ela não existe.
 
@@ -562,13 +570,14 @@ fato levantado em campo, não a uma preferência técnica.**
 | Observação de campo | Decisão de arquitetura | ADR |
 |---|---|---|
 | Não há dono do processo, e não haverá após dezembro | Repositório compartilhado; worker e site falham independentemente | ADR-001 |
-| A lista de e-mail já existe e funciona, com satisfação alta | Inscrever-se no canal preexistente em vez de criar outro | ADR-002 |
+| A lista de e-mail já existe e funciona, com satisfação alta | Ler o canal preexistente em vez de criar outro | ADR-002 |
 | A conta institucional ainda não existe; o grupo precisa trabalhar já | Fonte de dados isolada atrás de interface, com implementação local | ADR-003 |
+| A Gerinfra negou conta, API e permissão de postar (22/10/2026) | Leitura por encaminhamento para o Gmail do projeto; anúncio do site enviado pela conta da pessoa | ADR-011 |
 | O corpus tem mensagens ambíguas quanto à direção ("[PERDIDO] Mouse deixado no Grad02") | Quarentena com portão de duas perguntas | ADR-004 |
 | Encaminhamentos, reenvios e respostas de confirmação são comuns | A thread como unidade de registro | ADR-005 |
 | Não haverá responsável diário para revisar itens | Correção pelo próprio autor, sem painel administrativo | ADR-006 |
 | Toda a comunidade já tem conta Google do CIn | Login institucional para o autor, sem contas próprias | ADR-010 |
-| A negociação hoje é direta entre as pessoas | `From` do sistema, `Reply-To` da pessoa | ADR-007 |
+| A negociação hoje é direta entre as pessoas | O anúncio feito no site sai da conta da pessoa | ADR-011 |
 | Front em JavaScript e worker em Python | Camada de dados exposta como interface de rede | ADR-008 |
 | O sistema lê texto de qualquer pessoa da comunidade | Parser determinístico e NER, nunca LLM | ADR-009 |
 | Fone anunciado 16h39, reivindicado 16h42 | Ciclo do worker a cada 5 minutos | §2.2 |
