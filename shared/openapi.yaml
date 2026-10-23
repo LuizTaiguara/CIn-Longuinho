@@ -1,0 +1,865 @@
+openapi: 3.1.0
+info:
+  title: API Achados e Perdidos CIn-UFPE
+  version: 1.0.0
+  description: |
+    Contrato da API REST compartilhada do catálogo de Achados e Perdidos do CIn-UFPE.
+    
+    ### Invariantes e Regras de Negócio
+    1. **Privacidade Absoluta:** O endereço de e-mail de quem anunciou nunca aparece em nenhuma resposta da API, nem em rotas autenticadas como `GET /eu` ou `GET /eu/itens` (Invariante 1).
+    2. **Visibilidade no Servidor:** As rotas públicas `GET /itens` e `GET /itens/{id}` nunca retornam itens retidos em quarentena ou ocultados (Invariante 5). Item retido ou ocultado consultado em `GET /itens/{id}` retorna `404 Not Found` para não revelar sua existência.
+    3. **Exceção Única de Visibilidade:** A rota `GET /eu/itens` devolve ao autor autenticado as mensagens retidas que abriram uma thread dele, marcadas como fora do catálogo (`fora_do_catalogo: true`) e com `motivo_retencao`, para permitir sua classificação pelo autor (US-15, decisão de 14/10/2026).
+    4. **Imutabilidade e Não-Exclusão:** Nenhum registro é deletado. Não existem endpoints com método HTTP `DELETE` (Invariante 4). A remoção pelo autor é feita via `POST /itens/{id}/ocultar`.
+    5. **Evolução de Situação:** A situação de um item transiciona de `aberto` para `reivindicado` ou diretamente para `encerrado` (desfecho confirmado pelo autor via `POST /itens/{id}/encerrar`). Nunca retrocede.
+    6. **Autenticação Institucional:** Delegada ao Google OAuth 2.0 restrita a contas do domínio `@cin.ufpe.br` (ADR-010 e ADR-011). O app OAuth é configurado como Externo com escopos estritamente de identidade (`openid profile`), e a validação do domínio institucional é obrigatoriamente efetuada no servidor (o parâmetro `hd` do Google serve apenas como sugestão de interface).
+
+tags:
+  - name: Itens
+    description: Consulta pública e cadastro de itens do catálogo
+  - name: Ações do Autor
+    description: Operações restritas ao autor do item (correção, encerramento e ocultação)
+  - name: Área do Autor
+    description: Visualização e classificação de anúncios e mensagens retidas pertencentes ao usuário autenticado
+  - name: Sessão e Autenticação
+    description: Fluxo de autenticação Google OAuth 2.0 restrito a @cin.ufpe.br e gestão de sessão
+
+paths:
+  /itens:
+    get:
+      tags:
+        - Itens
+      summary: Listar itens do catálogo
+      description: |
+        Retorna a listagem pública paginada de itens publicados no catálogo.
+        Itens em quarentena, retidos ou ocultados **nunca** aparecem nesta listagem (Invariante 5).
+      operationId: listarItens
+      parameters:
+        - name: texto
+          in: query
+          required: false
+          description: Termo para busca textual na descrição e campos extraídos.
+          schema:
+            type: string
+        - name: local
+          in: query
+          required: false
+          description: Filtro por local onde o objeto foi achado ou perdido (ex. "Grad 5", "Anfiteatro").
+          schema:
+            type: string
+        - name: situacao
+          in: query
+          required: false
+          description: Filtro por situação do item.
+          schema:
+            $ref: '#/components/schemas/SituacaoItem'
+        - name: tipo
+          in: query
+          required: false
+          description: Filtro por tipo de anúncio.
+          schema:
+            $ref: '#/components/schemas/TipoItem'
+        - name: pagina
+          in: query
+          required: false
+          description: Número da página (iniciando em 1).
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
+        - name: limite
+          in: query
+          required: false
+          description: Quantidade máxima de itens por página.
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+      responses:
+        '200':
+          description: Listagem de itens retornada com sucesso.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RespostaListaItens'
+        '400':
+          description: Parâmetros de consulta inválidos.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Erro'
+
+    post:
+      tags:
+        - Itens
+      summary: Cadastrar item pelo site
+      description: |
+        Registra um novo item a partir do formulário web (US-06).
+        Exige sessão ativa do CIn. O item publicado fica associado à conta autenticada.
+      operationId: cadastrarItem
+      security:
+        - cookieAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NovoItemRequisicao'
+      responses:
+        '201':
+          description: Item cadastrado e publicado com sucesso no catálogo.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ItemDetalhe'
+        '400':
+          description: Dados de entrada inválidos.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Erro'
+        '401':
+          description: Não autenticado. Exige entrar com a conta do CIn.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Erro'
+
+  /itens/{id}:
+    get:
+      tags:
+        - Itens
+      summary: Obter detalhe de um item
+      description: |
+        Retorna as informações completas de um item do catálogo.
+        A sessão é opcional: o catálogo é público para leitura. Sem sessão, os campos gerais são retornados e `texto_original` vem como `null`; com sessão ativa do CIn (`@cin.ufpe.br`), `texto_original` é retornado mascarado e `pode_gerir` indica se o usuário autenticado é o autor.
+        
+        **Regras de visibilidade e privacidade:**
+        - Se o item estiver oculto, retido ou em quarentena, a API devolve status `404 Not Found` (nunca 403, para não revelar a existência do item a terceiros).
+        - O campo `texto_original` é retornado como `null` caso o visitante não possua uma sessão ativa `@cin.ufpe.br`. Quando logado com a conta do CIn, o texto original é exibido com telefones e e-mails mascarados pelo servidor por regra determinística (ADR-010 e US-05).
+        - O campo booleano `pode_gerir` é `true` apenas se houver sessão ativa do CIn e a conta autenticada for a autora deste item; caso contrário, é `false`.
+      operationId: obterItem
+      security:
+        - {}
+        - cookieAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Identificador único do item.
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Detalhes do item encontrados com sucesso.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ItemDetalhe'
+        '404':
+          description: Item não encontrado, ocultado ou retido em quarentena.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Erro'
+
+    patch:
+      tags:
+        - Ações do Autor
+      summary: Corrigir informações de um item
+      description: |
+        Permite a edição exclusiva pelo autor do anúncio (US-15).
+        Permite alterar exclusivamente: `descricao`, `local` e `localizacao`.
+        A alteração é registrada como evento de histórico sem apagar os dados anteriores.
+      operationId: editarItem
+      security:
+        - cookieAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Identificador único do item a ser corrigido.
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AtualizarItemRequisicao'
+      responses:
+        '200':
+          description: Item atualizado com sucesso pelo autor.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ItemDetalhe'
+        '400':
+          description: Dados de atualização inválidos.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Erro'
+        '401':
+          description: Não autenticado. Exige entrar com a conta do CIn.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Erro'
+        '403':
+          description: Proibido. A conta autenticada não é a autora deste item.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Erro'
+        '404':
+          description: Item não encontrado ou não acessível.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Erro'
+
+  /itens/{id}/encerrar:
+    post:
+      tags:
+        - Ações do Autor
+      summary: Encerrar anúncio pelo autor
+      description: |
+        Declaração de desfecho realizada pelo autor (US-15).
+        Transiciona a situação do item diretamente para `encerrado` (mesmo se estiver em `aberto`).
+        A fonte fica registrada no histórico de eventos como "confirmação do autor".
+      operationId: encerrarItem
+      security:
+        - cookieAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Identificador do item a ser encerrado.
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Item encerrado com sucesso.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ItemDetalhe'
+        '401':
+          description: Não autenticado. Exige entrar com a conta do CIn.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Erro'
+        '403':
+          description: Proibido. Apenas o autor do anúncio pode encerrar o item.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Erro'
+        '404':
+          description: Item não encontrado ou não acessível.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Erro'
+
+  /itens/{id}/ocultar:
+    post:
+      tags:
+        - Ações do Autor
+      summary: Ocultar item do catálogo pelo autor
+      description: |
+        Remoção de autosserviço prevista na US-15, simétrica ao `/encerrar`.
+        O item deixa de ser exibido no catálogo público e passa a devolver 404 em `GET /itens/{id}`.
+        Os dados originais brutos e o histórico permanecem preservados no banco de dados (Invariante 4).
+        **Atenção:** Esta operação não é reversível neste contrato.
+      operationId: ocultarItem
+      security:
+        - cookieAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Identificador do item a ser ocultado.
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Item ocultado do catálogo com sucesso.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ItemDetalhe'
+        '401':
+          description: Não autenticado. Exige entrar com a conta do CIn.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Erro'
+        '403':
+          description: Proibido. Apenas o autor pode ocultar o próprio anúncio.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Erro'
+        '404':
+          description: Item não encontrado ou não acessível.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Erro'
+
+  /eu:
+    get:
+      tags:
+        - Sessão e Autenticação
+      summary: Consultar dados da sessão atual
+      description: |
+        Retorna os dados do usuário autenticado no sistema.
+        **Regra estrita de privacidade:** Nenhum endereço de e-mail é exposto no retorno (Invariante 1).
+      operationId: obterSessao
+      security:
+        - cookieAuth: []
+      responses:
+        '200':
+          description: Sessão válida encontrada.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DadosSessao'
+        '401':
+          description: Não autenticado ou sessão expirada.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Erro'
+
+  /eu/itens:
+    get:
+      tags:
+        - Área do Autor
+      summary: Listar meus anúncios e mensagens retidas
+      description: |
+        Lista todos os itens anunciados pela conta do CIn atualmente autenticada (US-15).
+        
+        **Exceção à Invariante 5 (decisão de 14/10/2026 e shared/AGENTS.md):**
+        Inclui também mensagens retidas em quarentena cujo remetente da thread é o próprio autor, marcadas com `fora_do_catalogo: true` e contendo o `motivo_retencao`. Ninguém mais vê essas mensagens retidas além do próprio autor.
+      operationId: listarMeusItens
+      security:
+        - cookieAuth: []
+      responses:
+        '200':
+          description: Lista de anúncios e retidas do autor retornada com sucesso.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ItemDoAutor'
+        '401':
+          description: Não autenticado. Exige entrar com a conta do CIn.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Erro'
+
+  /eu/retidas/{id}/classificar:
+    post:
+      tags:
+        - Área do Autor
+      summary: Classificar mensagem retida do autor
+      description: |
+        Permite ao autor indicar se uma mensagem sua retida em quarentena é um "perdido" ou um "achado" (US-15).
+        Ao ser classificada, a mensagem é transformada em item publicado no catálogo e gera um evento de histórico com a fonte "classificação pelo autor".
+      operationId: classificarRetida
+      security:
+        - cookieAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Identificador da mensagem retida pertencente ao autor.
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ClassificarRetidaRequisicao'
+      responses:
+        '201':
+          description: Mensagem classificada com sucesso e publicada no catálogo como item.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ItemDetalhe'
+        '401':
+          description: Não autenticado. Exige entrar com a conta do CIn.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Erro'
+        '404':
+          description: Mensagem retida não encontrada ou não pertence à conta autenticada.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Erro'
+        '409':
+          description: Conflito. A mensagem já foi classificada e convertida em item anteriormente.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Erro'
+        '422':
+          description: Entidade não processável. Tipo fornecido é inválido.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Erro'
+
+  /auth/google:
+    get:
+      tags:
+        - Sessão e Autenticação
+      summary: Iniciar autenticação Google OAuth 2.0
+      description: |
+        Inicia o fluxo OAuth 2.0 de autenticação.
+        Redireciona diretamente (HTTP 302) para o consentimento do Google OAuth 2.0.
+      operationId: iniciarLoginGoogle
+      responses:
+        '302':
+          description: Redirecionamento direto para a tela de autenticação do Google.
+          headers:
+            Location:
+              description: URL de autorização do Google com client_id, redirect_uri, scope e state.
+              schema:
+                type: string
+
+  /auth/google/callback:
+    get:
+      tags:
+        - Sessão e Autenticação
+      summary: Retorno da autenticação Google OAuth 2.0
+      description: |
+        Recebe o código de autorização e o state validados do Google.
+        
+        **Segurança e Validação Institucional:**
+        - O aplicativo OAuth é registrado como Externo (ADR-010 e ADR-011), solicitando escopos estritamente de identidade (`openid profile`).
+        - O filtro do domínio `@cin.ufpe.br` é executado **obrigatoriamente pelo servidor** após receber o token de identidade do Google (o parâmetro `hd` é meramente uma dica de interface para o navegador, não garantindo restrição de acesso).
+        - **Caso de Sucesso:** Se a conta confirmada pelo Google pertencer ao domínio `@cin.ufpe.br`, o servidor cria a sessão, define o cookie HTTP-only `sessao_id` e emite redirecionamento `302` para o frontend.
+        - **Caso de Erro ou Conta Externa:** Se a conta for de fora do domínio `@cin.ufpe.br`, se o acesso for negado pelo usuário ou se o `state` for inválido, o servidor emite redirecionamento `302` para a aplicação frontend acompanhado de um parâmetro de erro na URL (ex.: `/login?erro=conta_fora_do_cin`), **sem retornar JSON 403**.
+      operationId: retornoLoginGoogle
+      parameters:
+        - name: code
+          in: query
+          required: false
+          description: Código de autorização emitido pelo Google.
+          schema:
+            type: string
+        - name: state
+          in: query
+          required: true
+          description: Parâmetro de proteção contra CSRF gerado no início do fluxo.
+          schema:
+            type: string
+        - name: error
+          in: query
+          required: false
+          description: Código de erro retornado pelo Google caso o usuário recuse a autorização.
+          schema:
+            type: string
+      responses:
+        '302':
+          description: Redirecionamento para o frontend com cookie de sessão em caso de sucesso, ou com parâmetro de erro em caso de falha.
+          headers:
+            Set-Cookie:
+              description: Cookie de sessão HTTP-only (ex.: `sessao_id=...; Path=/; Secure; HttpOnly; SameSite=Lax`).
+              schema:
+                type: string
+            Location:
+              description: URL de destino no frontend.
+              schema:
+                type: string
+
+  /auth/logout:
+    post:
+      tags:
+        - Sessão e Autenticação
+      summary: Encerrar sessão (Logout)
+      description: |
+        Invalida a sessão ativa no servidor e instrui o navegador a remover o cookie de sessão.
+      operationId: logout
+      security:
+        - cookieAuth: []
+      responses:
+        '204':
+          description: Sessão encerrada com sucesso. Cookie limpo.
+          headers:
+            Set-Cookie:
+              description: Instrução para expirar o cookie de sessão (ex.: `sessao_id=; Max-Age=0; Path=/`).
+              schema:
+                type: string
+        '401':
+          description: Nenhuma sessão ativa para encerrar.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Erro'
+
+components:
+  securitySchemes:
+    cookieAuth:
+      type: apiKey
+      in: cookie
+      name: sessao_id
+      description: |
+        Cookie HTTP-only gerado pelo backend após validação de login institucional `@cin.ufpe.br`.
+
+  schemas:
+    SituacaoItem:
+      type: string
+      description: Situação atual do item no catálogo. Vocabulário fechado.
+      enum:
+        - aberto
+        - reivindicado
+        - encerrado
+
+    LocalizacaoItem:
+      type: string
+      description: Onde o objeto se encontra fisicamente no momento. Vocabulário fechado (shared/AGENTS.md).
+      enum:
+        - no local
+        - com quem achou
+        - caixa do bloco A/E
+        - devolvido
+
+    TipoItem:
+      type: string
+      description: Classificação do item entre achado e perdido. Vocabulário fechado.
+      enum:
+        - perdido
+        - achado
+
+    ItemResumo:
+      type: object
+      description: Dados resumidos de um item para exibição em listas públicas do catálogo.
+      required:
+        - id
+        - tipo
+        - descricao
+        - local
+        - situacao
+        - localizacao
+        - data_registro
+      properties:
+        id:
+          type: string
+          description: Identificador único do item.
+          example: "item_98234a"
+        tipo:
+          $ref: '#/components/schemas/TipoItem'
+        descricao:
+          type: string
+          description: Descrição resumida do objeto.
+          example: "Garrafa térmica azul com adesivo do CIn"
+        local:
+          type: array
+          items:
+            type: string
+          description: Lista de locais citados onde o objeto foi achado ou perdido (ARQUITETURA §2.2).
+          example: ["Grad 5", "Lab de Hardware"]
+        situacao:
+          $ref: '#/components/schemas/SituacaoItem'
+        localizacao:
+          $ref: '#/components/schemas/LocalizacaoItem'
+        foto_url:
+          type:
+            - string
+            - "null"
+          description: URL da foto anexada, caso exista; caso contrário, `null`.
+          example: "https://armazenamento.cin.ufpe.br/fotos/garrafa.jpg"
+        data_registro:
+          type: string
+          format: date-time
+          description: Momento do registro inicial do item.
+          example: "2026-10-15T14:32:00Z"
+        data_atualizacao:
+          type:
+            - string
+            - "null"
+          format: date-time
+          description: Momento da última alteração de estado ou correção.
+          example: "2026-10-16T09:10:00Z"
+
+    ItemDetalhe:
+      type: object
+      description: Informações completas de um item para visualização detalhada.
+      required:
+        - id
+        - tipo
+        - descricao
+        - local
+        - situacao
+        - localizacao
+        - data_registro
+        - pode_gerir
+      properties:
+        id:
+          type: string
+          description: Identificador único do item.
+          example: "item_98234a"
+        tipo:
+          $ref: '#/components/schemas/TipoItem'
+        descricao:
+          type: string
+          description: Descrição detalhada do objeto.
+          example: "Garrafa térmica azul marca Kouda com adesivo do CIn"
+        local:
+          type: array
+          items:
+            type: string
+          description: Lista de locais citados onde o objeto foi achado ou perdido.
+          example: ["Grad 5"]
+        situacao:
+          $ref: '#/components/schemas/SituacaoItem'
+        localizacao:
+          $ref: '#/components/schemas/LocalizacaoItem'
+        foto_url:
+          type:
+            - string
+            - "null"
+          description: URL da foto anexada, caso exista; caso contrário, `null`.
+          example: null
+        data_registro:
+          type: string
+          format: date-time
+          description: Timestamp de registro do item.
+          example: "2026-10-15T14:32:00Z"
+        data_atualizacao:
+          type:
+            - string
+            - "null"
+          format: date-time
+          description: Timestamp da última atualização.
+          example: null
+        pode_gerir:
+          type: boolean
+          description: |
+            Indica se o visitante autenticado é o autor deste anúncio e possui permissão para editar, encerrar ou ocultar o item.
+            Retorna sempre `false` caso o usuário não possua sessão ativa.
+          example: true
+        texto_original:
+          type:
+            - string
+            - "null"
+          description: |
+            Corpo integral da mensagem original.
+            Regra rígida de privacidade (ADR-010): Retorna `null` se o usuário não possuir sessão autenticada com conta `@cin.ufpe.br`. Quando logado com a conta institucional, retorna o texto original com números de telefone e e-mails mascarados pelo servidor.
+          example: "Olá pessoal, esqueci minha garrafa azul na aula de Sistemas. Contato mascarado: [TELEFONE MASCARADO]"
+
+    ItemDoAutor:
+      type: object
+      description: Representação de um item ou mensagem retida na listagem pessoal do autor (GET /eu/itens).
+      required:
+        - id
+        - tipo
+        - descricao
+        - local
+        - situacao
+        - localizacao
+        - data_registro
+        - fora_do_catalogo
+      properties:
+        id:
+          type: string
+          description: Identificador do item ou da mensagem retida.
+          example: "item_98234a"
+        tipo:
+          type:
+            - string
+            - "null"
+          description: Tipo do item. Pode ser `null` se for uma mensagem retida ainda não classificada.
+          enum:
+            - perdido
+            - achado
+            - null
+          example: "achado"
+        descricao:
+          type: string
+          description: Descrição do anúncio ou trecho da mensagem retida.
+          example: "Encontrei um molho de chaves perto do DIn"
+        local:
+          type: array
+          items:
+            type: string
+          description: Lista de locais do item.
+          example: ["DIn"]
+        situacao:
+          type:
+            - string
+            - "null"
+          description: Situação do item, ou `null` caso esteja retido.
+          enum:
+            - aberto
+            - reivindicado
+            - encerrado
+            - null
+          example: "aberto"
+        localizacao:
+          type:
+            - string
+            - "null"
+          description: Localização atual declarada do objeto.
+          enum:
+            - no local
+            - com quem achou
+            - caixa do bloco A/E
+            - devolvido
+            - null
+          example: "com quem achou"
+        fora_do_catalogo:
+          type: boolean
+          description: |
+            Indica se o registro está retido fora do catálogo público.
+            Conforme exceção à Invariante 5, mensagens retidas em quarentena do próprio autor aparecem nesta listagem com este campo como `true`.
+          example: false
+        motivo_retencao:
+          type:
+            - string
+            - "null"
+          description: Motivo da retenção em quarentena caso `fora_do_catalogo` seja `true`.
+          example: null
+        data_registro:
+          type: string
+          format: date-time
+          description: Data do recebimento ou cadastro.
+          example: "2026-10-18T10:15:00Z"
+
+    NovoItemRequisicao:
+      type: object
+      description: Dados necessários para cadastrar um novo item através do formulário do site.
+      required:
+        - tipo
+        - descricao
+        - local
+        - localizacao
+      properties:
+        tipo:
+          $ref: '#/components/schemas/TipoItem'
+        descricao:
+          type: string
+          minLength: 5
+          description: Descrição clara do objeto achado ou perdido.
+          example: "Guarda-chuva preto com cabo de madeira"
+        local:
+          type: array
+          items:
+            type: string
+          minItems: 1
+          description: Lista com pelo menos um espaço do CIn onde o objeto foi achado ou perdido.
+          example: ["Auditório do CIn"]
+        localizacao:
+          $ref: '#/components/schemas/LocalizacaoItem'
+        foto_url:
+          type:
+            - string
+            - "null"
+          description: URL da foto hospedada, se houver.
+          example: null
+
+    AtualizarItemRequisicao:
+      type: object
+      description: Campos permitidos para atualização de anúncio pelo autor. Apenas descricao, local e localizacao são editáveis.
+      properties:
+        descricao:
+          type: string
+          description: Nova descrição corrigida para o item.
+          example: "Garrafa Kouda azul escuro 500ml"
+        local:
+          type: array
+          items:
+            type: string
+          description: Lista corrigida de locais onde foi perdido/achado.
+          example: ["Grad 5", "Lab de Redes"]
+        localizacao:
+          $ref: '#/components/schemas/LocalizacaoItem'
+
+    ClassificarRetidaRequisicao:
+      type: object
+      description: Classificação pelo autor de uma mensagem que ficou retida em quarentena (US-15).
+      required:
+        - tipo
+      properties:
+        tipo:
+          $ref: '#/components/schemas/TipoItem'
+
+    DadosSessao:
+      type: object
+      description: Informações da sessão autenticada. Nunca contém o e-mail do usuário (Invariante 1).
+      required:
+        - autenticado
+        - nome
+      properties:
+        autenticado:
+          type: boolean
+          description: Indica se existe uma sessão válida ativa.
+          example: true
+        nome:
+          type: string
+          description: Nome do usuário recuperado do perfil Google Workspace.
+          example: "Luiz Miguel"
+
+    Paginacao:
+      type: object
+      description: Metadados de paginação da listagem.
+      required:
+        - pagina_atual
+        - total_paginas
+        - total_itens
+        - limite
+      properties:
+        pagina_atual:
+          type: integer
+          example: 1
+        total_paginas:
+          type: integer
+          example: 5
+        total_itens:
+          type: integer
+          example: 87
+        limite:
+          type: integer
+          example: 20
+
+    RespostaListaItens:
+      type: object
+      description: Resposta paginada contendo itens públicos do catálogo.
+      required:
+        - itens
+        - paginacao
+      properties:
+        itens:
+          type: array
+          items:
+            $ref: '#/components/schemas/ItemResumo'
+        paginacao:
+          $ref: '#/components/schemas/Paginacao'
+
+    Erro:
+      type: object
+      description: Formato padronizado para retorno de mensagens de erro da API.
+      required:
+        - codigo
+        - mensagem
+      properties:
+        codigo:
+          type: string
+          description: Identificador padronizado do erro.
+          example: "NAO_AUTORIZADO"
+        mensagem:
+          type: string
+          description: Explicação legível sobre a falha ocorrida.
+          example: "Esta operação exige autenticação com a conta @cin.ufpe.br."
