@@ -202,6 +202,11 @@ Quando aplico o filtro
 Então vejo apenas itens daquele local
 E isso inclui itens que citam aquele local entre outros ("Grad 5 ou lab de hardware")
 
+Dado que acesso o catálogo sem aplicar filtro
+Quando os itens são exibidos
+Então vejo achados e perdidos juntos, numa única lista
+E posso filtrar para ver só achados ou só perdidos
+
 Dado que um item foi encerrado por declaração de terceiro (US-10)
 Quando ele aparece no catálogo
 Então mostra "encerrado segundo terceiro", e não apenas "encerrado"
@@ -226,8 +231,11 @@ E uma sugestão de buscar com menos termos
 | Busca com termo muito genérico ("preto") | Retorna muitos resultados, paginados. Não é erro. |
 | Banco indisponível | Página de erro explicando que o catálogo está temporariamente fora, sem rastro de exceção. |
 
-> **Pendente para a UI (Pedro e Rafael):** o catálogo separa achados e perdidos em abas
-> distintas ou mostra tudo junto com filtro? Decisão de interface.
+> **Lista única com filtro, não abas.** A UI propôs (Pedro, SCRUM-47, 23/10/2026) e o PO
+> aceitou em 25/10/2026. O catálogo abre com tudo junto, e quem quiser refina pelo filtro.
+> Motivo: um item publicado na categoria errada continua encontrável na visão geral, e quem
+> procura não precisa adivinhar a aba. Itens em quarentena continuam fora do catálogo
+> (invariante 5): o argumento vale para a classificação errada, não para o que foi retido.
 
 ---
 
