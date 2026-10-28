@@ -2,8 +2,8 @@
 
 **Disciplina:** IESI (CIN0139) · UFPE · 2026.2
 **PO:** Luiz Taiguara
-**Versão:** 01/10/2026 · revisado em 13/10/2026 (login com a conta do CIn, ADR-010) e em 22/10/2026 (sem conta
-institucional, ADR-011)
+**Versão:** 01/10/2026 · revisado em 13/10/2026 (login com a conta do CIn, ADR-010), em 22/10/2026 (sem conta
+institucional, ADR-011) e em 28/10/2026 (perda pelo site e decisões do contrato)
 
 ---
 
@@ -345,6 +345,8 @@ Dado que estou em um anúncio meu
 Quando peço a remoção
 Então o item deixa de aparecer no catálogo
 E o registro bruto permanece no banco
+E o item continua em "Meus anúncios", marcado como oculto
+E a remoção não pode ser desfeita pelo site
 
 Dado que estou no anúncio de outra pessoa
 Quando abro a página do item
@@ -370,7 +372,8 @@ E o aviso não contém nenhuma credencial
 | Autor edita item já encerrado | Permitido. A situação não retrocede automaticamente. |
 | Autor nunca classifica a mensagem retida | Ela continua na quarentena, sem nenhum efeito no catálogo. |
 | Mensagem retida é uma resposta na thread de outra pessoa | Não aparece em "Meus anúncios". Só a mensagem que abre a thread é anúncio. |
-| Alguém tenta ver a mensagem retida de outra pessoa pela API | 403. Mensagem retida é a exceção mais sensível à invariante 5 e deve ser coberta por teste. |
+| Alguém tenta ver a mensagem retida de outra pessoa pela API | 404, como se ela não existisse, para não revelar que existe. Mensagem retida é a exceção mais sensível à invariante 5 e deve ser coberta por teste. Era 403 até 28/10/2026 (decisão do PO). |
+| Autor se arrepende de ter removido o item | O site não desfaz. Ele pede pelo canal de contato (US-09), e alguém do grupo reexibe à mão. Decisão do PO em 28/10/2026. |
 | Aviso enviado para a lista em vez de para o autor | **Defeito grave** de privacidade. Deve ser coberto por teste. |
 | Recibo enviado várias vezes para a mesma conversa | **Defeito.** Deve haver verificação por conversa antes do envio. |
 
@@ -390,13 +393,13 @@ E o aviso não contém nenhuma credencial
 
 # SHOULD
 
-## US-06 · Cadastrar um achado pelo site
+## US-06 · Cadastrar um achado ou uma perda pelo site
 
-**Como** pessoa que encontrou um objeto,
-**quero** registrar o achado em poucos cliques, sem redigir e-mail,
+**Como** pessoa que encontrou ou perdeu um objeto,
+**quero** registrar o anúncio em poucos cliques, sem redigir e-mail,
 **para que** avisar a comunidade custe menos esforço.
 
-**Estimativa:** 5
+**Estimativa:** 5 (a rever no refinamento: entrou a perda, decisão do PO em 28/10/2026)
 
 ### Critérios de aceitação
 
@@ -406,12 +409,23 @@ Quando acesso o formulário de cadastro
 Então sou levado a entrar com a conta do CIn (US-15)
 E volto ao formulário depois de entrar
 
-Dado que encontrei um objeto e entrei com a minha conta
+Dado que entrei com a minha conta
 Quando acesso o formulário de cadastro
+Então escolho se é um achado ou uma perda
+
+Dado que encontrei um objeto e entrei com a minha conta
+Quando cadastro um achado
 Então escolho o local em uma lista predefinida dos espaços do CIn
 E escrevo uma descrição breve
 E informo onde deixei o objeto
 E anexo uma foto, opcionalmente
+
+Dado que perdi um objeto e entrei com a minha conta
+Quando cadastro uma perda
+Então escolho onde perdi em uma lista predefinida dos espaços do CIn, podendo marcar mais de um
+E escrevo uma descrição breve
+E anexo uma foto, opcionalmente
+E o formulário não pergunta onde o objeto está, porque quem perdeu não sabe
 
 Dado que preenchi os campos obrigatórios
 Quando envio o formulário
@@ -436,6 +450,11 @@ Então o site abre o e-mail pronto para a lista, saindo da minha conta (US-07)
 >
 > **Entrega junto com a US-07:** o cadastro pelo site não vai ao ar sem o e-mail pronto, para
 > que quem só usa e-mail continue vendo esses anúncios.
+>
+> **Decidido pelo PO em 28/10/2026:** o site também aceita perdas. A história nasceu só com o
+> achado, mas nada a excluía, e quem perdeu é justamente quem mais procura o catálogo. Na perda,
+> a localização atual não é perguntada e fica vazia: ela diz onde o objeto está agora, e quem
+> perdeu não sabe.
 
 ### Casos de falha
 
@@ -451,7 +470,7 @@ Então o site abre o e-mail pronto para a lista, saindo da minha conta (US-07)
 ## US-07 · Publicar na lista o que foi cadastrado pelo site
 
 **Como** comunidade do CIn,
-**quero** receber por e-mail os achados cadastrados pelo site,
+**quero** receber por e-mail os achados e as perdas cadastrados pelo site,
 **para que** quem só usa e-mail continue sabendo de tudo.
 
 **Estimativa:** 5 (a rever no refinamento: o formato ficou mais simples)
@@ -468,7 +487,8 @@ Dado que acabei de cadastrar um item pelo site
 Quando vejo a confirmação
 Então o site abre um e-mail pronto para achados-perdidos@cin.ufpe.br, saindo da minha conta do CIn
 E o assunto é padronizado
-E o corpo traz descrição, local, onde deixei o objeto, o link do item no catálogo e um código do item
+E o corpo traz descrição, local, o link do item no catálogo e um código do item
+E, se for um achado, traz também onde deixei o objeto
 E eu posso revisar o texto antes de enviar
 
 Dado que enviei o e-mail
