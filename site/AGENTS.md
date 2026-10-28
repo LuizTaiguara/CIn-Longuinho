@@ -27,7 +27,7 @@ Vale além do `AGENTS.md` da raiz. Front: Pedro e Rafael. UX: Klarissa.
   - Autoria é verificada no servidor. O front só esconde botões; quem nega é a API, com 403.
 - **Textos, telas e fluxos seguem os wireframes da UX** (F-04).
   - Mudar o que o usuário vê é decisão de produto: veja a seção "Decisões de produto" na raiz.
-  - Ainda pendente com o PO e a UI: abas separadas para achados e perdidos, ou lista única com filtro?
+  - O catálogo é **uma lista única** com achados e perdidos juntos, e o filtro refina. Não há abas (US-04, decisão do PO em 25/10/2026).
 
 ## Comandos
 
