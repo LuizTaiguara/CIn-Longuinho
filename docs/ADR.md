@@ -899,8 +899,17 @@ equipe, só com escopos de identidade e o domínio filtrado no servidor.
 local, e a questão volta ao PO com o resultado do teste.
 
 **Teste (22/10/2026):** o encaminhamento da caixa `@cin.ufpe.br` para a conta Gmail do projeto
-funciona. Falta conferir, no primeiro anúncio real encaminhado, se o remetente original e os
-cabeçalhos de conversa chegam preservados.
+funciona.
+
+**Cabeçalhos (28/10/2026), conferidos no primeiro anúncio real encaminhado:**
+- `From` e `Message-ID` chegam preservados. A assinatura DKIM de `cin.ufpe.br` passa, então o
+  remetente é confiável.
+- **`List-ID` não identifica a lista.** A mensagem chega à caixa de origem por listas aninhadas
+  (`achados-perdidos` → lista de alunos → lista da turma), e o `List-ID` é o da última, a da
+  turma. Quem prova a passagem pela lista é o cabeçalho `X-BeenThere`, que aparece uma vez por
+  lista e inclui `achados-perdidos@cin.ufpe.br`. O worker reconhece a lista por ele.
+- Falta conferir `References` e `In-Reply-To` numa resposta a um anúncio.
+- O encaminhamento depende de o integrante seguir inscrito na cadeia de listas (risco R7).
 
 ## Prós e contras das opções
 
