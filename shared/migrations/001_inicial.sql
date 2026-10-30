@@ -77,7 +77,11 @@ CREATE TABLE mensagem_bruta (
 
 CREATE TABLE item (
     id BIGSERIAL PRIMARY KEY,
-    thread_id TEXT NOT NULL UNIQUE, -- ADR-005: uma linha por thread
+    -- ADR-005: unidade de registro da lista. Aceita NULL para itens cadastrados
+    -- pelo site antes de irem para a lista (ADR-011). Continua UNIQUE.
+    thread_id TEXT UNIQUE,
+    -- ADR-011: código gerado no cadastro pelo site para vincular o e-mail posterior à thread
+    codigo TEXT UNIQUE,
     tipo tipo_item NOT NULL,
     descricao TEXT,
     local TEXT[], -- Lista de locais citados (ARQUITETURA §2.2; 6% citam >1 local)
@@ -89,7 +93,9 @@ CREATE TABLE item (
     fonte_encerramento TEXT, -- Preenchido no encerramento (ex.: 'confirmação do autor', 'terceiro')
     oculto BOOLEAN NOT NULL DEFAULT FALSE, -- Invariante 4: remoção é ocultar do catálogo, nunca DELETE
     criado_em TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    atualizado_em TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    atualizado_em TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    -- Garante que todo item tenha ao menos uma origem identificável: thread_id ou codigo
+    CONSTRAINT chk_item_origem CHECK (thread_id IS NOT NULL OR codigo IS NOT NULL)
 );
 
 -- ============================================================================
