@@ -1,13 +1,13 @@
 """Interface e modelo de dados para a fonte de mensagens do worker.
 
 Isola a origem dos dados (arquivos locais, Gmail, formulário web) do pipeline
-de processamento (ADR-003). O pipeline consome esta abstração sem conhecer
+de processamento (ADR-003, ADR-011). O pipeline consome esta abstração sem conhecer
 a implementação concreta ou detalhes de SDKs externos.
 """
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
 from datetime import datetime
-from typing import Iterable, List
+from typing import Iterable, List, Optional
 
 
 @dataclass(frozen=True)
@@ -35,11 +35,11 @@ class MensagemFonte:
     # Identificador da thread/conversa para agrupamento de mensagens (ADR-005)
     id_conversa: str
 
-    # Endereço de e-mail ou identificador de quem enviou
+    # E-mail do autor original do anúncio (e não de quem encaminhou, conforme ADR-011 e US-15)
     remetente: str
 
-    # Endereço de destino (ex: achados-perdidos@cin.ufpe.br)
-    destinatario: str
+    # Lista de destinatários (To e Cc, cobrindo envios múltiplos/aninhados)
+    destinatarios: List[str]
 
     # Assunto original do e-mail
     assunto: str
@@ -49,6 +49,15 @@ class MensagemFonte:
 
     # Data e hora do envio com fuso horário
     data_envio: datetime
+
+    # Indica se a mensagem passou pela lista institucional (verificado via X-BeenThere, ADR-011)
+    veio_da_lista: bool = True
+
+    # Message-ID da mensagem à qual esta responde (In-Reply-To, útil para montagem de thread)
+    em_resposta_a: Optional[str] = None
+
+    # Lista de Message-IDs de referências anteriores da thread (References)
+    referencias: List[str] = field(default_factory=list)
 
     # Lista de arquivos anexados (padrão: lista vazia)
     anexos: List[AnexoMensagem] = field(default_factory=list)
