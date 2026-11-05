@@ -30,7 +30,7 @@ paths:
         - Itens
       summary: Listar itens do catálogo
       description: |
-        Retorna a listagem pública paginada de itens publicados no catálogo.
+        Retorna a listagem pública paginada de itens publicados no catálogo, mais recente primeiro.
         Itens em quarentena, retidos ou ocultados **nunca** aparecem nesta listagem (Invariante 5).
       operationId: listarItens
       parameters:
@@ -228,6 +228,7 @@ paths:
         Declaração de desfecho realizada pelo autor (US-15).
         Transiciona a situação do item diretamente para `encerrado` (mesmo se estiver em `aberto`).
         A fonte fica registrada no histórico de eventos como "confirmação do autor".
+        Se o item já estiver `encerrado`, o evento é registrado no histórico e a situação não muda.
       operationId: encerrarItem
       security:
         - cookieAuth: []
@@ -342,6 +343,7 @@ paths:
       summary: Listar meus anúncios e mensagens retidas
       description: |
         Lista todos os itens anunciados pela conta do CIn atualmente autenticada (US-15).
+        Itens ocultos pelo autor também aparecem nesta listagem, marcados com `oculto: true`.
         
         **Exceção à Invariante 5 (decisão de 14/10/2026 e shared/AGENTS.md):**
         Inclui também mensagens retidas em quarentena cujo remetente da thread é o próprio autor, marcadas com `fora_do_catalogo: true` e contendo o `motivo_retencao`. Ninguém mais vê essas mensagens retidas além do próprio autor.
@@ -429,6 +431,16 @@ paths:
         Inicia o fluxo OAuth 2.0 de autenticação.
         Redireciona diretamente (HTTP 302) para o consentimento do Google OAuth 2.0.
       operationId: iniciarLoginGoogle
+      parameters:
+        - name: retorno
+          in: query
+          required: false
+          description: >
+            Caminho relativo para onde o servidor deve redirecionar após login bem-sucedido.
+            O servidor valida que o valor é um caminho relativo da própria aplicação antes
+            de redirecionar, prevenindo redirecionamento aberto (open redirect).
+          schema:
+            type: string
       responses:
         '302':
           description: Redirecionamento direto para a tela de autenticação do Google.
@@ -449,7 +461,7 @@ paths:
         **Segurança e Validação Institucional:**
         - O aplicativo OAuth é registrado como Externo (ADR-010 e ADR-011), solicitando escopos estritamente de identidade (`openid profile`).
         - O filtro do domínio `@cin.ufpe.br` é executado **obrigatoriamente pelo servidor** após receber o token de identidade do Google (o parâmetro `hd` é meramente uma dica de interface para o navegador, não garantindo restrição de acesso).
-        - **Caso de Sucesso:** Se a conta confirmada pelo Google pertencer ao domínio `@cin.ufpe.br`, o servidor cria a sessão, define o cookie HTTP-only `sessao_id` e emite redirecionamento `302` para o frontend.
+        - **Caso de Sucesso:** Se a conta confirmada pelo Google pertencer ao domínio `@cin.ufpe.br`, o servidor cria a sessão, define o cookie HTTP-only `sessao_id` e emite redirecionamento `302` para o frontend. Quando há um caminho `retorno` válido guardado no fluxo, o servidor redireciona o usuário para esse caminho após o login bem-sucedido.
         - **Caso de Erro ou Conta Externa:** Se a conta for de fora do domínio `@cin.ufpe.br`, se o acesso for negado pelo usuário ou se o `state` for inválido, o servidor emite redirecionamento `302` para a aplicação frontend acompanhado de um parâmetro de erro na URL (ex.: `/login?erro=conta_fora_do_cin`), **sem retornar JSON 403**.
       operationId: retornoLoginGoogle
       parameters:
@@ -476,7 +488,7 @@ paths:
           description: Redirecionamento para o frontend com cookie de sessão em caso de sucesso, ou com parâmetro de erro em caso de falha.
           headers:
             Set-Cookie:
-              description: Cookie de sessão HTTP-only (ex.: `sessao_id=...; Path=/; Secure; HttpOnly; SameSite=Lax`).
+              description: "Cookie de sessão HTTP-only (ex.: `sessao_id=...; Path=/; Secure; HttpOnly; SameSite=Lax`)."
               schema:
                 type: string
             Location:
@@ -499,7 +511,7 @@ paths:
           description: Sessão encerrada com sucesso. Cookie limpo.
           headers:
             Set-Cookie:
-              description: Instrução para expirar o cookie de sessão (ex.: `sessao_id=; Max-Age=0; Path=/`).
+              description: "Instrução para expirar o cookie de sessão (ex.: `sessao_id=; Max-Age=0; Path=/`)."
               schema:
                 type: string
         '401':
@@ -533,6 +545,7 @@ components:
       enum:
         - no local
         - com quem achou
+        - com um setor
         - caixa do bloco A/E
         - devolvido
 
@@ -543,6 +556,16 @@ components:
         - perdido
         - achado
 
+    FonteEncerramento:
+      type:
+        - string
+        - "null"
+      description: Fonte que originou o encerramento do item. Vocabulário fechado.
+      enum:
+        - confirmação do autor
+        - terceiro
+        - null
+
     ItemResumo:
       type: object
       description: Dados resumidos de um item para exibição em listas públicas do catálogo.
@@ -552,7 +575,6 @@ components:
         - descricao
         - local
         - situacao
-        - localizacao
         - data_registro
       properties:
         id:
@@ -574,13 +596,22 @@ components:
         situacao:
           $ref: '#/components/schemas/SituacaoItem'
         localizacao:
-          $ref: '#/components/schemas/LocalizacaoItem'
+          oneOf:
+            - $ref: '#/components/schemas/LocalizacaoItem'
+            - type: "null"
+          description: >
+            Localização atual declarada do objeto. Na perda (`tipo: perdido`), não é enviada e fica `null`.
+            No achado (`tipo: achado`), é obrigatória (validação no servidor).
+        setor:
+          type: string
+          description: >
+            Nome do setor em texto livre. Só vale quando `localizacao` é `com um setor`;
+            nos demais casos não é enviado.
         foto_url:
           type:
             - string
             - "null"
           description: URL da foto anexada, caso exista; caso contrário, `null`.
-          example: "https://armazenamento.cin.ufpe.br/fotos/garrafa.jpg"
         data_registro:
           type: string
           format: date-time
@@ -593,6 +624,12 @@ components:
           format: date-time
           description: Momento da última alteração de estado ou correção.
           example: "2026-10-16T09:10:00Z"
+        fonte_encerramento:
+          $ref: '#/components/schemas/FonteEncerramento'
+        data_situacao:
+          type: string
+          format: date-time
+          description: Momento da última transição de situação do item.
 
     ItemDetalhe:
       type: object
@@ -603,7 +640,6 @@ components:
         - descricao
         - local
         - situacao
-        - localizacao
         - data_registro
         - pode_gerir
       properties:
@@ -626,7 +662,17 @@ components:
         situacao:
           $ref: '#/components/schemas/SituacaoItem'
         localizacao:
-          $ref: '#/components/schemas/LocalizacaoItem'
+          oneOf:
+            - $ref: '#/components/schemas/LocalizacaoItem'
+            - type: "null"
+          description: >
+            Localização atual declarada do objeto. Na perda (`tipo: perdido`), não é enviada e fica `null`.
+            No achado (`tipo: achado`), é obrigatória (validação no servidor).
+        setor:
+          type: string
+          description: >
+            Nome do setor em texto livre. Só vale quando `localizacao` é `com um setor`;
+            nos demais casos não é enviado.
         foto_url:
           type:
             - string
@@ -645,6 +691,12 @@ components:
           format: date-time
           description: Timestamp da última atualização.
           example: null
+        fonte_encerramento:
+          $ref: '#/components/schemas/FonteEncerramento'
+        data_situacao:
+          type: string
+          format: date-time
+          description: Momento da última transição de situação do item.
         pode_gerir:
           type: boolean
           description: |
@@ -678,14 +730,10 @@ components:
           description: Identificador do item ou da mensagem retida.
           example: "item_98234a"
         tipo:
-          type:
-            - string
-            - "null"
+          oneOf:
+            - $ref: '#/components/schemas/TipoItem'
+            - type: "null"
           description: Tipo do item. Pode ser `null` se for uma mensagem retida ainda não classificada.
-          enum:
-            - perdido
-            - achado
-            - null
           example: "achado"
         descricao:
           type: string
@@ -698,28 +746,22 @@ components:
           description: Lista de locais do item.
           example: ["DIn"]
         situacao:
-          type:
-            - string
-            - "null"
+          oneOf:
+            - $ref: '#/components/schemas/SituacaoItem'
+            - type: "null"
           description: Situação do item, ou `null` caso esteja retido.
-          enum:
-            - aberto
-            - reivindicado
-            - encerrado
-            - null
           example: "aberto"
         localizacao:
-          type:
-            - string
-            - "null"
+          oneOf:
+            - $ref: '#/components/schemas/LocalizacaoItem'
+            - type: "null"
           description: Localização atual declarada do objeto.
-          enum:
-            - no local
-            - com quem achou
-            - caixa do bloco A/E
-            - devolvido
-            - null
           example: "com quem achou"
+        setor:
+          type: string
+          description: >
+            Nome do setor em texto livre. Só vale quando `localizacao` é `com um setor`;
+            nos demais casos não é enviado.
         fora_do_catalogo:
           type: boolean
           description: |
@@ -732,6 +774,11 @@ components:
             - "null"
           description: Motivo da retenção em quarentena caso `fora_do_catalogo` seja `true`.
           example: null
+        oculto:
+          type: boolean
+          description: >
+            Indica se o item foi ocultado pelo autor. Quando `true`, o item não aparece no catálogo público
+            e devolve `404` em `GET /itens/{id}`. A ocultação é irreversível.
         data_registro:
           type: string
           format: date-time
@@ -745,7 +792,6 @@ components:
         - tipo
         - descricao
         - local
-        - localizacao
       properties:
         tipo:
           $ref: '#/components/schemas/TipoItem'
@@ -762,7 +808,17 @@ components:
           description: Lista com pelo menos um espaço do CIn onde o objeto foi achado ou perdido.
           example: ["Auditório do CIn"]
         localizacao:
-          $ref: '#/components/schemas/LocalizacaoItem'
+          oneOf:
+            - $ref: '#/components/schemas/LocalizacaoItem'
+            - type: "null"
+          description: >
+            Localização atual do objeto. Obrigatória quando `tipo` é `achado` (validação no servidor).
+            Não enviada e fica `null` quando `tipo` é `perdido`.
+        setor:
+          type: string
+          description: >
+            Nome do setor em texto livre. Só vale quando `localizacao` é `com um setor`;
+            nos demais casos não é enviado.
         foto_url:
           type:
             - string
@@ -786,6 +842,12 @@ components:
           example: ["Grad 5", "Lab de Redes"]
         localizacao:
           $ref: '#/components/schemas/LocalizacaoItem'
+        setor:
+          type: string
+          description: >
+            Nome do setor em texto livre. Só vale quando `localizacao` é `com um setor`;
+            nos demais casos não é enviado. Se a localização mudar para outro valor,
+            o servidor descarta o setor anterior.
 
     ClassificarRetidaRequisicao:
       type: object
