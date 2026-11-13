@@ -154,3 +154,28 @@ button[type='submit'] {
     grid-template-columns: 1fr;
   }
 }
+
+.estado {
+  padding: 20px;
+  background: var(--superficie);
+  border: 1px solid var(--borda);
+  border-radius: 8px;
+}
+
+.estado h2 {
+  margin: 0 0 8px;
+  font-size: 1.15rem;
+}
+
+.estado p {
+  margin: 0 0 8px;
+  color: var(--texto-suave);
+}
+
+.estado button {
+  margin-top: 4px;
+}
+
+.estado-erro {
+  border-color: var(--destaque);
+}
