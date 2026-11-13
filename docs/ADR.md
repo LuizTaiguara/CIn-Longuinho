@@ -909,6 +909,10 @@ funciona.
   turma. Quem prova a passagem pela lista é o cabeçalho `X-BeenThere`, que aparece uma vez por
   lista e inclui `achados-perdidos@cin.ufpe.br`. O worker reconhece a lista por ele.
 - Falta conferir `References` e `In-Reply-To` numa resposta a um anúncio.
+- **Só entra o que passou pela lista (decisão do PO em 13/11/2026).** Há anúncios enviados só
+  para a lista de alunos, com a tag no assunto, sem passar por `achados-perdidos`. O worker não
+  os lê: sem `achados-perdidos@cin.ufpe.br` no `X-BeenThere`, a mensagem fica de fora. O filtro
+  do Gmail já encaminha só a lista, então isso mantém o que acontece hoje, sem custo novo.
 - O encaminhamento depende de o integrante seguir inscrito na cadeia de listas (risco R7).
 
 ## Prós e contras das opções
