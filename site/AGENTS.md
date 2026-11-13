@@ -31,5 +31,18 @@ Vale além do `AGENTS.md` da raiz. Front: Pedro e Rafael. UX: Klarissa.
 
 ## Comandos
 
-_A definir quando existir código (Sprint 0)._ Preencha aqui: instalar, rodar com mock,
-rodar testes, lint.
+Stack: **React + Vite**, com testes em **Vitest** + Testing Library (decisão de 13/11/2026). Rode
+tudo de dentro de `site/`, com Node 20 ou mais novo.
+
+| Para… | Comando |
+|---|---|
+| Instalar | `npm install` |
+| Rodar com o mock local | `npm run dev` e abrir o endereço que aparecer (porta 5173) |
+| Rodar contra uma API de verdade ou o mock oficial | `API_URL=http://localhost:8000 npm run dev` |
+| Testar | `npm test` |
+| Gerar a versão de produção | `npm run build` |
+
+**Mock local (`site/mock/`).** Sem `API_URL`, o `npm run dev` responde `/api/itens` e
+`/api/locais` com dados fictícios, imitando o servidor (busca sem acento, filtros, paginação).
+É **temporário**: quando o mock oficial do contrato (SCRUM-67) existir, rode com `API_URL` e apague
+a pasta.

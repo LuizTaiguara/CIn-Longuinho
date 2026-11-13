@@ -1,0 +1,156 @@
+/* Estilo mínimo e provisório. O visual segue os wireframes da Klarissa (F-04) quando o Pedro
+   montar a lista (SCRUM-97). */
+
+:root {
+  --fundo: #f7f7f5;
+  --superficie: #ffffff;
+  --texto: #1d1d1b;
+  --texto-suave: #5c5c58;
+  --borda: #d9d9d3;
+  --destaque: #b3261e;
+  --achado: #1e6b3a;
+  --perdido: #8a4b00;
+  font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  color: var(--texto);
+  background: var(--fundo);
+}
+
+body {
+  margin: 0;
+  background: var(--fundo);
+}
+
+.pagina {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 24px 16px 48px;
+}
+
+.cabecalho h1 {
+  margin: 0 0 4px;
+  font-size: 1.6rem;
+}
+
+.cabecalho p {
+  margin: 0 0 20px;
+  color: var(--texto-suave);
+}
+
+.barra-de-busca {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  align-items: end;
+  padding: 16px;
+  margin-bottom: 20px;
+  background: var(--superficie);
+  border: 1px solid var(--borda);
+  border-radius: 8px;
+}
+
+.campo {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.campo-texto {
+  grid-column: 1 / -1;
+}
+
+.campo label {
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.linha {
+  display: flex;
+  gap: 8px;
+}
+
+input,
+select,
+button {
+  font: inherit;
+  padding: 8px 10px;
+  border: 1px solid var(--borda);
+  border-radius: 6px;
+  background: var(--superficie);
+  color: var(--texto);
+  min-width: 0;
+}
+
+input[type='search'] {
+  flex: 1;
+}
+
+button {
+  cursor: pointer;
+}
+
+button[type='submit'] {
+  background: var(--destaque);
+  border-color: var(--destaque);
+  color: #fff;
+}
+
+.limpar {
+  grid-column: 1 / -1;
+  justify-self: start;
+  border: none;
+  background: none;
+  padding: 0;
+  color: var(--destaque);
+  text-decoration: underline;
+}
+
+.lista-itens {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 10px;
+}
+
+.item {
+  padding: 12px 14px;
+  background: var(--superficie);
+  border: 1px solid var(--borda);
+  border-radius: 8px;
+}
+
+.item .descricao {
+  margin: 6px 0 4px;
+}
+
+.item .detalhes {
+  margin: 0;
+  font-size: 0.9rem;
+  color: var(--texto-suave);
+}
+
+.tipo {
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.tipo-achado {
+  color: var(--achado);
+}
+
+.tipo-perdido {
+  color: var(--perdido);
+}
+
+.aviso {
+  color: var(--texto-suave);
+}
+
+@media (max-width: 640px) {
+  .barra-de-busca {
+    grid-template-columns: 1fr;
+  }
+}
