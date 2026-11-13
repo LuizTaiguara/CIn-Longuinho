@@ -386,7 +386,9 @@ E o aviso não contém nenhuma credencial
 >    Depois, o gabarito do corpus (caso 19) estendeu a exceção à declaração de terceiro na
 >    thread, com a fonte "terceiro" e confiança média (US-10).
 > 3. **A mensagem retida aparece para o autor em "Meus anúncios", e ele resolve** dizendo se é
->    perda ou achado. É a exceção única à invariante 5. Isso aumenta o esforço desta história,
+>    perda ou achado. É uma das duas exceções à invariante 5. A outra é o item oculto, que
+>    continua em "Meus anúncios" marcado como oculto (decisão de 28/10/2026, registrada como
+>    exceção em 13/11/2026). Isso aumenta o esforço desta história,
 >    e a estimativa precisa ser revista no refinamento.
 
 ---
