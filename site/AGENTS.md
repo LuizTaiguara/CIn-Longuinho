@@ -46,3 +46,7 @@ tudo de dentro de `site/`, com Node 20 ou mais novo.
 `/api/locais` com dados fictícios, imitando o servidor (busca sem acento, filtros, paginação).
 É **temporário**: quando o mock oficial do contrato (SCRUM-67) existir, rode com `API_URL` e apague
 a pasta.
+
+Para ver os estados da SCRUM-100 no navegador: `MOCK_VAZIO=1 npm run dev` (catálogo vazio) e
+`MOCK_FALHA=1 npm run dev` (API fora do ar). A busca sem resultado aparece com qualquer termo
+que não exista, por exemplo `?texto=guarda-chuva`.
