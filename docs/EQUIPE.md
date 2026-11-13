@@ -4,7 +4,7 @@
 |---|---|---|---|
 | Luiz Taiguara | PO — decisões de produto, aceite das histórias | `ltog` | `LuizTaiguara` |
 | Miguel | Backend; revisor de `shared/` e do contrato | `luiz miguel` (não é o Luiz!) | `oliveiraluizmiguel57-blip` |
-| Cleyton | Backend (worker) | Cleyton junior da silva cardoso | _preencher_ |
+| Cleyton | Backend (worker) | Cleyton junior da silva cardoso | `cleytoncardoso` |
 | Samuel | Backend (worker) | Samuel Renan Mendes | _preencher_ |
 | Pedro | Front (site) | Pedro Henrique Cabral Galdino dos Santos | _preencher_ |
 | Rafael | Front (site) | RAFAEL DUMKE DE MEDEIROS | _preencher_ |
