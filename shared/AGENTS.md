@@ -36,5 +36,5 @@ Vale além do `AGENTS.md` da raiz. **Revisor obrigatório: Miguel.**
   - O servidor compara a sessão com o remetente. Ninguém mais vê essa mensagem.
   - Decisão do PO em 14/10/2026. Ver ARQUITETURA §2.3 e invariante 5 da raiz.
 - **`situacao`:** `aberto`, `reivindicado` ou `encerrado`. Nenhum outro valor.
-- **`localizacao`:** `no local`, `com quem achou`, `caixa do bloco A/E` ou `devolvido`. Só muda por declaração.
+- **`localizacao`:** `no local`, `com quem achou`, `com um setor`, `caixa do bloco A/E` ou `devolvido`. Só muda por declaração.
 - **Não existe endpoint de `DELETE` para item.** Existe ocultar.
