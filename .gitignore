@@ -1,7 +1,7 @@
 # Segredos e configuração local
 .env
 .env.*
-!.env.exemplo
+!.env.example
 .claude/settings.local.json
 
 # Material local do PO (fora do repositório)
