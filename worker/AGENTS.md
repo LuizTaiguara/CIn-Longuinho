@@ -95,3 +95,6 @@ falhou (credencial, Gmail fora); `2` banco indisponível. Em todos, nada fica ma
    e um evento `edicao` (regra `extracao_automatica`) com `aplicado = FALSE`; apagar a linha de `processamento` do anúncio
    refaz só a extração, preenchendo o que estiver vazio. É o mesmo caminho que a API usa depois
    que o autor classifica uma retida em "Meus anúncios".
+7. Resposta numa thread com item vai a `situacao.py` (tabela de regras no topo do arquivo): gera no
+   máximo um evento e só aplica a transição se ela for válida (invariante 2). Autor = mesmo e-mail do
+   anúncio. Resposta numa thread sem item fica pendente até o anúncio virar item.
