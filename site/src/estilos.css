@@ -327,3 +327,15 @@ button:disabled {
     margin-bottom: 6px;
   }
 }
+
+.rodape {
+  margin-top: 40px;
+  padding-top: 16px;
+  border-top: 1px solid var(--borda);
+  font-size: 0.9rem;
+  color: var(--texto-suave);
+}
+
+.rodape a {
+  overflow-wrap: anywhere;
+}

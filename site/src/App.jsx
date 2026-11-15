@@ -3,6 +3,7 @@
 // (filtros, página, item aberto) e os testes possam renderizar <App /> direto.
 
 import { BrowserRouter, Link, Route, Routes } from 'react-router-dom'
+import Rodape from './componentes/Rodape.jsx'
 import { ProvedorSessao } from './hooks/useSessao.js'
 import PaginaCatalogo from './paginas/PaginaCatalogo.jsx'
 import PaginaItem from './paginas/PaginaItem.jsx'
@@ -35,6 +36,8 @@ function Casca() {
           <Route path="*" element={<NaoEncontrada />} />
         </Routes>
       </main>
+
+      <Rodape />
     </div>
   )
 }
