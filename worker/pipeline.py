@@ -12,6 +12,7 @@ Cada mensagem é processada numa transação própria, que termina com a linha d
 Se algo falha no meio, a transação volta e a mensagem continua pendente para o próximo ciclo.
 """
 import logging
+import re
 from collections import OrderedDict
 from dataclasses import dataclass, field
 from typing import Callable, Dict, List, Optional
@@ -19,6 +20,8 @@ from typing import Callable, Dict, List, Optional
 from worker.banco import MensagemBruta, Repositorio
 from worker.classificador import Classificacao, classificar
 from worker.situacao import RespostaAnterior, decidir
+from worker.aviso import ConfigAviso, link_do_item, montar_aviso
+from worker.envio import Envio, EnvioIndisponivel, EnvioRecusado, criar_envio
 from worker.extrator import Extracao, ModeloIndisponivel, criar_modelo, extrair
 from worker.fonte import FonteMensagens
 from worker.texto import limpar_assunto, limpar_corpo
@@ -26,6 +29,8 @@ from worker.texto import limpar_assunto, limpar_corpo
 # `evento.tipo_evento` só aceita o vocabulário de shared/AGENTS.md: a extração entra como `edicao`
 # (ela preenche campos do item) e a regra nos detalhes diz de onde veio.
 REGRA_EXTRACAO = "extracao_automatica"
+# Código do item cadastrado pelo site (shared/AGENTS.md): AP- e 6 caracteres de A-Z2-7.
+CODIGO_DO_SITE = re.compile(r"\bAP-[A-Z2-7]{6}\b")
 
 log = logging.getLogger("worker.pipeline")
 
@@ -38,6 +43,7 @@ class ResumoCiclo:
     novas: int = 0
     por_status: Dict[str, int] = field(default_factory=dict)
     pendentes: int = 0
+    avisos: int = 0
 
     def contar(self, status: Optional[str]) -> None:
         if status is None:
@@ -49,18 +55,22 @@ class ResumoCiclo:
         status = ", ".join(f"{k}={v}" for k, v in sorted(self.por_status.items())) or "nenhuma"
         return (
             f"lidas={self.lidas} novas={self.novas} processadas: {status}; "
-            f"aguardando próximo ciclo={self.pendentes}"
+            f"aguardando próximo ciclo={self.pendentes}; avisos ao autor={self.avisos}"
         )
 
 
 def agrupar_por_thread(mensagens: List[MensagemBruta]) -> "OrderedDict[str, List[MensagemBruta]]":
-    """Agrupa mantendo a ordem cronológica dentro de cada thread."""
-    grupos: "OrderedDict[str, List[MensagemBruta]]" = OrderedDict()
+    """Agrupa por thread, em ordem cronológica dentro de cada uma, e ordena as threads pela primeira
+    mensagem: se duas threads trazem o mesmo código do site, a mais antiga é que liga (US-07)."""
+    def ordem(m: MensagemBruta):
+        return (m.data_envio is None, m.data_envio, m.id)
+
+    grupos: Dict[str, List[MensagemBruta]] = {}
     for m in mensagens:
         grupos.setdefault(m.thread_id, []).append(m)
     for lista in grupos.values():
-        lista.sort(key=lambda m: (m.data_envio is None, m.data_envio, m.id))
-    return grupos
+        lista.sort(key=ordem)
+    return OrderedDict(sorted(grupos.items(), key=lambda par: ordem(par[1][0])))
 
 
 FONTE_AUTOMATICA = "detecção automática"
@@ -94,10 +104,14 @@ class Pipeline:
         repositorio: Repositorio,
         classificador: Callable[..., Classificacao] = classificar,
         modelo_extracao: Optional[Callable] = None,
+        envio: Optional[Envio] = None,
+        config_aviso: Optional[ConfigAviso] = None,
     ):
         self.repo = repositorio
         self.classificar = classificador
         self.modelo = modelo_extracao if modelo_extracao is not None else criar_modelo()
+        self.envio = envio if envio is not None else criar_envio()
+        self.config_aviso = config_aviso if config_aviso is not None else ConfigAviso.do_ambiente()
 
     def _extrair(self, mensagem: MensagemBruta, corpo: str, tipo: str):
         """Devolve (Extracao, None) ou (None, motivo) se o modelo estiver indisponível."""
@@ -160,8 +174,32 @@ class Pipeline:
         thread = self.repo.mensagens_da_thread(mensagem.thread_id)
         anuncio = primeira_da_lista(thread)
         if anuncio is not None and anuncio.mensagem_id == mensagem.mensagem_id:
-            return self.processar_anuncio(mensagem, thread)
+            return self.ligar_por_codigo(mensagem) or self.processar_anuncio(mensagem, thread)
         return self.processar_resposta(mensagem, anuncio)
+
+    def ligar_por_codigo(self, mensagem: MensagemBruta) -> Optional[str]:
+        """US-07: o anúncio traz `[AP-XXXXXX]` de um item cadastrado pelo site. A thread passa a ser
+        desse item: sem classificação e sem item novo. Código desconhecido segue o fluxo normal.
+
+        Se o item já está ligado a outra thread (o autor mandou o e-mail pronto duas vezes), a
+        segunda fica só no histórico, com `aplicado = FALSE`: `item.thread_id` é UNIQUE."""
+        for codigo in dict.fromkeys(CODIGO_DO_SITE.findall(f"{mensagem.assunto}\n{mensagem.corpo}")):
+            item = self.repo.item_por_codigo(codigo)
+            if item is None or item.origem != "site":
+                continue
+            if item.thread_id == mensagem.thread_id:
+                return "ligada"  # reprocessamento da mesma mensagem: nada a fazer
+            detalhes = {"codigo": codigo, "mensagem_bruta_id": mensagem.id}
+            if item.thread_id is None and self.repo.item_da_thread(mensagem.thread_id) is None:
+                if self.repo.ligar_thread(item.id, mensagem.thread_id):
+                    self.repo.registrar_evento(item.id, "ligacao_thread", FONTE_AUTOMATICA, True, detalhes=detalhes)
+                    return "ligada"
+            self.repo.registrar_evento(
+                item.id, "ligacao_thread", FONTE_AUTOMATICA, False, detalhes=detalhes,
+                motivo_recusa="o item já está ligado a outra conversa da lista",
+            )
+            return "ligada"
+        return None
 
     def processar_anuncio(self, mensagem: MensagemBruta, thread: List[MensagemBruta]) -> Optional[str]:
         item = self.repo.item_da_thread(mensagem.thread_id)
@@ -291,4 +329,38 @@ class Pipeline:
         resumo = ResumoCiclo()
         self.ingerir(fonte, resumo)
         self.processar_pendentes(resumo)
+        self.avisar_autores(resumo)
         return resumo
+
+    def avisar_autores(self, resumo: ResumoCiclo) -> None:
+        """US-15: um aviso por thread ao autor do anúncio (regras e ordem das operações em worker/aviso.py)."""
+        motivo = self.config_aviso.motivo_desligado()
+        if motivo:
+            log.info("aviso ao autor desligado: %s", motivo)
+            return
+        conexao = self.repo.conexao
+        site_url = self.config_aviso.site_url
+        for item in self.repo.itens_para_avisar(self.config_aviso.a_partir_de):
+            try:
+                if not self.repo.reservar_aviso(item.id):
+                    conexao.rollback()
+                    continue
+                link = link_do_item(site_url, item.id)
+                self.repo.registrar_evento(item.id, "aviso_autor", FONTE_AUTOMATICA, True, detalhes={"link": link})
+                self.envio.enviar(montar_aviso(item.autor_email, item.id, site_url))
+                conexao.commit()
+                resumo.avisos += 1
+            except EnvioRecusado as erro:
+                # Endereço que não pode receber: fica registrado e não é tentado de novo.
+                conexao.rollback()
+                self.repo.registrar_evento(
+                    item.id, "aviso_autor", FONTE_AUTOMATICA, False, motivo_recusa=f"aviso não enviado: {erro}"
+                )
+                conexao.commit()
+            except EnvioIndisponivel as erro:
+                conexao.rollback()
+                log.warning("envio indisponível; avisos ficam para o próximo ciclo (%s)", erro)
+                return
+            except Exception:
+                conexao.rollback()
+                raise

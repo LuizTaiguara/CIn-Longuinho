@@ -237,6 +237,48 @@ class Repositorio:
     def item_por_id(self, item_id: int) -> Optional[Item]:
         return self._item("id = %s", (item_id,))
 
+    def item_por_codigo(self, codigo: str) -> Optional[Item]:
+        return self._item("codigo = %s", (codigo,))
+
+    def ligar_thread(self, item_id: int, thread_id: str) -> bool:
+        """US-07: o e-mail pronto chegou à lista. Só liga item sem thread; devolve se ligou."""
+        with self.conexao.cursor() as cur:
+            cur.execute(
+                "UPDATE item SET thread_id = %s, atualizado_em = NOW() WHERE id = %s AND thread_id IS NULL",
+                (thread_id, item_id),
+            )
+            return cur.rowcount == 1
+
+    def itens_para_avisar(self, a_partir_de) -> List[Item]:
+        """Itens da lista cujo autor ainda não recebeu o aviso da US-15 (regras em worker/aviso.py)."""
+        with self.conexao.cursor(row_factory=dict_row) as cur:
+            cur.execute(
+                f"""
+                SELECT {_COLUNAS_ITEM} FROM item i
+                WHERE origem = 'lista' AND NOT oculto AND situacao <> 'encerrado'
+                  AND aviso_autor_enviado_em IS NULL AND autor_email <> ''
+                  AND data_anuncio >= %s
+                  AND NOT EXISTS (SELECT 1 FROM evento e WHERE e.item_id = i.id
+                                  AND e.tipo_evento IN ('classificacao_pelo_autor', 'aviso_autor'))
+                ORDER BY id
+                """,
+                (a_partir_de,),
+            )
+            linhas = cur.fetchall()
+        self.conexao.commit()
+        for linha in linhas:
+            linha["local"] = list(linha["local"] or [])
+        return [Item(**l) for l in linhas]
+
+    def reservar_aviso(self, item_id: int) -> bool:
+        """Marca o aviso como enviado se ninguém marcou antes. Sem commit: entra na transação do envio."""
+        with self.conexao.cursor() as cur:
+            cur.execute(
+                "UPDATE item SET aviso_autor_enviado_em = NOW() WHERE id = %s AND aviso_autor_enviado_em IS NULL",
+                (item_id,),
+            )
+            return cur.rowcount == 1
+
     def criar_item(
         self,
         thread_id: str,
