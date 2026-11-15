@@ -10,6 +10,8 @@ from __future__ import annotations
 import re
 from datetime import datetime, timezone
 
+from api.privacidade import mascarar
+
 PADRAO_ID_ITEM = re.compile(r"^item_([1-9][0-9]{0,17})$")
 PADRAO_ID_RETIDA = re.compile(r"^retida_([1-9][0-9]{0,17})$")
 
@@ -33,7 +35,7 @@ def data_iso(valor: datetime | None) -> str | None:
 
 def _setor(linha: dict) -> str | None:
     # Contrato: `setor` só vem preenchido quando `localizacao` é "com um setor".
-    return linha.get("setor") if linha.get("localizacao") == "com um setor" else None
+    return mascarar(linha.get("setor")) if linha.get("localizacao") == "com um setor" else None
 
 
 def _data_atualizacao(linha: dict) -> str | None:
@@ -47,8 +49,9 @@ def item_resumo(linha: dict) -> dict:
     return {
         "id": id_item(linha["id"]),
         "tipo": linha["tipo"],
-        "descricao": linha.get("descricao") or "",
-        "local": list(linha.get("local") or []),
+        # Texto livre pode trazer contato copiado da mensagem: sai mascarado também.
+        "descricao": mascarar(linha.get("descricao") or ""),
+        "local": [mascarar(nome) for nome in (linha.get("local") or [])],
         "situacao": linha["situacao"],
         "localizacao": linha.get("localizacao"),
         "setor": _setor(linha),

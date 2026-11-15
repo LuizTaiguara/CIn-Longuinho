@@ -99,6 +99,15 @@ COLUNAS_ITEM_DETALHE = (
 )
 
 
+def sem_contato_sql(expressao: str) -> str:
+    """Tira do texto, no SQL, o que `privacidade.mascarar` esconderia (e-mail e telefone)."""
+    return (
+        "regexp_replace(regexp_replace(coalesce(" + expressao + ", ''),"
+        " '[^[:space:]]*@[^[:space:]]*', ' ', 'g'),"
+        " '\\+?[0-9][0-9 ().-]{6,}[0-9]', ' ', 'g')"
+    )
+
+
 def _escapar_like(termo: str) -> str:
     return termo.replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_")
 
@@ -155,10 +164,7 @@ def itens_publicados(
         )
         params.append(filtros.local)
 
-    alvo = (
-        "lower(unaccent(concat_ws(' ', i.descricao,"
-        " array_to_string(coalesce(i.local, '{}'::text[]), ' '), i.setor)))"
-    )
+    campos = "concat_ws(' ', i.descricao, array_to_string(coalesce(i.local, '{}'::text[]), ' '), i.setor)"
     juncao = ""
     if com_sessao and filtros.termos():
         juncao = (
@@ -166,17 +172,9 @@ def itens_publicados(
             + SQL_MENSAGEM_DE_ABERTURA.format(thread="i.thread_id")
             + ") abertura ON TRUE"
         )
-        corpo_sem_contato = (
-            "regexp_replace(regexp_replace(coalesce(abertura.corpo, ''),"
-            " '[^[:space:]]+@[^[:space:]]+', ' ', 'g'),"
-            " '\\+?[0-9][0-9 ().-]{6,}[0-9]', ' ', 'g')"
-        )
-        alvo = (
-            "lower(unaccent(concat_ws(' ', i.descricao,"
-            " array_to_string(coalesce(i.local, '{}'::text[]), ' '), i.setor, "
-            + corpo_sem_contato
-            + ")))"
-        )
+        campos = f"concat_ws(' ', {campos}, abertura.corpo)"
+    # O que a resposta mascara não pode ser achado pela busca: e-mails e telefones saem do alvo.
+    alvo = f"lower(unaccent({sem_contato_sql(campos)}))"
     for termo in filtros.termos():
         condicoes.append(f"{alvo} LIKE '%%' || lower(unaccent(%s)) || '%%'")
         params.append(_escapar_like(termo))
