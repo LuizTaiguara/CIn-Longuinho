@@ -16,12 +16,13 @@ from fastapi import APIRouter, FastAPI, Request
 from api import config as modulo_config
 from api import erros, privacidade
 from api.banco import Banco
-from api.rotas import itens, locais
+from api.google import ClienteGoogle
+from api.rotas import auth, eu, itens, locais
 
 log_acesso = logging.getLogger("api.acesso")
 
 # Todos os roteadores montados sob API_PREFIX. O teste de privacidade percorre esta lista.
-ROTEADORES = (itens.roteador, locais.roteador)
+ROTEADORES = (itens.roteador, locais.roteador, eu.roteador, auth.roteador)
 
 
 def criar_app(config: modulo_config.Config | None = None) -> FastAPI:
@@ -45,6 +46,7 @@ def criar_app(config: modulo_config.Config | None = None) -> FastAPI:
     )
     app.state.config = config
     app.state.banco = banco
+    app.state.google = ClienteGoogle(config)
     erros.instalar(app)
 
     @app.middleware("http")

@@ -84,3 +84,74 @@ def paginacao(pagina: int, limite: int, total: int) -> dict:
         "total_itens": total,
         "limite": limite,
     }
+
+
+# ---------------------------------------------------------------------------
+# Área do autor (US-15)
+# ---------------------------------------------------------------------------
+
+TAMANHO_TRECHO_RETIDA = 140
+_PREFIXOS_ASSUNTO = re.compile(r"^\s*(?:\[[^\]]*\]\s*|(?:re|res|fw|fwd|enc)\s*:\s*)+", re.IGNORECASE)
+
+
+def id_retida(numero: int) -> str:
+    return f"retida_{numero}"
+
+
+def assunto_limpo(assunto: str | None) -> str:
+    """Tira a etiqueta da lista (`[Achados e Perdidos]`) e prefixos de resposta/encaminhamento."""
+    return _PREFIXOS_ASSUNTO.sub("", assunto or "").strip()
+
+
+def descricao_da_mensagem(assunto: str | None, corpo: str | None) -> str:
+    """Assunto limpo ou, sem assunto, as primeiras 140 letras do corpo. Sempre mascarado."""
+    texto = assunto_limpo(assunto)
+    if not texto:
+        texto = " ".join((corpo or "").split())[:TAMANHO_TRECHO_RETIDA]
+    return mascarar(texto) or ""
+
+
+def item_do_autor(linha: dict) -> dict:
+    return {
+        "id": id_item(linha["id"]),
+        "tipo": linha["tipo"],
+        "descricao": mascarar(linha.get("descricao") or ""),
+        "local": [mascarar(nome) for nome in (linha.get("local") or [])],
+        "situacao": linha["situacao"],
+        "localizacao": linha.get("localizacao"),
+        "setor": _setor(linha),
+        "fora_do_catalogo": False,
+        "motivo_retencao": None,
+        "oculto": bool(linha.get("oculto")),
+        "data_registro": data_iso(linha["data_anuncio"]),
+        "data_situacao": data_iso(linha.get("data_situacao")),
+        "fonte_encerramento": linha.get("fonte_encerramento"),
+        "revisar": bool(linha.get("revisar")),
+        "origem": linha["origem"],
+        "codigo": linha.get("codigo"),
+        "foi_para_a_lista": bool(linha.get("foi_para_a_lista")),
+        "foto_url": linha.get("foto_url"),
+    }
+
+
+def retida_do_autor(linha: dict) -> dict:
+    return {
+        "id": id_retida(linha["id"]),
+        "tipo": None,
+        "descricao": descricao_da_mensagem(linha.get("assunto"), linha.get("corpo")),
+        "local": [],
+        "situacao": None,
+        "localizacao": None,
+        "setor": None,
+        "fora_do_catalogo": True,
+        "motivo_retencao": linha["motivo_retencao"],
+        "oculto": False,
+        "data_registro": data_iso(linha["data_envio"]),
+        "data_situacao": None,
+        "fonte_encerramento": None,
+        "revisar": False,
+        "origem": "lista",
+        "codigo": None,
+        "foi_para_a_lista": True,
+        "foto_url": None,
+    }

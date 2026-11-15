@@ -207,3 +207,150 @@ def mensagem_de_abertura(con: psycopg.Connection, thread_id: str) -> dict | None
     return con.execute(
         SQL_MENSAGEM_DE_ABERTURA.format(thread="%s"), [thread_id]
     ).fetchone()
+
+
+# ---------------------------------------------------------------------------
+# Área do autor (US-15)
+# ---------------------------------------------------------------------------
+
+COLUNAS_ITEM_DO_AUTOR = """
+    i.id, i.tipo::text AS tipo, i.descricao, i.local, i.situacao::text AS situacao,
+    i.localizacao::text AS localizacao, i.setor, i.foto_url, i.data_anuncio, i.data_situacao,
+    i.fonte_encerramento, i.revisar, i.origem, i.codigo, i.oculto,
+    (i.origem = 'lista' OR i.thread_id IS NOT NULL) AS foi_para_a_lista
+"""
+
+
+def item_por_id(
+    con: psycopg.Connection,
+    item_id: int,
+    email_sessao: str | None,
+    incluir_oculto: bool = False,
+    travar: bool = False,
+) -> dict | None:
+    """Item com `pode_gerir` e `oculto`. Com `travar`, segura a linha até o fim da transação."""
+    filtro_oculto = "" if incluir_oculto else " AND i.oculto = FALSE"
+    trava = " FOR UPDATE" if travar else ""
+    return con.execute(
+        f"SELECT {COLUNAS_ITEM_DETALHE}, i.oculto FROM item i WHERE i.id = %s{filtro_oculto}{trava}",
+        [email_sessao, item_id],
+    ).fetchone()
+
+
+def itens_do_autor(con: psycopg.Connection, email_sessao: str) -> list[dict]:
+    """Todos os itens da pessoa, inclusive os ocultos (segunda exceção da invariante 5)."""
+    return con.execute(
+        f"SELECT {COLUNAS_ITEM_DO_AUTOR} FROM item i"
+        f" WHERE {endereco_sql('i.autor_email')} = lower(%s)"
+        " ORDER BY i.data_anuncio DESC, i.id DESC",
+        [email_sessao],
+    ).fetchall()
+
+
+# Retida que é da pessoa: a mensagem retida é a que ABRIU a thread (respostas na thread de
+# outra pessoa nunca contam) e o remetente dela é o endereço da sessão.
+_CONDICAO_RETIDA_DO_AUTOR = (
+    f"{endereco_sql('msg.remetente')} = lower(%s)"
+    " AND msg.id = (" + SQL_MENSAGEM_DE_ABERTURA.format(thread="msg.thread_id").replace("SELECT mb.id, mb.assunto, mb.corpo, mb.data_envio", "SELECT mb.id") + ")"
+)
+
+
+def retidas_do_autor(con: psycopg.Connection, email_sessao: str) -> list[dict]:
+    """Mensagens retidas que abriram uma thread da pessoa e ainda esperam classificação."""
+    return con.execute(
+        "SELECT q.id, q.motivo_retencao, msg.assunto, msg.corpo,"
+        " coalesce(msg.data_envio, msg.criado_em) AS data_envio"
+        " FROM quarentena q JOIN mensagem_bruta msg ON msg.id = q.mensagem_bruta_id"
+        f" WHERE q.resolvida = FALSE AND {_CONDICAO_RETIDA_DO_AUTOR}"
+        " AND NOT EXISTS (SELECT 1 FROM item i WHERE i.thread_id = msg.thread_id)"
+        " ORDER BY coalesce(msg.data_envio, msg.criado_em) DESC, q.id DESC",
+        [email_sessao],
+    ).fetchall()
+
+
+def retida_do_autor(con: psycopg.Connection, retida_id: int, email_sessao: str) -> dict | None:
+    """Uma retida da pessoa (resolvida ou não), travada para a classificação."""
+    return con.execute(
+        "SELECT q.id, q.resolvida, q.thread_id AS thread_quarentena, msg.thread_id,"
+        " msg.mensagem_id, msg.assunto, msg.corpo,"
+        " coalesce(msg.data_envio, msg.criado_em) AS data_envio"
+        " FROM quarentena q JOIN mensagem_bruta msg ON msg.id = q.mensagem_bruta_id"
+        f" WHERE q.id = %s AND {_CONDICAO_RETIDA_DO_AUTOR}"
+        " FOR UPDATE OF q",
+        [retida_id, email_sessao],
+    ).fetchone()
+
+
+def thread_tem_item(con: psycopg.Connection, thread_id: str) -> bool:
+    return con.execute("SELECT 1 FROM item WHERE thread_id = %s", [thread_id]).fetchone() is not None
+
+
+def criar_item_da_retida(
+    con: psycopg.Connection, tipo: str, thread_id: str, autor_email: str, descricao: str, data_anuncio
+) -> int:
+    return con.execute(
+        "INSERT INTO item (tipo, origem, thread_id, autor_email, descricao, data_anuncio)"
+        " VALUES (%s::tipo_item, 'lista', %s, %s, %s, coalesce(%s, NOW())) RETURNING id",
+        [tipo, thread_id, autor_email, descricao, data_anuncio],
+    ).fetchone()["id"]
+
+
+def resolver_retida(con: psycopg.Connection, retida_id: int, mensagem_id: str) -> None:
+    con.execute("UPDATE quarentena SET resolvida = TRUE WHERE id = %s", [retida_id])
+    # Única remoção do sistema (Decisão 13): apagar o controle de processamento é o sinal para
+    # o worker rodar a extração dessa mensagem no próximo ciclo. Nenhum dado é perdido.
+    con.execute("DELETE FROM processamento WHERE mensagem_id = %s", [mensagem_id])
+
+
+def registrar_evento(
+    con: psycopg.Connection,
+    item_id: int,
+    tipo_evento: str,
+    fonte: str,
+    aplicado: bool,
+    situacao_anterior: str | None = None,
+    situacao_nova: str | None = None,
+    motivo_recusa: str | None = None,
+    detalhes: dict | None = None,
+) -> None:
+    """Evento append-only. Nunca grava endereço de e-mail em `detalhes`."""
+    from psycopg.types.json import Jsonb
+
+    con.execute(
+        "INSERT INTO evento (item_id, tipo_evento, situacao_anterior, situacao_nova, fonte,"
+        " aplicado, motivo_recusa, detalhes)"
+        " VALUES (%s, %s, %s::situacao_item, %s::situacao_item, %s, %s, %s, %s)",
+        [
+            item_id, tipo_evento, situacao_anterior, situacao_nova, fonte, aplicado,
+            motivo_recusa, Jsonb(detalhes) if detalhes is not None else None,
+        ],
+    )
+
+
+def atualizar_campos(con: psycopg.Connection, item_id: int, campos: dict) -> None:
+    """UPDATE só das colunas editáveis pelo autor (lista fechada)."""
+    permitidas = {"descricao", "local", "localizacao", "setor"}
+    if not campos or set(campos) - permitidas:
+        raise ValueError("campos fora da lista editável")
+    atribuicoes = []
+    valores = []
+    for coluna in sorted(campos):
+        tipo = "::localizacao_item" if coluna == "localizacao" else ""
+        atribuicoes.append(f"{coluna} = %s{tipo}")
+        valores.append(campos[coluna])
+    con.execute(
+        f"UPDATE item SET {', '.join(atribuicoes)}, atualizado_em = NOW() WHERE id = %s",
+        [*valores, item_id],
+    )
+
+
+def encerrar(con: psycopg.Connection, item_id: int) -> None:
+    con.execute(
+        "UPDATE item SET situacao = 'encerrado', fonte_encerramento = 'confirmação do autor',"
+        " atualizado_em = NOW() WHERE id = %s",
+        [item_id],
+    )
+
+
+def ocultar(con: psycopg.Connection, item_id: int) -> None:
+    con.execute("UPDATE item SET oculto = TRUE, atualizado_em = NOW() WHERE id = %s", [item_id])

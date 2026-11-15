@@ -117,6 +117,23 @@ docker compose up -d api
 api/.venv/bin/python -m pytest api/testes
 ```
 
+**Entrar sem Google (desenvolvimento).** Ponha no `.env` um endereço fictício do CIn, por exemplo
+`LOGIN_SIMULADO=fic.teste@cin.ufpe.br`. Aí `GET /api/auth/google` cria a sessão direto, com o nome
+"Pessoa de Teste", e volta ao site. A API **recusa subir** com `LOGIN_SIMULADO` preenchido se
+`SITE_URL` for `https://`: em produção ele fica vazio.
+
+**Login Google de verdade.** Crie o client OAuth uma vez, no Google Cloud Console da conta do projeto:
+
+1. *APIs e serviços → Tela de consentimento OAuth*: tipo **Externo**, só os escopos de identidade
+   (`openid`, `email`, `profile`). Nenhum escopo sensível.
+2. *Credenciais → Criar credenciais → ID do cliente OAuth*: tipo **Aplicativo da Web**.
+3. Em *URIs de redirecionamento autorizados*, cadastre `API_URL/api/auth/google/callback`
+   (em desenvolvimento, `http://localhost:8000/api/auth/google/callback`; é o `GOOGLE_REDIRECT_URI`).
+4. Copie o ID e a chave secreta para `GOOGLE_CLIENT_ID` e `GOOGLE_CLIENT_SECRET` no `.env` (nunca no código).
+
+Só contas `@cin.ufpe.br` com e-mail verificado entram: a conferência é feita pela API, e o `hd`
+mandado ao Google é só dica de tela.
+
 ---
 
 ## Uso de IA no time
