@@ -49,5 +49,35 @@ ler → classificar → extrair → gravar      (a quarentena interrompe o pipe)
 
 ## Comandos
 
-_A definir quando existir código (Sprint 0)._ Preencha aqui: instalar dependências, rodar
-local com arquivos, rodar testes.
+Todos rodam da **raiz do repositório**.
+
+```bash
+# instalar (Python 3.12, igual ao Dockerfile)
+python -m venv .venv && . .venv/bin/activate
+pip install -r worker/requirements.txt
+
+# banco local (Postgres com as migrações de shared/migrations/)
+cp .env.example .env              # uma vez
+docker compose up -d banco
+
+# testes: criam e migram o banco <nome>_teste_worker (DATABASE_URL_TESTE); sem Postgres, pulam
+python -m pytest worker/testes
+python -m unittest discover worker/testes   # alternativa sem pytest
+
+# rodar um ciclo sobre o corpus local, sem credencial nem internet
+python -m worker --fonte arquivos --dir worker/corpus/casos --uma-vez
+
+# em contêiner (o mesmo ciclo; produção chama isso pelo cron a cada 5 minutos)
+docker compose run --rm worker
+```
+
+Códigos de saída de `python -m worker`: `0` ciclo ok ou outra execução em andamento; `1` fonte
+falhou (credencial, Gmail fora); `2` banco indisponível. Em todos, nada fica marcado pela metade.
+
+### Como o ciclo funciona
+
+1. **Ingestão:** tudo o que a fonte entrega vai para `mensagem_bruta` (idempotente pelo `Message-ID`).
+2. **Processamento:** o pipeline pega do banco as mensagens sem linha em `processamento`, por thread
+   e em ordem de envio. Reprocessar uma mensagem = `DELETE FROM processamento WHERE mensagem_id = ...`;
+   o próximo ciclo a refaz a partir do bruto, sem reler a fonte.
+3. Mensagem que não passou por `achados-perdidos@cin.ufpe.br` fica `ignorada` (decisão do PO, 13/11).

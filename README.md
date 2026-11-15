@@ -85,15 +85,21 @@ O sistema foi desenhado para desenvolvimento, teste e demonstração **sem depen
   As migrações de `shared/migrations/` rodam na primeira subida do volume. Para recomeçar do
   zero: `docker compose down -v`. Para conferir as regras do banco (append-only, situação que
   só avança): `psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f shared/testes/test_regras_banco.sql`.
-* **Rodar os testes do worker** (leitor de `.eml` contra o corpus):
+* **Worker de ingestão** (detalhes em `worker/AGENTS.md`, seção "Comandos"):
   ```bash
-  python -m unittest discover worker/testes
+  python -m venv .venv && . .venv/bin/activate
+  pip install -r worker/requirements.txt
+  docker compose up -d banco
+  python -m pytest worker/testes            # testes (usam o banco <nome>_teste_worker)
+  python -m worker --fonte arquivos --dir worker/corpus/casos --uma-vez   # um ciclo sobre o corpus
+  docker compose run --rm worker            # o mesmo ciclo, em contêiner
   ```
+  Em produção, o worker roda por cron e morre a cada ciclo:
+  `*/5 * * * * cd /caminho && docker compose run --rm worker`
 * **Rodar o site com o mock local:** ver `site/AGENTS.md` (`npm install`, `npm run dev`).
 
 ### Próximos passos e comandos previstos
 
-* **Executar o worker de ingestão:** `(disponível quando a task correspondente for concluída)`
 * **Executar a API:** `(disponível quando a task correspondente for concluída)`
 
 ---
