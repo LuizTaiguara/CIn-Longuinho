@@ -1,12 +1,14 @@
 // Cadastro pelo site (SCRUM-55, US-06). Exige a conta do CIn (a rota passa por ExigeSessao).
 // Achado pergunta onde o objeto está agora; perdido não pergunta, porque quem perdeu não sabe.
 // O item entra direto no catálogo, sem classificação: os dados já vêm estruturados.
+// Depois, a confirmação mostra o e-mail pronto para a lista (US-07): a pessoa envia da própria conta.
 
 import { useRef, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { cadastrarItem, enviarFoto } from '../api/cliente.js'
+import { cadastrarItem, enviarFoto, obterEmailPronto } from '../api/cliente.js'
 import CampoLocais, { LOCAIS_VAZIOS, locaisEscolhidos } from '../componentes/CampoLocais.jsx'
 import CampoLocalizacao from '../componentes/CampoLocalizacao.jsx'
+import EmailPronto from '../componentes/EmailPronto.jsx'
 import { useLocais } from '../hooks/useCatalogo.js'
 import { apagarRascunho, guardarRascunho, lerRascunho } from '../rascunho.js'
 import { telaDeLogin } from '../rotasDoLogin.js'
@@ -68,7 +70,7 @@ function mensagemDaFoto(erro) {
   return 'a foto não pôde ser enviada agora'
 }
 
-function Confirmacao({ item, avisoFoto }) {
+function Confirmacao({ item, avisoFoto, email }) {
   return (
     <section className="confirmacao-cadastro" aria-labelledby="titulo-confirmacao">
       <h1 id="titulo-confirmacao" tabIndex={-1}>
@@ -80,6 +82,20 @@ function Confirmacao({ item, avisoFoto }) {
       {avisoFoto && (
         <p className="alerta" role="alert">
           O anúncio foi publicado sem foto: {avisoFoto}. Você pode corrigir o resto do anúncio na página dele.
+        </p>
+      )}
+
+      <h2>Agora, avise a lista</h2>
+      <p>
+        Para quem só usa e-mail ficar sabendo, mande este e-mail pronto para a lista, da sua conta do CIn. As
+        respostas chegam a você, como em qualquer e-mail que você manda para a lista.
+      </p>
+      {email ? (
+        <EmailPronto email={email} />
+      ) : (
+        <p className="alerta" role="alert">
+          Não foi possível montar o e-mail agora. Ele fica disponível em{' '}
+          <Link to="/meus-anuncios">Meus anúncios</Link>, no botão "Abrir o e-mail de novo".
         </p>
       )}
     </section>
@@ -164,7 +180,13 @@ export default function PaginaCadastrar() {
         avisoFoto = mensagemDaFoto(erro)
       }
     }
-    setConfirmacao({ item, avisoFoto })
+    let email = null
+    try {
+      email = await obterEmailPronto(item.id)
+    } catch {
+      // Sem o e-mail agora: a confirmação aponta "Meus anúncios", onde dá para abrir de novo.
+    }
+    setConfirmacao({ item, avisoFoto, email })
     setEnviando(false)
   }
 
