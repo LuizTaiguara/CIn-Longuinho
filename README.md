@@ -89,7 +89,22 @@ O sistema foi desenhado para desenvolvimento, teste e demonstração **sem depen
   ```bash
   python -m unittest discover worker/testes
   ```
-* **Rodar o site com o mock local:** ver `site/AGENTS.md` (`npm install`, `npm run dev`).
+* **Rodar o site:** ver a subseção abaixo e `site/AGENTS.md`.
+
+### Rodar o site
+
+```bash
+cd site
+npm ci
+npm run dev                                   # com o mock local, sem backend: http://localhost:5173
+API_URL=http://localhost:8000 npm run dev     # contra a API de verdade, que precisa estar de pé
+npm test                                      # testes (sem internet e sem credencial)
+```
+
+Sem `API_URL`, o site usa um mock local das 14 rotas do contrato, com login simulado (o botão
+"Entrar com a conta do CIn" entra direto, sem Google). Os estados de erro e vazio se veem com
+`MOCK_VAZIO=1`, `MOCK_FALHA=1`, `MOCK_CONTATO_FALHA=1` e `MOCK_LOGIN_FORA=1` (detalhes em
+`site/AGENTS.md`).
 
 ### Próximos passos e comandos previstos
 
