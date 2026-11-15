@@ -10,3 +10,8 @@ pytest==9.2.0
 # Extração (US-03): GLiNER, reconhecimento de entidades local. Não é LLM (ADR-009).
 torch==2.15.0+cpu
 gliner==0.2.30
+
+# Fonte Gmail (US-01, ADR-011): API oficial e OAuth de app instalado, só leitura.
+google-api-python-client==2.202.0
+google-auth==2.62.2
+google-auth-oauthlib==1.5.0
