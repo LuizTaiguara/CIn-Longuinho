@@ -79,7 +79,7 @@ class TestCiclo(TesteComBanco):
         self.assertEqual(vistas.index("<a.m1@teste.invalid>") < vistas.index("<a.m2@teste.invalid>"), True)
         self.assertEqual(vistas.index("<b.m4@teste.invalid>") < vistas.index("<b.m3@teste.invalid>"), True)
         grupos = agrupar_por_thread(self.repo.mensagens_pendentes())
-        self.assertEqual(list(grupos), ["a", "b"])
+        self.assertEqual(list(grupos), ["b", "a"])  # threads na ordem da primeira mensagem (b começa às 9h05)
 
     def test_ciclo_sobre_o_corpus_grava_as_70_mensagens(self):
         resumo = Pipeline(self.repo).executar_ciclo(LeitorArquivoLocal(CORPUS))
