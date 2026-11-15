@@ -3,7 +3,9 @@
 // (filtros, página, item aberto) e os testes possam renderizar <App /> direto.
 
 import { BrowserRouter, Link, Route, Routes } from 'react-router-dom'
+import { ProvedorSessao } from './hooks/useSessao.js'
 import PaginaCatalogo from './paginas/PaginaCatalogo.jsx'
+import PaginaItem from './paginas/PaginaItem.jsx'
 
 function NaoEncontrada() {
   return (
@@ -29,6 +31,7 @@ function Casca() {
       <main>
         <Routes>
           <Route path="/" element={<PaginaCatalogo />} />
+          <Route path="/itens/:id" element={<PaginaItem />} />
           <Route path="*" element={<NaoEncontrada />} />
         </Routes>
       </main>
@@ -39,7 +42,9 @@ function Casca() {
 export default function App() {
   return (
     <BrowserRouter>
-      <Casca />
+      <ProvedorSessao>
+        <Casca />
+      </ProvedorSessao>
     </BrowserRouter>
   )
 }
