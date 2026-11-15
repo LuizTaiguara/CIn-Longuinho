@@ -3,13 +3,16 @@
 //   1. mensagens retidas que abriram uma thread minha (fora do catálogo, com o motivo);
 //   2. anúncios no catálogo;
 //   3. anúncios que removi do catálogo (marcados, sem botão: não dá para desfazer pelo site).
+// Anúncio do site cujo e-mail o worker ainda não leu na lista aparece com "ainda não foi para a
+// lista" e o botão para abrir o e-mail pronto de novo (US-07).
 // Os grupos 1 e 3 são as duas exceções da invariante 5: a API só os manda para o próprio autor.
 // O site não filtra nem esconde nada: mostra o que GET /api/eu/itens devolver.
 
 import { useCallback, useEffect, useState } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
-import { classificarRetida, listarMeusItens } from '../api/cliente.js'
+import { classificarRetida, listarMeusItens, obterEmailPronto } from '../api/cliente.js'
 import CartaoItem, { ROTULO_TIPO } from '../componentes/CartaoItem.jsx'
+import EmailPronto from '../componentes/EmailPronto.jsx'
 import { telaDeLogin } from '../rotasDoLogin.js'
 import { dataCompleta, tempoRelativo } from '../tempoRelativo.js'
 
@@ -73,6 +76,41 @@ function Retida({ retida, onClassificada, onRecarregar }) {
         </p>
       )}
     </article>
+  )
+}
+
+function AindaNaoFoiParaALista({ item }) {
+  const [estado, setEstado] = useState({ carregando: false, email: null, falha: false })
+  const navigate = useNavigate()
+
+  const abrir = async () => {
+    setEstado({ carregando: true, email: null, falha: false })
+    try {
+      setEstado({ carregando: false, email: await obterEmailPronto(item.id), falha: false })
+    } catch (erro) {
+      if (erro.status === 401) return navigate(telaDeLogin('/meus-anuncios', 'sessao_expirada'))
+      setEstado({ carregando: false, email: null, falha: true })
+    }
+  }
+
+  return (
+    <div className="pendencia-lista">
+      <p className="marcacao">ainda não foi para a lista</p>
+      {estado.email ? (
+        <EmailPronto email={estado.email} id={`email-${item.id}`} />
+      ) : (
+        <div className="botoes">
+          <button type="button" className="secundario" onClick={abrir} disabled={estado.carregando}>
+            {estado.carregando ? 'Abrindo…' : 'Abrir o e-mail de novo'}
+          </button>
+        </div>
+      )}
+      {estado.falha && (
+        <p className="alerta" role="alert">
+          Não foi possível montar o e-mail agora. Tente de novo.
+        </p>
+      )}
+    </div>
   )
 }
 
@@ -161,7 +199,12 @@ export default function PaginaMeusAnuncios() {
               {(retida) => <Retida retida={retida} onClassificada={recarregar} onRecarregar={recarregar} />}
             </Grupo>
             <Grupo titulo="No catálogo" itens={noCatalogo}>
-              {(item) => <CartaoItem item={item} />}
+              {(item) => (
+                <>
+                  <CartaoItem item={item} />
+                  {item.origem === 'site' && !item.foi_para_a_lista && <AindaNaoFoiParaALista item={item} />}
+                </>
+              )}
             </Grupo>
             <Grupo titulo="Removidos do catálogo" itens={ocultos}>
               {(item) => <Oculto item={item} />}

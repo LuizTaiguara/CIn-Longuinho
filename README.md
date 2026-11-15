@@ -101,6 +101,14 @@ API_URL=http://localhost:8000 npm run dev     # contra a API de verdade, que pre
 npm test                                      # testes (sem internet e sem credencial)
 ```
 
+Para subir a versão de produção (build servido por nginx, que repassa `/api/` para a API), da raiz:
+
+```bash
+docker compose up -d --build api site         # site em http://localhost:8080, API em :8000
+```
+
+Com o compose, ponha `SITE_URL=http://localhost:8080` no `.env`, para o login voltar ao site.
+
 Sem `API_URL`, o site usa um mock local das 14 rotas do contrato, com login simulado (o botão
 "Entrar com a conta do CIn" entra direto, sem Google). Os estados de erro e vazio se veem com
 `MOCK_VAZIO=1`, `MOCK_FALHA=1`, `MOCK_CONTATO_FALHA=1` e `MOCK_LOGIN_FORA=1` (detalhes em
