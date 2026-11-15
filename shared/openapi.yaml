@@ -11,7 +11,7 @@ info:
     3. **Duas Exceções de Visibilidade, ambas só em `GET /eu/itens` e só para o próprio autor:** (a) a mensagem retida que abriu uma thread dele aparece marcada como fora do catálogo (`fora_do_catalogo: true`) e com `motivo_retencao`, para ele dizer se é perda ou achado (US-15, decisão do PO em 14/10/2026); (b) o item que ele ocultou aparece com `oculto: true`, e a ocultação não pode ser desfeita (decisão do PO em 28/10/2026, registrada como exceção em 13/11/2026). Ninguém mais vê esses registros.
     4. **Imutabilidade e Não-Exclusão:** Nenhum registro é deletado. Não existem endpoints com método HTTP `DELETE` (Invariante 4). A remoção pelo autor é feita via `POST /itens/{id}/ocultar`.
     5. **Evolução de Situação:** A situação de um item transiciona de `aberto` para `reivindicado` ou diretamente para `encerrado` (desfecho confirmado pelo autor via `POST /itens/{id}/encerrar`). Nunca retrocede.
-    6. **Autenticação Institucional:** Delegada ao Google OAuth 2.0 restrita a contas do domínio `@cin.ufpe.br` (ADR-010 e ADR-011). O app OAuth é configurado como Externo com escopos estritamente de identidade (`openid profile`), e a validação do domínio institucional é obrigatoriamente efetuada no servidor (o parâmetro `hd` do Google serve apenas como sugestão de interface).
+    6. **Autenticação Institucional:** Delegada ao Google OAuth 2.0 restrita a contas do domínio `@cin.ufpe.br` (ADR-010 e ADR-011). O app OAuth é configurado como Externo com escopos estritamente de identidade (`openid email profile`: sem o escopo `email` o Google não devolve o endereço e o servidor não consegue conferir o domínio), e a validação do domínio institucional é obrigatoriamente efetuada no servidor (o parâmetro `hd` do Google serve apenas como sugestão de interface).
 
     ### Códigos de erro (`Erro.codigo`)
     | Código | HTTP | Quando |
@@ -677,7 +677,7 @@ paths:
         Recebe o código de autorização e o state validados do Google.
         
         **Segurança e Validação Institucional:**
-        - O aplicativo OAuth é registrado como Externo (ADR-010 e ADR-011), solicitando escopos estritamente de identidade (`openid profile`).
+        - O aplicativo OAuth é registrado como Externo (ADR-010 e ADR-011), solicitando escopos estritamente de identidade (`openid email profile`: sem o escopo `email` o Google não devolve o endereço e o servidor não consegue conferir o domínio).
         - O filtro do domínio `@cin.ufpe.br` é executado **obrigatoriamente pelo servidor** após receber o token de identidade do Google (o parâmetro `hd` é meramente uma dica de interface para o navegador, não garantindo restrição de acesso).
         - **Caso de Sucesso:** Se a conta confirmada pelo Google pertencer ao domínio `@cin.ufpe.br`, o servidor cria a sessão, define o cookie HTTP-only `sessao_id` e emite redirecionamento `302` para o frontend. Quando há um caminho `retorno` válido guardado no fluxo, o servidor redireciona o usuário para esse caminho após o login bem-sucedido.
         - **Caso de Erro ou Conta Externa:** Se a conta for de fora do domínio `@cin.ufpe.br`, se o acesso for negado pelo usuário ou se o `state` for inválido, o servidor emite redirecionamento `302` para a aplicação frontend acompanhado de um parâmetro de erro na URL (ex.: `/login?erro=conta_fora_do_cin`), **sem retornar JSON 403**.
