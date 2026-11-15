@@ -17,12 +17,12 @@ from api import config as modulo_config
 from api import erros, privacidade
 from api.banco import Banco
 from api.google import ClienteGoogle
-from api.rotas import auth, eu, itens, locais
+from api.rotas import auth, cadastro, eu, itens, locais
 
 log_acesso = logging.getLogger("api.acesso")
 
 # Todos os roteadores montados sob API_PREFIX. O teste de privacidade percorre esta lista.
-ROTEADORES = (itens.roteador, locais.roteador, eu.roteador, auth.roteador)
+ROTEADORES = (itens.roteador, cadastro.roteador, locais.roteador, eu.roteador, auth.roteador)
 
 
 def criar_app(config: modulo_config.Config | None = None) -> FastAPI:

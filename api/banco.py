@@ -354,3 +354,75 @@ def encerrar(con: psycopg.Connection, item_id: int) -> None:
 
 def ocultar(con: psycopg.Connection, item_id: int) -> None:
     con.execute("UPDATE item SET oculto = TRUE, atualizado_em = NOW() WHERE id = %s", [item_id])
+
+
+# ---------------------------------------------------------------------------
+# Cadastro pelo site (US-06, US-07)
+# ---------------------------------------------------------------------------
+
+JANELA_CLIQUE_DUPLO_SEGUNDOS = 30
+
+
+def travar_cadastros_do_autor(con: psycopg.Connection, email_sessao: str) -> None:
+    """Serializa os cadastros de uma mesma pessoa, para o clique duplo não criar dois itens."""
+    con.execute("SELECT pg_advisory_xact_lock(hashtext('cadastro:' || lower(%s)))", [email_sessao])
+
+
+def cadastro_recente_igual(
+    con: psycopg.Connection, email_sessao: str, tipo: str, descricao: str
+) -> int | None:
+    linha = con.execute(
+        "SELECT id FROM item"
+        " WHERE origem = 'site' AND lower(autor_email) = lower(%s) AND tipo = %s::tipo_item"
+        " AND descricao = %s AND criado_em > NOW() - make_interval(secs => %s)"
+        " ORDER BY id DESC LIMIT 1",
+        [email_sessao, tipo, descricao, JANELA_CLIQUE_DUPLO_SEGUNDOS],
+    ).fetchone()
+    return linha["id"] if linha else None
+
+
+def codigo_existe(con: psycopg.Connection, codigo: str) -> bool:
+    return con.execute("SELECT 1 FROM item WHERE codigo = %s", [codigo]).fetchone() is not None
+
+
+def criar_item_do_site(
+    con: psycopg.Connection,
+    codigo: str,
+    tipo: str,
+    descricao: str,
+    local: list[str],
+    localizacao: str | None,
+    setor: str | None,
+    autor_email: str,
+) -> int:
+    return con.execute(
+        "INSERT INTO item (codigo, tipo, descricao, local, localizacao, setor, autor_email,"
+        " origem, thread_id, data_anuncio)"
+        " VALUES (%s, %s::tipo_item, %s, %s, %s::localizacao_item, %s, %s, 'site', NULL, NOW())"
+        " RETURNING id",
+        [codigo, tipo, descricao, local, localizacao, setor, autor_email],
+    ).fetchone()["id"]
+
+
+def trocar_foto(con: psycopg.Connection, item_id: int, foto_url: str) -> None:
+    con.execute(
+        "UPDATE item SET foto_url = %s, atualizado_em = NOW() WHERE id = %s", [foto_url, item_id]
+    )
+
+
+def item_da_foto(con: psycopg.Connection, foto_url: str, email_sessao: str | None) -> dict | None:
+    """Item que usa esta foto agora. Serve para não entregar foto de item oculto a terceiros."""
+    return con.execute(
+        "SELECT i.oculto, coalesce("
+        + endereco_sql("i.autor_email")
+        + " = lower(%s), FALSE) AS pode_gerir FROM item i WHERE i.foto_url = %s LIMIT 1",
+        [email_sessao, foto_url],
+    ).fetchone()
+
+
+def dados_do_email_pronto(con: psycopg.Connection, item_id: int) -> dict | None:
+    return con.execute(
+        "SELECT id, codigo, origem, tipo::text AS tipo, descricao, local,"
+        " localizacao::text AS localizacao, setor FROM item WHERE id = %s",
+        [item_id],
+    ).fetchone()

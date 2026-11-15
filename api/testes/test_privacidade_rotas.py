@@ -88,12 +88,28 @@ def roteiro(c: dict) -> list[tuple[str, str, str, dict]]:
         ("POST", "/itens/{id}/ocultar", f"/api/itens/{c['oculto']}/ocultar", {}),
         ("POST", "/itens/{id}/ocultar", f"/api/itens/{c['item']}/ocultar", {}),
         ("GET", "/eu/itens", "/api/eu/itens", {}),
+        ("POST", "/itens", "/api/itens", {"json": {"tipo": "perdido", "descricao": f"Mochila azul, falar com {AUTORA}", "local": ["Grad 1"]}}),
+        ("POST", "/itens", "/api/itens", {"json": {"tipo": "achado", "descricao": "Garrafa", "local": ["Grad 1"]}}),
+        ("POST", "/itens/{id}/foto", f"/api/itens/{c['encerrado']}/foto", {"files": {"foto": ("f.png", _png(), "image/png")}}),
+        ("POST", "/itens/{id}/foto", f"/api/itens/{c['encerrado']}/foto", {"files": {"foto": ("f.jpg", b"nada", "image/jpeg")}}),
+        ("GET", "/fotos/{nome}", "/api/fotos/" + "0" * 32 + ".jpg", {}),
+        ("GET", "/eu/itens", "/api/eu/itens", {}),
         ("POST", "/auth/logout", "/api/auth/logout", {}),
     ]
     return chamadas
 
 
 SESSOES = [None, OUTRA_PESSOA, AUTORA]
+
+
+def _png() -> bytes:
+    import io
+
+    from PIL import Image
+
+    saida = io.BytesIO()
+    Image.new("RGB", (8, 8)).save(saida, format="PNG")
+    return saida.getvalue()
 
 
 def _conferir_sem_endereco(texto: str, onde: str) -> None:
