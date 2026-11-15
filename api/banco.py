@@ -202,6 +202,18 @@ def item_publicado(
 
 
 
+def destinatario_do_contato(con: psycopg.Connection, item_id: int) -> dict | None:
+    """O endereço do autor de um item visível, só para entregar o contato (US-05).
+
+    É a única consulta que traz `autor_email` para o Python. O valor vai direto para o
+    cabeçalho `To` do e-mail e não é registrado, devolvido nem gravado em evento.
+    """
+    return con.execute(
+        "SELECT id, descricao, autor_email AS destinatario FROM item WHERE id = %s AND oculto = FALSE",
+        [item_id],
+    ).fetchone()
+
+
 def mensagem_de_abertura(con: psycopg.Connection, thread_id: str) -> dict | None:
     """Assunto e corpo da primeira mensagem da thread que veio da lista. Nunca o remetente."""
     return con.execute(

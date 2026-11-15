@@ -21,8 +21,9 @@ Vale além do `AGENTS.md` da raiz. Backend: Miguel (revisor do contrato em `shar
 | `google.py` | Login Google: URL de autorização e verificação do `id_token` (trocável nos testes) |
 | `privacidade.py` | Mascaramento de e-mail e telefone; todo log nasce mascarado |
 | `fotos.py` | Confere a foto pelos bytes (JPEG, PNG, WebP, até 5 MB) e a regrava sem metadados |
+| `envio.py` | E-mail privado pela conta do projeto: modos `nao_enviar`, `arquivo` (`.eml`) e `smtp` |
 | `erros.py` | Formato `Erro` (`{codigo, mensagem}`) e os códigos do contrato |
-| `rotas/` | `itens.py` (catálogo e ações do autor), `locais.py`, `cadastro.py` (cadastro pelo site, foto, e-mail pronto), `eu.py` (Meus anúncios, retidas), `auth.py` (login) |
+| `rotas/` | `itens.py` (catálogo e ações do autor), `locais.py`, `cadastro.py` (cadastro pelo site, foto, e-mail pronto), `contato.py` (falar com quem anunciou), `eu.py` (Meus anúncios, retidas), `auth.py` (login) |
 | `testes/` | pytest + `TestClient`, contra um Postgres de verdade |
 
 ## Regras (as invariantes, materializadas aqui)
@@ -47,6 +48,12 @@ Mais:
 - Item do site publica na hora, com `codigo` `AP-XXXXXX` e sem classificação. Clique duplo (mesma
   pessoa, mesmo tipo e descrição em 30 s) devolve o mesmo item.
 - Foto só é servida enquanto é a foto de um item visível (ou ao autor, se o item foi ocultado).
+- Contato (US-05): o endereço do autor só entra no Python em `banco.destinatario_do_contato`, vai
+  direto para o `To` e não volta na resposta (`202` vazio), no erro, no log nem no evento (`{tamanho}`).
+  `Reply-To` é sempre o e-mail da sessão. Falha de envio: `502 ENVIO_FALHOU`, sem evento.
+- E-mail: o sistema nunca posta na lista. Em desenvolvimento e em teste, **nunca** `smtp` (os testes
+  trocam `smtplib.SMTP` por uma função que falha; use `EMAIL_MODO_ENVIO=arquivo` para ver o `.eml`).
+  Com `smtp`, a API não sobe sem `EMAIL_REMETENTE` e `SMTP_*` reais.
 - Falha de login nunca é JSON: é `302` para `SITE_URL/login?erro=<motivo>`.
 - `LOGIN_SIMULADO` só em desenvolvimento; a API não sobe com ele e `SITE_URL` https.
 - Não invente campo no contrato. Se precisar, é `shared/` (revisão do Miguel) e, se mudar o que o

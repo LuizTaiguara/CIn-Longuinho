@@ -80,6 +80,18 @@ def con(url_banco):
         yield conexao
 
 
+@pytest.fixture(autouse=True)
+def smtp_proibido(monkeypatch):
+    """Em teste, SMTP nunca roda: qualquer tentativa de abrir conexão falha o teste."""
+    import smtplib
+
+    def _proibido(*args, **kwargs):
+        raise AssertionError("SMTP não pode ser usado em teste")
+
+    monkeypatch.setattr(smtplib, "SMTP", _proibido)
+    monkeypatch.setattr(smtplib, "SMTP_SSL", _proibido)
+
+
 def fazer_config(url_banco: str, **extra) -> modulo_config.Config:
     valores = dict(
         database_url=url_banco,
