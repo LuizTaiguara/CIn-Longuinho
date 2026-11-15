@@ -1,10 +1,11 @@
 """SCRUM-90 · o pipeline inteiro contra o corpus e o gabarito do PO.
 
-Falha se `destino`, `tipo`, `situacao` ou `fonte_encerramento` divergirem em qualquer thread.
-`local` e `objeto` só entram no relatório (`python -m worker.avaliar`).
+Falha se `destino`, `tipo`, `situacao`, `fonte_encerramento` ou `localizacao` divergirem em
+qualquer thread. `local` e `objeto` só entram no relatório (`python -m worker.avaliar`).
+A `localizacao` sai das regras fechadas, não do modelo, então o teste roda com o modelo simulado.
 
-Enquanto a US-10 (situação nas respostas, W4) não existe, `situacao` e `fonte_encerramento` são
-exigidos só nas threads cujo desfecho não depende de resposta na lista. O W4 tira essa restrição.
+Enquanto a US-10 (situação nas respostas, W4) não existe, `situacao`, `fonte_encerramento` e
+`localizacao` são exigidos só nas threads sem resposta na lista. O W4 tira essa restrição.
 """
 import unittest
 
@@ -12,7 +13,7 @@ from worker.avaliar import avaliar
 from worker.testes.apoio import URL_TESTE, preparar_banco
 
 ESTRITOS_SEMPRE = ["destino", "tipo"]
-ESTRITOS_SEM_RESPOSTA = ["situacao", "fonte_encerramento"]
+ESTRITOS_SEM_RESPOSTA = ["situacao", "fonte_encerramento", "localizacao"]
 
 
 class TestGabarito(unittest.TestCase):

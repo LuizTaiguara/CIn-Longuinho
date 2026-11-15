@@ -67,6 +67,10 @@ python -m unittest discover worker/testes   # alternativa sem pytest
 # rodar um ciclo sobre o corpus local, sem credencial nem internet
 python -m worker --fonte arquivos --dir worker/corpus/casos --uma-vez
 
+# GLiNER (extração): baixa ~1,2 GB no primeiro uso para HF_HOME (padrão ~/.cache/huggingface).
+# Os testes usam o modelo simulado; para incluir o teste com o modelo real:
+WORKER_TESTE_GLINER=1 python -m pytest worker/testes/test_extracao.py
+
 # validar contra o corpus e o gabarito do PO (recria o banco de teste e imprime esperado × obtido)
 python -m worker.avaliar
 
@@ -87,3 +91,7 @@ falhou (credencial, Gmail fora); `2` banco indisponível. Em todos, nada fica ma
 4. A primeira mensagem da thread que passou pela lista é o **anúncio**: vai ao classificador
    (`classificador.py`, regras explicadas no topo do arquivo). As outras são **respostas**.
 5. Classificador com erro: a mensagem fica sem `processamento` e volta no próximo ciclo.
+6. Item publicado passa pela extração (`extrator.py`). Sem modelo, publica só com a classificação
+   e um evento `extracao` com `aplicado = FALSE`; apagar a linha de `processamento` do anúncio
+   refaz só a extração, preenchendo o que estiver vazio. É o mesmo caminho que a API usa depois
+   que o autor classifica uma retida em "Meus anúncios".

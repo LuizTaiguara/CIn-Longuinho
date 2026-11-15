@@ -246,19 +246,43 @@ class Repositorio:
         data_anuncio: Optional[datetime],
         revisar: bool,
         local: Optional[List[str]] = None,
+        localizacao: Optional[str] = None,
+        setor: Optional[str] = None,
     ) -> int:
-        """Cria o item vindo da lista, sempre `aberto` e com `localizacao` NULL (invariante 3)."""
+        """Cria o item vindo da lista, sempre `aberto`. `localizacao` só vem preenchida quando o
+        autor a declarou com uma frase explícita (invariante 3); senão fica NULL."""
         with self.conexao.cursor() as cur:
             cur.execute(
                 """
-                INSERT INTO item (thread_id, tipo, descricao, local, autor_email, origem, revisar,
-                                  data_anuncio)
-                VALUES (%s, %s, %s, %s, %s, 'lista', %s, COALESCE(%s, NOW()))
+                INSERT INTO item (thread_id, tipo, descricao, local, localizacao, setor, autor_email,
+                                  origem, revisar, data_anuncio)
+                VALUES (%s, %s, %s, %s, %s, %s, %s, 'lista', %s, COALESCE(%s, NOW()))
                 RETURNING id
                 """,
-                (thread_id, tipo, descricao, local or [], autor_email, revisar, data_anuncio),
+                (thread_id, tipo, descricao, local or [], localizacao, setor, autor_email, revisar, data_anuncio),
             )
             return cur.fetchone()[0]
+
+    def atualizar_campos(self, item_id: int, campos: Dict[str, Any]) -> None:
+        """Atualiza descrição, local, localização e setor. Nunca `tipo` nem `situacao`."""
+        permitidos = {"descricao", "local", "localizacao", "setor"}
+        campos = {k: v for k, v in campos.items() if k in permitidos}
+        if not campos:
+            return
+        atribuicoes = ", ".join(f"{k} = %s" for k in campos)
+        with self.conexao.cursor() as cur:
+            cur.execute(
+                f"UPDATE item SET {atribuicoes}, atualizado_em = NOW() WHERE id = %s",
+                (*campos.values(), item_id),
+            )
+
+    def tem_evento(self, item_id: int, tipo_evento: str, aplicado: Optional[bool] = None) -> bool:
+        with self.conexao.cursor() as cur:
+            cur.execute(
+                "SELECT 1 FROM evento WHERE item_id = %s AND tipo_evento = %s AND (%s::boolean IS NULL OR aplicado = %s) LIMIT 1",
+                (item_id, tipo_evento, aplicado, aplicado),
+            )
+            return cur.fetchone() is not None
 
     def registrar_evento(
         self,

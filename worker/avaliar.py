@@ -34,7 +34,7 @@ GABARITO = RAIZ_REPOSITORIO / "worker" / "corpus" / "gabarito.json"
 CORPUS = RAIZ_REPOSITORIO / "worker" / "corpus" / "casos"
 CAMPOS = ["destino", "tipo", "situacao", "fonte_encerramento", "localizacao", "local", "objeto"]
 # Campos que fazem `python -m worker.avaliar` sair com código 1 se divergirem.
-CAMPOS_ESTRITOS = ["destino", "tipo", "situacao", "fonte_encerramento"]
+CAMPOS_ESTRITOS = ["destino", "tipo", "situacao", "fonte_encerramento", "localizacao"]
 PALAVRAS_VAZIAS = {"de", "da", "do", "das", "dos", "e", "com", "em", "na", "no", "um", "uma", "lado"}
 
 
