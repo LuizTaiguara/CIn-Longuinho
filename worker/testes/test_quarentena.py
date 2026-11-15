@@ -50,7 +50,7 @@ class TestQuarentena(TesteComBanco):
                             corpo="Esqueci uma lousinha na sala 5, já fui buscar e tô registrando pois a portaria pediu."))
         self.assertEqual(self.consultar("SELECT situacao, fonte_encerramento FROM item")[0], ("encerrado", "confirmação do autor"))
         eventos = self.consultar("SELECT tipo_evento, situacao_nova FROM evento ORDER BY id")
-        self.assertEqual(eventos, [("classificacao", "aberto"), ("extracao", None), ("desfecho", "encerrado")])
+        self.assertEqual(eventos, [("classificacao", "aberto"), ("edicao", None), ("desfecho", "encerrado")])
 
     def test_remetente_sem_endereco_publica_com_autor_vazio(self):
         self.rodar(mensagem(1, remetente="Pessoa Sem Endereço", corpo="Perdi meu carregador no Grad 5."))

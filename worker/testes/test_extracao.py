@@ -177,7 +177,7 @@ class TestExtracaoNoPipeline(TesteComBanco):
         self.assertEqual(descricao, "Bolsa")
         self.assertEqual(local, ["banheiro masculino do 2° andar do bloco E"])
         self.assertEqual(localizacao, "no local")
-        aplicado, detalhes = self.consultar("SELECT aplicado, detalhes FROM evento WHERE tipo_evento = 'extracao'")[0]
+        aplicado, detalhes = self.consultar("SELECT aplicado, detalhes FROM evento WHERE tipo_evento = 'edicao' AND detalhes->>'regra' = 'extracao_automatica'")[0]
         self.assertTrue(aplicado)
         self.assertEqual(detalhes["objetos"], ["bolsa"])
 
@@ -186,7 +186,7 @@ class TestExtracaoNoPipeline(TesteComBanco):
         Pipeline(self.repo, modelo_extracao=ModeloFora()).executar_ciclo(FonteFalsa([m]))
         tipo, descricao, local = self.consultar("SELECT tipo, descricao, local FROM item")[0]
         self.assertEqual((tipo, descricao, local), ("achado", "Carregador", []))
-        aplicado, motivo = self.consultar("SELECT aplicado, motivo_recusa FROM evento WHERE tipo_evento = 'extracao'")[0]
+        aplicado, motivo = self.consultar("SELECT aplicado, motivo_recusa FROM evento WHERE tipo_evento = 'edicao' AND detalhes->>'regra' = 'extracao_automatica'")[0]
         self.assertFalse(aplicado)
         self.assertIn("reprocessável", motivo)
 
@@ -214,7 +214,7 @@ class TestExtracaoNoPipeline(TesteComBanco):
         self.assertEqual(local, ["Grad 2"])
         self.assertIsNone(localizacao)
         eventos = [e for (e,) in self.consultar("SELECT tipo_evento FROM evento ORDER BY id")]
-        self.assertEqual(eventos, ["classificacao_pelo_autor", "extracao"])
+        self.assertEqual(eventos, ["classificacao_pelo_autor", "edicao"])
         self.assertEqual(self.repo.status_processamento(m.id_mensagem), "item")
 
     def test_reextracao_nao_sobrescreve_o_que_o_autor_ja_preencheu(self):

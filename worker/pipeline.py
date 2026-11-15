@@ -22,6 +22,10 @@ from worker.extrator import Extracao, ModeloIndisponivel, criar_modelo, extrair
 from worker.fonte import FonteMensagens
 from worker.texto import limpar_assunto, limpar_corpo
 
+# `evento.tipo_evento` só aceita o vocabulário de shared/AGENTS.md: a extração entra como `edicao`
+# (ela preenche campos do item) e a regra nos detalhes diz de onde veio.
+REGRA_EXTRACAO = "extracao_automatica"
+
 log = logging.getLogger("worker.pipeline")
 
 
@@ -105,14 +109,15 @@ class Pipeline:
     def _registrar_extracao(self, item_id: int, extracao: Optional[Extracao], motivo: Optional[str], campos=None) -> None:
         if extracao is None:
             self.repo.registrar_evento(
-                item_id, "extracao", FONTE_AUTOMATICA, False,
+                item_id, "edicao", FONTE_AUTOMATICA, False,
                 motivo_recusa=f"modelo de extração indisponível; item reprocessável ({motivo})",
+                detalhes={"regra": REGRA_EXTRACAO},
             )
             return
-        detalhes = extracao.detalhes()
+        detalhes = {"regra": REGRA_EXTRACAO, **extracao.detalhes()}
         if campos is not None:
             detalhes["campos_preenchidos"] = sorted(campos)
-        self.repo.registrar_evento(item_id, "extracao", FONTE_AUTOMATICA, True, detalhes=detalhes)
+        self.repo.registrar_evento(item_id, "edicao", FONTE_AUTOMATICA, True, detalhes=detalhes)
 
     # ------------------------------------------------------------------ fase 1
     def ingerir(self, fonte: FonteMensagens, resumo: ResumoCiclo) -> None:
