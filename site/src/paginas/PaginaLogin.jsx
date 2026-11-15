@@ -6,11 +6,15 @@ import { linkDeLogin } from '../api/cliente.js'
 import { useSessao } from '../hooks/useSessao.js'
 import { retornoSeguro } from '../rotasDoLogin.js'
 
+// Códigos que a API manda em /login?erro=... (api/rotas/auth.py), mais `sessao_expirada`, que é do site.
 const MENSAGENS_DE_ERRO = {
   conta_fora_do_cin: 'Só contas @cin.ufpe.br podem gerir anúncios. O catálogo continua aberto para leitura.',
+  recusado: 'O login foi cancelado. O catálogo continua aberto para leitura.',
+  estado_invalido: 'O login não pôde ser concluído. Tente entrar de novo.',
+  login_indisponivel:
+    'O login com o Google está indisponível agora. O catálogo continua aberto para leitura; tente entrar mais tarde.',
   sessao_expirada:
     'Sua sessão expirou. Entre de novo para continuar: o que você tinha escrito ficou guardado neste navegador.',
-  acesso_negado: 'O login foi cancelado. O catálogo continua aberto para leitura.',
 }
 const ERRO_GENERICO = 'Não foi possível entrar agora. Tente de novo em alguns minutos. O catálogo continua aberto para leitura.'
 

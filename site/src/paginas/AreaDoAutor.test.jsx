@@ -70,11 +70,24 @@ describe('entrar com a conta do CIn (SCRUM-106, US-15)', () => {
     expect(await screen.findByText('Garrafa térmica azul')).toBeTruthy()
   })
 
-  it('login do Google indisponível: mensagem honesta, sem detalhe técnico', async () => {
-    irPara('/login?erro=falha_no_google')
+  it('Login do Google indisponível: mensagem honesta, e o catálogo segue para leitura', async () => {
+    irPara('/login?erro=login_indisponivel')
     simularApi()
     render(<App />)
-    expect((await screen.findByRole('alert')).textContent).toMatch(/Não foi possível entrar agora.*catálogo continua aberto/)
+    expect((await screen.findByRole('alert')).textContent).toMatch(/indisponível agora.*catálogo continua aberto/)
+  })
+
+  it.each([
+    ['recusado', /O login foi cancelado/],
+    ['estado_invalido', /não pôde ser concluído/],
+    ['codigo_desconhecido', /Não foi possível entrar agora/],
+  ])('erro "%s" da API tem mensagem própria, sem detalhe técnico', async (codigo, mensagem) => {
+    irPara(`/login?erro=${codigo}`)
+    simularApi()
+    render(<App />)
+    const alerta = await screen.findByRole('alert')
+    expect(alerta.textContent).toMatch(mensagem)
+    expect(alerta.textContent).not.toContain(codigo)
   })
 
   it('com sessão, o cabeçalho mostra "Meus anúncios" e "Sair", e "Sair" encerra a sessão', async () => {
