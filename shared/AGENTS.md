@@ -49,7 +49,7 @@ São colunas `TEXT` no schema, então o vocabulário vive aqui. Use só estes va
 
 | Coluna | Valores |
 |---|---|
-| `evento.tipo_evento` | `criacao`, `classificacao`, `classificacao_pelo_autor`, `reivindicacao`, `desfecho`, `edicao`, `ocultacao`, `ligacao_thread`, `contato`, `aviso_autor` |
+| `evento.tipo_evento` | `criacao`, `classificacao`, `classificacao_pelo_autor`, `extracao`, `reivindicacao`, `desfecho`, `edicao`, `ocultacao`, `ligacao_thread`, `contato`, `aviso_autor` |
 | `evento.fonte` | `confirmação do autor`, `terceiro`, `detecção automática`, `classificação pelo autor`, `cadastro pelo site` |
 | `item.fonte_encerramento` | `confirmação do autor`, `terceiro` (CHECK no banco) |
 | `item.origem` | `lista`, `site` (CHECK no banco) |
