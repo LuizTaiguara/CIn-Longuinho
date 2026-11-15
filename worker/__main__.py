@@ -2,6 +2,11 @@
 
 Acorda, lê, grava e morre (ADR-003, worker/AGENTS.md). Em produção roda por cron com `--uma-vez`.
 Sem `--uma-vez`, repete o ciclo a cada WORKER_INTERVALO_SEGUNDOS, só para conveniência local.
+
+Códigos de saída:
+  0  ciclo terminou, ou outra execução já estava em andamento (não é erro)
+  1  a fonte falhou (credencial expirada, Gmail fora do ar); nada foi marcado como processado
+  2  banco indisponível; nenhuma mensagem foi consumida
 """
 import argparse
 import logging
@@ -9,14 +14,19 @@ import sys
 import time
 from typing import Callable, List, Optional
 
-from worker.banco import Repositorio, conectar
+import psycopg
+
+from worker.banco import BancoIndisponivel, Repositorio, conectar
 from worker.config import Config, carregar_dotenv
-from worker.fonte import FonteMensagens
+from worker.fonte import CredencialInvalida, FonteIndisponivel, FonteMensagens
 from worker.pipeline import Pipeline
+from worker.registro import configurar_log
 
 log = logging.getLogger("worker")
 
 SAIDA_OK = 0
+SAIDA_FONTE = 1
+SAIDA_BANCO = 2
 
 
 def criar_fonte(nome: str, diretorio: str, repositorio: Optional[Repositorio] = None) -> FonteMensagens:
@@ -32,14 +42,42 @@ def executar_uma_vez(
     fabrica_fonte: Callable[[Repositorio], FonteMensagens],
     fabrica_pipeline: Callable[[Repositorio], Pipeline] = Pipeline,
 ) -> int:
-    conexao = conectar(database_url)
+    """Um ciclo completo, com trava e tratamento das falhas da US-01."""
+    try:
+        conexao = conectar(database_url)
+    except BancoIndisponivel as erro:
+        log.error("banco indisponível, encerrando sem consumir mensagens: %s", erro)
+        return SAIDA_BANCO
+
     try:
         repo = Repositorio(conexao)
-        resumo = fabrica_pipeline(repo).executar_ciclo(fabrica_fonte(repo))
+        if not repo.tentar_trava():
+            log.info("outra execução do worker está em andamento; encerrando")
+            return SAIDA_OK
+        try:
+            pipeline = fabrica_pipeline(repo)
+            resumo = pipeline.executar_ciclo(fabrica_fonte(repo))
+        except CredencialInvalida as erro:
+            log.error("credencial da fonte expirada ou revogada; nada foi marcado: %s", erro)
+            return SAIDA_FONTE
+        except FonteIndisponivel as erro:
+            log.error("fonte indisponível; o próximo ciclo tenta de novo: %s", erro)
+            return SAIDA_FONTE
+        finally:
+            try:
+                repo.liberar_trava()
+            except psycopg.Error:
+                pass  # a trava cai junto com a sessão
         log.info("ciclo concluído: %s", resumo)
         return SAIDA_OK
+    except psycopg.OperationalError as erro:
+        log.error("banco caiu durante o ciclo; o que não terminou continua pendente (%s)", type(erro).__name__)
+        return SAIDA_BANCO
     finally:
-        conexao.close()
+        try:
+            conexao.close()
+        except psycopg.Error:
+            pass
 
 
 def analisar_argumentos(argv: Optional[List[str]], config: Config) -> argparse.Namespace:
@@ -52,7 +90,7 @@ def analisar_argumentos(argv: Optional[List[str]], config: Config) -> argparse.N
 
 def main(argv: Optional[List[str]] = None) -> int:
     carregar_dotenv()
-    logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s: %(message)s")
+    configurar_log()
     config = Config.do_ambiente()
     args = analisar_argumentos(argv, config)
 

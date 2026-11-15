@@ -7,6 +7,7 @@ Regras que este módulo materializa:
 - `mensagem_bruta` é append-only: só INSERT, com `ON CONFLICT DO NOTHING` pelo `mensagem_id`.
 - O estado "já processei" é a tabela `processamento` (chave: `Message-ID`). Reprocessar é apagar a
   linha dela, e é a única tabela em que DELETE é permitido. O worker nunca apaga nada.
+- A trava de execução concorrente é um advisory lock de sessão com chave fixa.
 """
 import json
 from dataclasses import dataclass, field
@@ -18,6 +19,9 @@ import psycopg
 from psycopg.rows import dict_row
 
 from worker.fonte import MensagemFonte
+
+# Chave fixa do pg_try_advisory_lock. Qualquer número serve, desde que só o worker o use.
+CHAVE_TRAVA_WORKER = 50_2026_01
 
 # Vocabulário de processamento.status (shared/AGENTS.md).
 STATUS_PROCESSAMENTO = {"item", "evento", "quarentena", "ligada", "ignorada"}
@@ -94,6 +98,20 @@ class Repositorio:
 
     def __init__(self, conexao: psycopg.Connection):
         self.conexao = conexao
+
+    # ------------------------------------------------------------------ trava
+    def tentar_trava(self) -> bool:
+        """Tenta pegar a trava do worker. Fora de transação, para valer pela sessão inteira."""
+        with self.conexao.cursor() as cur:
+            cur.execute("SELECT pg_try_advisory_lock(%s)", (CHAVE_TRAVA_WORKER,))
+            obtida = bool(cur.fetchone()[0])
+        self.conexao.commit()
+        return obtida
+
+    def liberar_trava(self) -> None:
+        with self.conexao.cursor() as cur:
+            cur.execute("SELECT pg_advisory_unlock(%s)", (CHAVE_TRAVA_WORKER,))
+        self.conexao.commit()
 
     # ------------------------------------------------------------------ mensagem_bruta
     def gravar_mensagem_bruta(self, msg: MensagemFonte) -> bool:
