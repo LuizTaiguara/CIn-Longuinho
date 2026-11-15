@@ -101,16 +101,19 @@ def test_nenhuma_rota_expoe_o_endereco_de_quem_anunciou(entrar, cenario, caplog,
         _conferir_sem_endereco(registro.getMessage(), f"log {registro.name}")
 
 
-def test_roteiro_cobre_todas_as_rotas_da_api(cliente, cenario):
+def test_roteiro_cobre_todas_as_rotas_da_api(cenario):
     from fastapi.routing import APIRoute
 
-    prefixo = cliente.app.state.config.api_prefix
+    from api.main import ROTEADORES
+
     rotas_da_api = {
-        (metodo, rota.path.removeprefix(prefixo))
-        for rota in cliente.app.routes
+        (metodo, rota.path)
+        for roteador in ROTEADORES
+        for rota in roteador.routes
         if isinstance(rota, APIRoute)
         for metodo in rota.methods
     }
     cobertas = {(metodo, rota) for metodo, rota, _, _ in roteiro(cenario)}
 
+    assert len(rotas_da_api) >= 3
     assert rotas_da_api <= cobertas, f"rotas sem roteiro de privacidade: {sorted(rotas_da_api - cobertas)}"

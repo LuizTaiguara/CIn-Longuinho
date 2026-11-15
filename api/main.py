@@ -20,6 +20,9 @@ from api.rotas import itens, locais
 
 log_acesso = logging.getLogger("api.acesso")
 
+# Todos os roteadores montados sob API_PREFIX. O teste de privacidade percorre esta lista.
+ROTEADORES = (itens.roteador, locais.roteador)
+
 
 def criar_app(config: modulo_config.Config | None = None) -> FastAPI:
     privacidade.instalar_mascara_de_logs()
@@ -57,8 +60,8 @@ def criar_app(config: modulo_config.Config | None = None) -> FastAPI:
         return resposta
 
     api = APIRouter(prefix=config.api_prefix)
-    api.include_router(itens.roteador)
-    api.include_router(locais.roteador)
+    for roteador in ROTEADORES:
+        api.include_router(roteador)
     app.include_router(api)
     return app
 
