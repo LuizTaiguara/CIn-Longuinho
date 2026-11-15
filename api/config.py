@@ -75,6 +75,21 @@ def validar(config: Config) -> None:
             )
     if config.email_modo_envio not in ("nao_enviar", "arquivo", "smtp"):
         raise ConfiguracaoInvalida("EMAIL_MODO_ENVIO deve ser nao_enviar, arquivo ou smtp.")
+    if config.email_modo_envio == "smtp":
+        faltando = [
+            nome
+            for nome, valor in (
+                ("EMAIL_REMETENTE", config.email_remetente),
+                ("SMTP_HOST", config.smtp_host),
+                ("SMTP_USUARIO", config.smtp_usuario),
+                ("SMTP_SENHA", config.smtp_senha),
+            )
+            if not valor or valor.startswith("troque-por") or valor.endswith(".invalid")
+        ]
+        if faltando:
+            raise ConfiguracaoInvalida(
+                "EMAIL_MODO_ENVIO=smtp exige " + ", ".join(faltando) + " preenchidos de verdade."
+            )
 
 
 def _carregar_dotenv() -> None:

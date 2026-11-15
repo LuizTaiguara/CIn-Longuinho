@@ -79,6 +79,10 @@ def roteiro(c: dict) -> list[tuple[str, str, str, dict]]:
         ("GET", "/auth/google/callback", "/api/auth/google/callback?state=x&code=y", {}),
         ("GET", "/auth/google/callback", "/api/auth/google/callback?error=access_denied", {}),
         # Rotas que mudam dados vêm depois das leituras; o logout fica por último.
+        ("POST", "/itens/{id}/contato", f"/api/itens/{c['item']}/contato", {"json": {"mensagem": "Acho que essa garrafa é minha, posso buscar?"}}),
+        ("POST", "/itens/{id}/contato", f"/api/itens/{c['oculto']}/contato", {"json": {"mensagem": "Acho que essa garrafa é minha, posso buscar?"}}),
+        ("POST", "/itens/{id}/contato", f"/api/itens/{c['retida']}/contato", {"json": {"mensagem": "Acho que essa garrafa é minha, posso buscar?"}}),
+        ("POST", "/itens/{id}/contato", f"/api/itens/{c['item']}/contato", {"json": {"mensagem": "curta"}}),
         ("PATCH", "/itens/{id}", f"/api/itens/{c['item']}", {"json": {"descricao": "Garrafa azul de tampa preta"}}),
         ("PATCH", "/itens/{id}", f"/api/itens/{c['encerrado']}", {"json": {"autor_email": AUTORA}}),
         ("POST", "/eu/retidas/{id}/classificar", f"/api/eu/retidas/{c['retida']}/classificar", {"json": {"tipo": "perdido"}}),
