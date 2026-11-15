@@ -93,6 +93,33 @@ def _cabecalhos_da_fonte(msg: MensagemFonte) -> Dict[str, Any]:
     }
 
 
+@dataclass
+class Item:
+    """Os campos de `item` que o worker lê para decidir transições."""
+
+    id: int
+    thread_id: Optional[str]
+    codigo: Optional[str]
+    tipo: str
+    descricao: Optional[str]
+    local: List[str]
+    situacao: str
+    localizacao: Optional[str]
+    setor: Optional[str]
+    autor_email: str
+    fonte_encerramento: Optional[str]
+    origem: str
+    revisar: bool
+    aviso_autor_enviado_em: Optional[datetime]
+
+
+_COLUNAS_ITEM = (
+    "id, thread_id, codigo, tipo::text AS tipo, descricao, local, situacao::text AS situacao, "
+    "localizacao::text AS localizacao, setor, autor_email, fonte_encerramento, origem, revisar, "
+    "aviso_autor_enviado_em"
+)
+
+
 class Repositorio:
     """Operações do worker sobre o banco. Recebe uma conexão já aberta."""
 
@@ -191,3 +218,117 @@ class Repositorio:
             cur.execute("SELECT status FROM processamento WHERE mensagem_id = %s", (mensagem_id,))
             linha = cur.fetchone()
         return linha[0] if linha else None
+
+
+    # ------------------------------------------------------------------ item, evento e quarentena
+    # Toda escrita abaixo entra na transação da mensagem (sem commit aqui).
+    def _item(self, onde: str, parametros: tuple) -> Optional[Item]:
+        with self.conexao.cursor(row_factory=dict_row) as cur:
+            cur.execute(f"SELECT {_COLUNAS_ITEM} FROM item WHERE {onde}", parametros)
+            linha = cur.fetchone()
+        if not linha:
+            return None
+        linha["local"] = list(linha["local"] or [])
+        return Item(**linha)
+
+    def item_da_thread(self, thread_id: str) -> Optional[Item]:
+        return self._item("thread_id = %s", (thread_id,))
+
+    def item_por_id(self, item_id: int) -> Optional[Item]:
+        return self._item("id = %s", (item_id,))
+
+    def criar_item(
+        self,
+        thread_id: str,
+        tipo: str,
+        descricao: str,
+        autor_email: str,
+        data_anuncio: Optional[datetime],
+        revisar: bool,
+        local: Optional[List[str]] = None,
+    ) -> int:
+        """Cria o item vindo da lista, sempre `aberto` e com `localizacao` NULL (invariante 3)."""
+        with self.conexao.cursor() as cur:
+            cur.execute(
+                """
+                INSERT INTO item (thread_id, tipo, descricao, local, autor_email, origem, revisar,
+                                  data_anuncio)
+                VALUES (%s, %s, %s, %s, %s, 'lista', %s, COALESCE(%s, NOW()))
+                RETURNING id
+                """,
+                (thread_id, tipo, descricao, local or [], autor_email, revisar, data_anuncio),
+            )
+            return cur.fetchone()[0]
+
+    def registrar_evento(
+        self,
+        item_id: int,
+        tipo_evento: str,
+        fonte: str,
+        aplicado: bool,
+        situacao_anterior: Optional[str] = None,
+        situacao_nova: Optional[str] = None,
+        motivo_recusa: Optional[str] = None,
+        detalhes: Optional[dict] = None,
+    ) -> int:
+        with self.conexao.cursor() as cur:
+            cur.execute(
+                """
+                INSERT INTO evento (item_id, tipo_evento, situacao_anterior, situacao_nova, fonte,
+                                    aplicado, motivo_recusa, detalhes)
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+                RETURNING id
+                """,
+                (
+                    item_id,
+                    tipo_evento,
+                    situacao_anterior,
+                    situacao_nova,
+                    fonte,
+                    aplicado,
+                    motivo_recusa,
+                    json.dumps(detalhes, ensure_ascii=False) if detalhes is not None else None,
+                ),
+            )
+            return cur.fetchone()[0]
+
+    def mudar_situacao(
+        self, item_id: int, nova: str, fonte_encerramento: Optional[str] = None, revisar: Optional[bool] = None
+    ) -> None:
+        """Aplica uma transição já validada pelo chamador. O trigger do banco é só rede de segurança."""
+        with self.conexao.cursor() as cur:
+            cur.execute(
+                """
+                UPDATE item
+                SET situacao = %s,
+                    fonte_encerramento = COALESCE(%s, fonte_encerramento),
+                    revisar = COALESCE(%s, revisar),
+                    atualizado_em = NOW()
+                WHERE id = %s
+                """,
+                (nova, fonte_encerramento, revisar, item_id),
+            )
+
+    def reter(self, mensagem: "MensagemBruta", motivo: str, grau_confianca: Optional[float]) -> int:
+        with self.conexao.cursor() as cur:
+            cur.execute(
+                """
+                INSERT INTO quarentena (thread_id, mensagem_bruta_id, motivo_retencao, grau_confianca)
+                VALUES (%s, %s, %s, %s)
+                RETURNING id
+                """,
+                (mensagem.thread_id, mensagem.id, motivo, grau_confianca),
+            )
+            return cur.fetchone()[0]
+
+    def eventos_do_item(self, item_id: int) -> List[Dict[str, Any]]:
+        with self.conexao.cursor(row_factory=dict_row) as cur:
+            cur.execute(
+                """
+                SELECT tipo_evento, fonte, aplicado, situacao_anterior::text AS situacao_anterior,
+                       situacao_nova::text AS situacao_nova, motivo_recusa, detalhes
+                FROM evento WHERE item_id = %s ORDER BY id
+                """,
+                (item_id,),
+            )
+            return cur.fetchall()
