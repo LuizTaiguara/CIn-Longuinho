@@ -28,5 +28,22 @@ services:
       timeout: 3s
       retries: 10
 
+  # Worker de ingestão (SCRUM-50). Não sobe com `docker compose up`: roda um ciclo e sai.
+  #   docker compose run --rm worker
+  # Em produção, pelo cron: */5 * * * * cd /caminho && docker compose run --rm worker
+  worker:
+    build:
+      context: .
+      dockerfile: worker/Dockerfile
+    profiles: [worker]
+    env_file: .env
+    environment:
+      # Dentro da rede do compose, o banco atende pelo nome do serviço.
+      DATABASE_URL: postgresql://${POSTGRES_USER:-longuinho}:${POSTGRES_PASSWORD:-longuinho}@banco:5432/${POSTGRES_DB:-longuinho}
+    depends_on:
+      banco:
+        condition: service_healthy
+    command: ["python", "-m", "worker", "--uma-vez"]
+
 volumes:
   banco-dados:
