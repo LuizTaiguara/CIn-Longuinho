@@ -18,6 +18,7 @@ from typing import Callable, Dict, List, Optional
 
 from worker.banco import MensagemBruta, Repositorio
 from worker.classificador import Classificacao, classificar
+from worker.situacao import RespostaAnterior, decidir
 from worker.extrator import Extracao, ModeloIndisponivel, criar_modelo, extrair
 from worker.fonte import FonteMensagens
 from worker.texto import limpar_assunto, limpar_corpo
@@ -237,8 +238,53 @@ class Pipeline:
         return "item"
 
     def processar_resposta(self, mensagem: MensagemBruta, anuncio: Optional[MensagemBruta]) -> Optional[str]:
-        """Respostas ficam pendentes até a US-10 (situação na thread) ser implementada."""
-        return None
+        """US-10: a resposta pode reivindicar, encerrar ou corrigir o local do item da thread.
+
+        Sem item na thread (anúncio retido, ainda pendente ou thread sem anúncio da lista), a
+        resposta fica pendente: quando a API publicar a retida, o próximo ciclo a processa na ordem.
+        Cada resposta gera no máximo um evento; a que não diz nada só é marcada `evento`.
+        """
+        if anuncio is None:
+            return None
+        item = self.repo.item_da_thread(mensagem.thread_id)
+        if item is None:
+            return None
+
+        thread = self.repo.mensagens_da_thread(mensagem.thread_id)
+        respostas = [
+            RespostaAnterior(m.email_remetente, m.data_envio)
+            for m in thread
+            if m.veio_da_lista and m.mensagem_id != anuncio.mensagem_id
+            and (m.data_envio is None or mensagem.data_envio is None or m.data_envio <= mensagem.data_envio)
+        ]
+        decisao = decidir(
+            item_tipo=item.tipo,
+            item_situacao=item.situacao,
+            item_local=list(item.local or []),
+            item_localizacao=item.localizacao,
+            autor_email=item.autor_email,
+            remetente_email=mensagem.email_remetente,
+            texto_novo=limpar_corpo(mensagem.corpo, so_texto_novo=True),
+            respostas_ate_aqui=respostas,
+        )
+        if decisao is None:
+            return "evento"
+
+        if decisao.aplicado and decisao.situacao_nova and decisao.situacao_nova != item.situacao:
+            self.repo.mudar_situacao(
+                item.id, decisao.situacao_nova,
+                fonte_encerramento=decisao.fonte_encerramento, revisar=decisao.revisar,
+            )
+        if decisao.aplicado and decisao.campos:
+            self.repo.atualizar_campos(item.id, decisao.campos)
+        self.repo.registrar_evento(
+            item.id, decisao.tipo_evento, decisao.fonte, decisao.aplicado,
+            situacao_anterior=decisao.situacao_anterior,
+            situacao_nova=decisao.situacao_nova,
+            motivo_recusa=decisao.motivo_recusa,
+            detalhes={**decisao.detalhes, "mensagem_bruta_id": mensagem.id},
+        )
+        return "evento"
 
     # ------------------------------------------------------------------ ciclo
     def executar_ciclo(self, fonte: FonteMensagens) -> ResumoCiclo:
