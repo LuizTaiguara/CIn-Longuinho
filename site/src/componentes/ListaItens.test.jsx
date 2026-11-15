@@ -110,3 +110,27 @@ describe('paginação do catálogo (US-04)', () => {
     expect(screen.queryByRole('navigation', { name: 'Páginas do catálogo' })).toBeNull()
   })
 })
+
+describe('situação e há quanto tempo no catálogo (SCRUM-99, US-04)', () => {
+  beforeEach(() => vi.useFakeTimers({ toFake: ['Date'], now: new Date('2026-11-15T12:00:00Z') }))
+  afterEach(() => vi.useRealTimers())
+
+  it('item reivindicado há semanas aparece na busca, com o tempo visível', async () => {
+    irPara('/?texto=chaves')
+    simularApi({
+      itens: [{ ...ITEM, descricao: 'Molho de chaves', situacao: 'reivindicado', data_situacao: '2026-10-25T12:00:00Z' }],
+    })
+    render(<App />)
+    const cartao = (await screen.findByText('Molho de chaves')).closest('article')
+    expect(within(cartao).getByText('reivindicado há 3 semanas, retirada não confirmada')).toBeTruthy()
+  })
+
+  it('a data aparece como "há 3 dias", com a data completa no title', async () => {
+    simularApi({ itens: [{ ...ITEM, data_registro: '2026-11-12T14:32:00Z' }] })
+    render(<App />)
+    const cartao = (await screen.findByText('Garrafa térmica azul')).closest('article')
+    const tempo = cartao.querySelector('time')
+    expect(tempo.textContent).toBe('há 2 dias')
+    expect(tempo.getAttribute('title')).toBe('12 de novembro de 2026 às 11:32')
+  })
+})

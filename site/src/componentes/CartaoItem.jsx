@@ -2,6 +2,8 @@
 // A descrição é o link para a página do item.
 
 import { Link } from 'react-router-dom'
+import { textoDaSituacao } from '../situacao.js'
+import { dataCompleta, tempoRelativo } from '../tempoRelativo.js'
 
 const ROTULO_TIPO = { achado: 'Achado', perdido: 'Perdido' }
 
@@ -17,9 +19,16 @@ export default function CartaoItem({ item }) {
       <p className="detalhes">
         <span>{item.local.length ? item.local.join(', ') : 'Local não informado'}</span>
         {' · '}
-        <time dateTime={item.data_registro}>{new Date(item.data_registro).toLocaleDateString('pt-BR')}</time>
+        <time dateTime={item.data_registro} title={dataCompleta(item.data_registro)}>
+          {tempoRelativo(item.data_registro)}
+        </time>
       </p>
-      <p className="situacao">{item.situacao}</p>
+      <p className={`situacao situacao-${item.situacao}`}>
+        <span className="visualmente-oculto">Situação: </span>
+        <span title={item.data_situacao ? `Desde ${dataCompleta(item.data_situacao)}` : undefined}>
+          {textoDaSituacao(item)}
+        </span>
+      </p>
     </article>
   )
 }
