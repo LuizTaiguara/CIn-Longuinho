@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { FILTROS_VAZIOS, filtrosDaUrl, paramsDosFiltros, temFiltroAtivo } from './filtros.js'
+import { FILTROS_VAZIOS, filtrosDaUrl, paginaDaUrl, paramsDosFiltros, temFiltroAtivo } from './filtros.js'
 
 describe('filtrosDaUrl', () => {
   it('lê os filtros da query', () => {
@@ -37,5 +37,22 @@ describe('temFiltroAtivo', () => {
   it('é falso sem filtros e verdadeiro com qualquer um', () => {
     expect(temFiltroAtivo(FILTROS_VAZIOS)).toBe(false)
     expect(temFiltroAtivo({ ...FILTROS_VAZIOS, local: 'Grad 1' })).toBe(true)
+  })
+})
+
+describe('paginaDaUrl', () => {
+  it('lê a página da query', () => {
+    expect(paginaDaUrl('?texto=chave&pagina=3')).toBe(3)
+  })
+
+  it('sem página, inválida ou menor que 1 é a primeira', () => {
+    expect(paginaDaUrl('')).toBe(1)
+    expect(paginaDaUrl('?pagina=abc')).toBe(1)
+    expect(paginaDaUrl('?pagina=0')).toBe(1)
+    expect(paginaDaUrl('?pagina=-2')).toBe(1)
+  })
+
+  it('a página não entra nos filtros', () => {
+    expect(filtrosDaUrl('?pagina=2')).toEqual(FILTROS_VAZIOS)
   })
 })

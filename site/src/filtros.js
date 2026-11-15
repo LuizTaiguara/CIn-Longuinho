@@ -34,3 +34,9 @@ export function paramsDosFiltros(filtros) {
 export function temFiltroAtivo(filtros) {
   return CAMPOS.some((campo) => (filtros[campo] ?? '').trim() !== '')
 }
+
+// Página do catálogo na URL (?pagina=2). Ausente, inválida ou menor que 1 vira 1.
+export function paginaDaUrl(search) {
+  const pagina = Number.parseInt(new URLSearchParams(search).get('pagina') ?? '', 10)
+  return Number.isInteger(pagina) && pagina > 1 ? pagina : 1
+}

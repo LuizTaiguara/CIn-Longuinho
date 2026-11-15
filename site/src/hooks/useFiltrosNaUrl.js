@@ -1,22 +1,25 @@
-import { useCallback, useEffect, useState } from 'react'
-import { filtrosDaUrl, paramsDosFiltros } from '../filtros.js'
+import { useCallback, useMemo } from 'react'
+import { useSearchParams } from 'react-router-dom'
+import { filtrosDaUrl, paginaDaUrl, paramsDosFiltros } from '../filtros.js'
 
-// Mantém os filtros na URL: dá para compartilhar uma busca, e o "voltar" do navegador desfaz o filtro.
+// Mantém filtros e página na URL: dá para compartilhar uma busca, e o "voltar" do navegador desfaz
+// o filtro ou a troca de página. Mudar um filtro volta para a primeira página.
 export function useFiltrosNaUrl() {
-  const [filtros, setFiltros] = useState(() => filtrosDaUrl(window.location.search))
+  const [params, setParams] = useSearchParams()
+  const busca = params.toString()
+  const filtros = useMemo(() => filtrosDaUrl(busca), [busca])
+  const pagina = paginaDaUrl(busca)
 
-  useEffect(() => {
-    const aoVoltar = () => setFiltros(filtrosDaUrl(window.location.search))
-    window.addEventListener('popstate', aoVoltar)
-    return () => window.removeEventListener('popstate', aoVoltar)
-  }, [])
+  const mudarFiltros = useCallback((novos) => setParams(paramsDosFiltros(novos)), [setParams])
 
-  const mudarFiltros = useCallback((novos) => {
-    const query = paramsDosFiltros(novos).toString()
-    const url = `${window.location.pathname}${query ? `?${query}` : ''}`
-    window.history.pushState(null, '', url)
-    setFiltros(filtrosDaUrl(query))
-  }, [])
+  const mudarPagina = useCallback(
+    (novaPagina) => {
+      const novos = paramsDosFiltros(filtros)
+      if (novaPagina > 1) novos.set('pagina', String(novaPagina))
+      setParams(novos)
+    },
+    [filtros, setParams],
+  )
 
-  return [filtros, mudarFiltros]
+  return { filtros, pagina, mudarFiltros, mudarPagina }
 }
