@@ -1,8 +1,9 @@
 -- Testes de validação para as invariantes de append-only e transição de status
 -- Task: SCRUM-71 (subtarefa da SCRUM-45)
 --
--- Pode ser executado com psql ou dentro de uma transação com ROLLBACK:
--- psql "$DATABASE_URL" -f shared/testes/test_regras_banco.sql
+-- Roda dentro de uma transação e termina em ROLLBACK, sem deixar lixo:
+-- psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f shared/testes/test_regras_banco.sql
+-- Qualquer FALHA aborta o psql com erro; só NOTICEs de SUCESSO significam que passou.
 
 BEGIN;
 
@@ -58,12 +59,79 @@ BEGIN
 END;
 $$;
 
--- 4. Validar transições permitidas e proibidas de 'situacao'
+-- 3b. Validar bloqueio de UPDATE nas tabelas append-only (e liberação na quarentena)
 DO $$
 BEGIN
+    BEGIN
+        UPDATE mensagem_bruta SET corpo = 'alterado' WHERE id = 999901;
+        RAISE EXCEPTION 'FALHA: UPDATE em "mensagem_bruta" deveria ter sido bloqueado!';
+    EXCEPTION WHEN check_violation THEN
+        RAISE NOTICE 'SUCESSO: UPDATE em "mensagem_bruta" bloqueado conforme esperado.';
+    END;
+
+    BEGIN
+        UPDATE evento SET fonte = 'alterada' WHERE id = 999901;
+        RAISE EXCEPTION 'FALHA: UPDATE em "evento" deveria ter sido bloqueado!';
+    EXCEPTION WHEN check_violation THEN
+        RAISE NOTICE 'SUCESSO: UPDATE em "evento" bloqueado conforme esperado.';
+    END;
+
+    -- Permitido: a quarentena muda quando o autor classifica a retida
+    UPDATE quarentena SET resolvida = TRUE WHERE id = 999901;
+    RAISE NOTICE 'SUCESSO: UPDATE em "quarentena" (resolvida) autorizado.';
+END;
+$$;
+
+-- 3c. Validar que ocultar é irreversível
+DO $$
+BEGIN
+    UPDATE item SET oculto = TRUE WHERE id = 999901;
+    RAISE NOTICE 'SUCESSO: ocultar o item autorizado.';
+
+    BEGIN
+        UPDATE item SET oculto = FALSE WHERE id = 999901;
+        RAISE EXCEPTION 'FALHA: reexibir o item (oculto TRUE -> FALSE) deveria ter sido bloqueado!';
+    EXCEPTION WHEN check_violation THEN
+        RAISE NOTICE 'SUCESSO: reexibir o item bloqueado conforme esperado.';
+    END;
+END;
+$$;
+
+-- 3d. Validar o vocabulário de fonte_encerramento
+DO $$
+BEGIN
+    BEGIN
+        UPDATE item SET fonte_encerramento = 'palpite' WHERE id = 999901;
+        RAISE EXCEPTION 'FALHA: fonte_encerramento fora do vocabulário deveria ter sido bloqueada!';
+    EXCEPTION WHEN check_violation THEN
+        RAISE NOTICE 'SUCESSO: fonte_encerramento fora do vocabulário bloqueada conforme esperado.';
+    END;
+
+    UPDATE item SET fonte_encerramento = 'terceiro' WHERE id = 999901;
+    RAISE NOTICE 'SUCESSO: fonte_encerramento "terceiro" aceita.';
+    UPDATE item SET fonte_encerramento = NULL WHERE id = 999901;
+END;
+$$;
+
+-- 4. Validar transições permitidas e proibidas de 'situacao', e o data_situacao
+DO $$
+DECLARE
+    antes TIMESTAMPTZ;
+    depois TIMESTAMPTZ;
+BEGIN
+    -- data_situacao de teste no passado, para ver a troca
+    UPDATE item SET data_situacao = NOW() - INTERVAL '1 day' WHERE id = 999901;
+    SELECT data_situacao INTO antes FROM item WHERE id = 999901;
+
     -- Permitido: aberto -> reivindicado
     UPDATE item SET situacao = 'reivindicado' WHERE id = 999901;
     RAISE NOTICE 'SUCESSO: Transição aberto -> reivindicado autorizada.';
+
+    SELECT data_situacao INTO depois FROM item WHERE id = 999901;
+    IF depois <= antes THEN
+        RAISE EXCEPTION 'FALHA: data_situacao deveria ter avançado na transição!';
+    END IF;
+    RAISE NOTICE 'SUCESSO: data_situacao atualizada na transição.';
 
     -- Proibido: reivindicado -> aberto (retrocesso)
     BEGIN

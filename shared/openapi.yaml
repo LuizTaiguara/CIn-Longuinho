@@ -8,14 +8,34 @@ info:
     ### Invariantes e Regras de Negócio
     1. **Privacidade Absoluta:** O endereço de e-mail de quem anunciou nunca aparece em nenhuma resposta da API, nem em rotas autenticadas como `GET /eu` ou `GET /eu/itens` (Invariante 1).
     2. **Visibilidade no Servidor:** As rotas públicas `GET /itens` e `GET /itens/{id}` nunca retornam itens retidos em quarentena ou ocultados (Invariante 5). Item retido ou ocultado consultado em `GET /itens/{id}` retorna `404 Not Found` para não revelar sua existência.
-    3. **Exceção Única de Visibilidade:** A rota `GET /eu/itens` devolve ao autor autenticado as mensagens retidas que abriram uma thread dele, marcadas como fora do catálogo (`fora_do_catalogo: true`) e com `motivo_retencao`, para permitir sua classificação pelo autor (US-15, decisão de 14/10/2026).
+    3. **Duas Exceções de Visibilidade, ambas só em `GET /eu/itens` e só para o próprio autor:** (a) a mensagem retida que abriu uma thread dele aparece marcada como fora do catálogo (`fora_do_catalogo: true`) e com `motivo_retencao`, para ele dizer se é perda ou achado (US-15, decisão do PO em 14/10/2026); (b) o item que ele ocultou aparece com `oculto: true`, e a ocultação não pode ser desfeita (decisão do PO em 28/10/2026, registrada como exceção em 13/11/2026). Ninguém mais vê esses registros.
     4. **Imutabilidade e Não-Exclusão:** Nenhum registro é deletado. Não existem endpoints com método HTTP `DELETE` (Invariante 4). A remoção pelo autor é feita via `POST /itens/{id}/ocultar`.
     5. **Evolução de Situação:** A situação de um item transiciona de `aberto` para `reivindicado` ou diretamente para `encerrado` (desfecho confirmado pelo autor via `POST /itens/{id}/encerrar`). Nunca retrocede.
     6. **Autenticação Institucional:** Delegada ao Google OAuth 2.0 restrita a contas do domínio `@cin.ufpe.br` (ADR-010 e ADR-011). O app OAuth é configurado como Externo com escopos estritamente de identidade (`openid profile`), e a validação do domínio institucional é obrigatoriamente efetuada no servidor (o parâmetro `hd` do Google serve apenas como sugestão de interface).
 
+    ### Códigos de erro (`Erro.codigo`)
+    | Código | HTTP | Quando |
+    |---|---|---|
+    | `PARAMETROS_INVALIDOS` | 400 | Query ou corpo fora do contrato |
+    | `LOCALIZACAO_OBRIGATORIA` | 400 | Achado cadastrado sem `localizacao` |
+    | `FOTO_INVALIDA` | 400 | Formato de foto não aceito (aceitos: JPEG, PNG, WebP) |
+    | `NAO_AUTENTICADO` | 401 | Rota exige sessão do CIn |
+    | `NAO_AUTORIZADO` | 403 | Sessão válida, mas a conta não é a autora do item |
+    | `NAO_ENCONTRADO` | 404 | Item inexistente, oculto ou retido (não se distingue) |
+    | `JA_CLASSIFICADA` | 409 | Retida já virou item |
+    | `FOTO_GRANDE` | 413 | Foto acima do limite (5 MB) |
+    | `ENVIO_FALHOU` | 502 | O e-mail de contato não pôde ser enviado |
+    | `INDISPONIVEL` | 503 | Banco fora do ar |
+
+servers:
+  - url: /api
+    description: Todas as rotas ficam sob o prefixo /api (decisão do PO em 13/11/2026).
+
 tags:
   - name: Itens
     description: Consulta pública e cadastro de itens do catálogo
+  - name: Locais
+    description: Vocabulário fechado dos espaços do CIn (F-07, SCRUM-64)
   - name: Ações do Autor
     description: Operações restritas ao autor do item (correção, encerramento e ocultação)
   - name: Área do Autor
@@ -33,6 +53,7 @@ paths:
         Retorna a listagem pública paginada de itens publicados no catálogo, mais recente primeiro.
         Itens em quarentena, retidos ou ocultados **nunca** aparecem nesta listagem (Invariante 5).
       operationId: listarItens
+      security: []
       parameters:
         - name: texto
           in: query
@@ -113,7 +134,10 @@ paths:
               schema:
                 $ref: '#/components/schemas/ItemDetalhe'
         '400':
-          description: Dados de entrada inválidos.
+          description: >
+            Dados de entrada inválidos. Um achado sem `localizacao` devolve o código
+            `LOCALIZACAO_OBRIGATORIA`, e o front mostra a mensagem no campo certo
+            (decisão do PO em 13/11/2026).
           content:
             application/json:
               schema:
@@ -124,6 +148,28 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Erro'
+
+  /locais:
+    get:
+      tags:
+        - Locais
+      summary: Listar os locais do CIn
+      description: |
+        Devolve o vocabulário fechado de locais (F-07, SCRUM-64), só os ativos, para o filtro
+        de local do catálogo (US-04) e a lista do formulário de cadastro (US-06).
+        O `nome` devolvido aqui é o valor aceito pelo parâmetro `local` de `GET /itens`.
+        É a tabela `local` sem `id`, `ponto_custodia`, `ativo` e `criado_em`.
+      operationId: listarLocais
+      security: []
+      responses:
+        '200':
+          description: Lista de locais ativos.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Local'
 
   /itens/{id}:
     get:
@@ -311,6 +357,174 @@ paths:
               schema:
                 $ref: '#/components/schemas/Erro'
 
+  /itens/{id}/email-pronto:
+    get:
+      tags:
+        - Ações do Autor
+      summary: Texto do e-mail pronto para a lista (US-07)
+      description: |
+        Devolve ao autor o e-mail pronto para `achados-perdidos@cin.ufpe.br`, com assunto padronizado
+        e corpo com descrição, local, onde o objeto está (no achado), o link do item e o código (ADR-011).
+        O site abre esse texto no programa de e-mail (ou na tela de escrever do Gmail) e a pessoa envia
+        da própria conta. O sistema nunca posta na lista.
+        Só existe para item com `origem: site`; nos demais devolve 404.
+      operationId: obterEmailPronto
+      security:
+        - cookieAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: E-mail pronto.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EmailPronto'
+        '401':
+          description: Não autenticado.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Erro'
+        '403':
+          description: A conta autenticada não é a autora do item.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Erro'
+        '404':
+          description: Item não encontrado, não acessível ou sem origem no site.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Erro'
+
+  /itens/{id}/foto:
+    post:
+      tags:
+        - Ações do Autor
+      summary: Anexar a foto do item (US-06)
+      description: |
+        Recebe a foto por `multipart/form-data` (campo `foto`), guarda no servidor e preenche `foto_url`.
+        Aceita JPEG, PNG e WebP até 5 MB. Uma foto por item: enviar outra substitui a URL, e o arquivo
+        anterior é mantido (nada é apagado). Só o autor pode enviar.
+      operationId: enviarFoto
+      security:
+        - cookieAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required:
+                - foto
+              properties:
+                foto:
+                  type: string
+                  format: binary
+      responses:
+        '200':
+          description: Foto guardada; `foto_url` preenchida.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ItemDetalhe'
+        '400':
+          description: Formato não aceito (`FOTO_INVALIDA`).
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Erro'
+        '401':
+          description: Não autenticado.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Erro'
+        '403':
+          description: A conta autenticada não é a autora do item.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Erro'
+        '404':
+          description: Item não encontrado ou não acessível.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Erro'
+        '413':
+          description: Foto acima do limite (`FOTO_GRANDE`).
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Erro'
+
+  /itens/{id}/contato:
+    post:
+      tags:
+        - Itens
+      summary: Falar com quem anunciou, sem ver o endereço (US-05)
+      description: |
+        Encaminha uma mensagem ao autor do item por e-mail privado enviado pela conta do projeto
+        (ADR-011). Quem escreve precisa estar com a sessão do CIn: o endereço da sessão vai como
+        `Reply-To`, para o autor poder responder, e a exigência de sessão é o freio contra spam.
+        O endereço do autor nunca aparece na resposta. A API registra um evento `contato` no item,
+        sem guardar nenhum endereço no evento.
+      operationId: contatarAutor
+      security:
+        - cookieAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ContatoRequisicao'
+      responses:
+        '202':
+          description: Mensagem aceita e encaminhada.
+        '400':
+          description: Mensagem vazia ou acima do limite.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Erro'
+        '401':
+          description: Não autenticado. O contato exige entrar com a conta do CIn.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Erro'
+        '404':
+          description: Item não encontrado ou não acessível.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Erro'
+        '502':
+          description: Não foi possível enviar (`ENVIO_FALHOU`). Sugerir tentar mais tarde.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Erro'
+
   /eu:
     get:
       tags:
@@ -431,6 +645,7 @@ paths:
         Inicia o fluxo OAuth 2.0 de autenticação.
         Redireciona diretamente (HTTP 302) para o consentimento do Google OAuth 2.0.
       operationId: iniciarLoginGoogle
+      security: []
       parameters:
         - name: retorno
           in: query
@@ -439,6 +654,9 @@ paths:
             Caminho relativo para onde o servidor deve redirecionar após login bem-sucedido.
             O servidor valida que o valor é um caminho relativo da própria aplicação antes
             de redirecionar, prevenindo redirecionamento aberto (open redirect).
+            Valor inválido (URL absoluta, outro domínio, começando com `//`) é ignorado
+            sem erro: o login segue normalmente e termina na página inicial
+            (decisão do PO em 13/11/2026).
           schema:
             type: string
       responses:
@@ -464,6 +682,7 @@ paths:
         - **Caso de Sucesso:** Se a conta confirmada pelo Google pertencer ao domínio `@cin.ufpe.br`, o servidor cria a sessão, define o cookie HTTP-only `sessao_id` e emite redirecionamento `302` para o frontend. Quando há um caminho `retorno` válido guardado no fluxo, o servidor redireciona o usuário para esse caminho após o login bem-sucedido.
         - **Caso de Erro ou Conta Externa:** Se a conta for de fora do domínio `@cin.ufpe.br`, se o acesso for negado pelo usuário ou se o `state` for inválido, o servidor emite redirecionamento `302` para a aplicação frontend acompanhado de um parâmetro de erro na URL (ex.: `/login?erro=conta_fora_do_cin`), **sem retornar JSON 403**.
       operationId: retornoLoginGoogle
+      security: []
       parameters:
         - name: code
           in: query
@@ -575,7 +794,14 @@ components:
         - descricao
         - local
         - situacao
+        - localizacao
+        - setor
+        - foto_url
         - data_registro
+        - data_atualizacao
+        - fonte_encerramento
+        - data_situacao
+        - revisar
       properties:
         id:
           type: string
@@ -583,6 +809,12 @@ components:
           example: "item_98234a"
         tipo:
           $ref: '#/components/schemas/TipoItem'
+        revisar:
+          type: boolean
+          description: >
+            `true` quando o classificador publicou com confiança média (ADR-004): o catálogo
+            mostra o selo "revisar". Nunca retém por extração fraca.
+          example: false
         descricao:
           type: string
           description: Descrição resumida do objeto.
@@ -603,15 +835,18 @@ components:
             Localização atual declarada do objeto. Na perda (`tipo: perdido`), não é enviada e fica `null`.
             No achado (`tipo: achado`), é obrigatória (validação no servidor).
         setor:
-          type: string
+          type:
+            - string
+            - "null"
           description: >
-            Nome do setor em texto livre. Só vale quando `localizacao` é `com um setor`;
-            nos demais casos não é enviado.
+            Nome do setor em texto livre. Vem sempre: preenchido quando `localizacao` é
+            `com um setor`, `null` nos demais casos (decisão do PO em 13/11/2026).
         foto_url:
           type:
             - string
             - "null"
           description: URL da foto anexada, caso exista; caso contrário, `null`.
+          example: "https://example.com/fotos/item_98234a.jpg"
         data_registro:
           type: string
           format: date-time
@@ -640,8 +875,16 @@ components:
         - descricao
         - local
         - situacao
+        - localizacao
+        - setor
+        - foto_url
         - data_registro
+        - data_atualizacao
+        - fonte_encerramento
+        - data_situacao
         - pode_gerir
+        - texto_original
+        - revisar
       properties:
         id:
           type: string
@@ -649,6 +892,10 @@ components:
           example: "item_98234a"
         tipo:
           $ref: '#/components/schemas/TipoItem'
+        revisar:
+          type: boolean
+          description: Ver `ItemResumo.revisar`.
+          example: false
         descricao:
           type: string
           description: Descrição detalhada do objeto.
@@ -669,16 +916,18 @@ components:
             Localização atual declarada do objeto. Na perda (`tipo: perdido`), não é enviada e fica `null`.
             No achado (`tipo: achado`), é obrigatória (validação no servidor).
         setor:
-          type: string
+          type:
+            - string
+            - "null"
           description: >
-            Nome do setor em texto livre. Só vale quando `localizacao` é `com um setor`;
-            nos demais casos não é enviado.
+            Nome do setor em texto livre. Vem sempre: preenchido quando `localizacao` é
+            `com um setor`, `null` nos demais casos (decisão do PO em 13/11/2026).
         foto_url:
           type:
             - string
             - "null"
           description: URL da foto anexada, caso exista; caso contrário, `null`.
-          example: null
+          example: "https://example.com/fotos/item_98234a.jpg"
         data_registro:
           type: string
           format: date-time
@@ -722,13 +971,56 @@ components:
         - local
         - situacao
         - localizacao
-        - data_registro
+        - setor
         - fora_do_catalogo
+        - motivo_retencao
+        - oculto
+        - data_registro
+        - data_situacao
+        - fonte_encerramento
+        - revisar
+        - origem
+        - codigo
+        - foi_para_a_lista
+        - foto_url
       properties:
         id:
           type: string
           description: Identificador do item ou da mensagem retida.
           example: "item_98234a"
+        revisar:
+          type: boolean
+          description: Ver `ItemResumo.revisar`. `false` na mensagem retida.
+          example: false
+        origem:
+          type: string
+          enum:
+            - lista
+            - site
+          description: "De onde veio o anúncio: do e-mail na lista ou do formulário do site (US-06)."
+          example: "lista"
+        codigo:
+          type:
+            - string
+            - "null"
+          description: >
+            Código do item cadastrado pelo site, no formato `AP-XXXXXX` (6 caracteres de A-Z e 2-7).
+            Vai no assunto do e-mail pronto (US-07) para o worker ligar a thread ao item. `null` quando
+            `origem` é `lista`.
+          example: null
+        foi_para_a_lista:
+          type: boolean
+          description: >
+            `false` só quando `origem` é `site` e o worker ainda não leu na lista o e-mail com o
+            código (US-07). O site mostra "ainda não foi para a lista" e o botão para abrir o e-mail
+            de novo. Sempre `true` quando `origem` é `lista`.
+          example: true
+        foto_url:
+          type:
+            - string
+            - "null"
+          description: URL da foto, se houver.
+          example: null
         tipo:
           oneOf:
             - $ref: '#/components/schemas/TipoItem'
@@ -758,15 +1050,18 @@ components:
           description: Localização atual declarada do objeto.
           example: "com quem achou"
         setor:
-          type: string
+          type:
+            - string
+            - "null"
           description: >
-            Nome do setor em texto livre. Só vale quando `localizacao` é `com um setor`;
-            nos demais casos não é enviado.
+            Nome do setor em texto livre. Vem sempre: preenchido quando `localizacao` é
+            `com um setor`, `null` nos demais casos (decisão do PO em 13/11/2026).
         fora_do_catalogo:
           type: boolean
           description: |
-            Indica se o registro está retido fora do catálogo público.
-            Conforme exceção à Invariante 5, mensagens retidas em quarentena do próprio autor aparecem nesta listagem com este campo como `true`.
+            Indica se o registro é uma mensagem retida que espera a classificação do autor.
+            Conforme a primeira exceção à Invariante 5, mensagens retidas em quarentena do próprio autor aparecem nesta listagem com este campo como `true`.
+            No item oculto pelo autor vem `false`: ele se distingue por `oculto: true` (decisão do PO em 13/11/2026).
           example: false
         motivo_retencao:
           type:
@@ -784,6 +1079,15 @@ components:
           format: date-time
           description: Data do recebimento ou cadastro.
           example: "2026-10-18T10:15:00Z"
+        data_situacao:
+          type:
+            - string
+            - "null"
+          format: date-time
+          description: Momento da última transição de situação. `null` na mensagem retida.
+          example: "2026-10-18T10:15:00Z"
+        fonte_encerramento:
+          $ref: '#/components/schemas/FonteEncerramento'
 
     NovoItemRequisicao:
       type: object
@@ -819,12 +1123,6 @@ components:
           description: >
             Nome do setor em texto livre. Só vale quando `localizacao` é `com um setor`;
             nos demais casos não é enviado.
-        foto_url:
-          type:
-            - string
-            - "null"
-          description: URL da foto hospedada, se houver.
-          example: null
 
     AtualizarItemRequisicao:
       type: object
@@ -848,6 +1146,37 @@ components:
             Nome do setor em texto livre. Só vale quando `localizacao` é `com um setor`;
             nos demais casos não é enviado. Se a localização mudar para outro valor,
             o servidor descarta o setor anterior.
+
+    EmailPronto:
+      type: object
+      description: E-mail pronto para a lista (US-07). A pessoa envia da própria conta.
+      required:
+        - para
+        - assunto
+        - corpo
+      properties:
+        para:
+          type: string
+          example: "achados-perdidos@cin.ufpe.br"
+        assunto:
+          type: string
+          description: Padronizado, com o código entre colchetes.
+          example: "[AP-K7F3Q2] Achado: garrafa térmica azul no Grad 5"
+        corpo:
+          type: string
+          description: Texto simples, com descrição, local, onde está (no achado), link e código.
+
+    ContatoRequisicao:
+      type: object
+      description: "Mensagem para quem anunciou (US-05). Sem campo de e-mail: o da sessão é usado."
+      required:
+        - mensagem
+      properties:
+        mensagem:
+          type: string
+          minLength: 10
+          maxLength: 2000
+          example: "Oi! Acho que essa garrafa é minha, tem um adesivo do CIn na tampa. Posso buscar amanhã?"
 
     ClassificarRetidaRequisicao:
       type: object
@@ -873,6 +1202,24 @@ components:
           type: string
           description: Nome do usuário recuperado do perfil Google Workspace.
           example: "Luiz Miguel"
+
+    Local:
+      type: object
+      description: Um espaço do CIn do vocabulário fechado (F-07). Sem id nem metadados.
+      required:
+        - nome
+        - bloco
+      properties:
+        nome:
+          type: string
+          description: Nome oficial do local, igual ao aceito pelo filtro `local` de `GET /itens`.
+          example: "Grad 5"
+        bloco:
+          type:
+            - string
+            - "null"
+          description: Bloco pelo nome de uso da comunidade, ou `null` quando não se sabe.
+          example: "Vermelho"
 
     Paginacao:
       type: object

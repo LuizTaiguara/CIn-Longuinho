@@ -50,8 +50,11 @@ class TestLeitorArquivoLocal(unittest.TestCase):
         self.assertEqual(msg.anexos[0].nome_arquivo, "1000060457.jpg")
         self.assertEqual(msg.anexos[0].tipo_mime, "image/jpeg")
 
-    def test_caso20_encaminhado_de_outra_lista_extrai_autor_original(self):
-        """Valida o caso 20 (ADR-011): mensagem encaminhada preserva o autor original do anúncio."""
+    def test_caso20_encaminhado_de_outra_lista_mantem_o_from_e_cita_o_do_corpo(self):
+        """Valida o caso 20 (ADR-011): o From continua sendo o remetente, e o do corpo vai à parte.
+
+        O corpo de um encaminhamento não é autenticado, então ele nunca decide a autoria.
+        """
         caminho_caso = self.diretorio_corpus / "20-encaminhado-de-outra-lista"
         leitor = LeitorArquivoLocal(caminho_caso)
         mensagens = list(leitor.obter_mensagens())
@@ -61,8 +64,14 @@ class TestLeitorArquivoLocal(unittest.TestCase):
         # Na mensagem 02 (encaminhada com Fwd:)
         msg_encaminhada = mensagens[1]
         self.assertIn("Fwd:", msg_encaminhada.assunto)
+        # O remetente é o cabeçalho From, e só ele
         self.assertIn("Patrícia Helena Duarte Nogueira", msg_encaminhada.remetente)
         self.assertIn("fic.patricia.nogueira@cin.ufpe.br", msg_encaminhada.remetente)
+        self.assertNotIn("Mensaje reenviado", msg_encaminhada.remetente)
+        # O "De:" do corpo encaminhado fica à parte, só para informação
+        self.assertIn("fic.patricia.nogueira@cin.ufpe.br", msg_encaminhada.remetente_citado)
+        # Mensagem sem encaminhamento no corpo não tem remetente citado
+        self.assertIsNone(mensagens[0].remetente_citado)
         self.assertEqual(msg_encaminhada.id_conversa, "1a08d70135f437bb")
         self.assertEqual(msg_encaminhada.em_resposta_a, "<caso20.m01@corpus.achados.invalid>")
 

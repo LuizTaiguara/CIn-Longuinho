@@ -104,19 +104,17 @@ def _extrair_corpo_e_anexos(msg: email.message.EmailMessage) -> Tuple[str, List[
     return corpo_texto.strip(), anexos
 
 
-def _extrair_remetente_original(remetente_cabecalho: str, corpo_texto: str) -> str:
-    """Extrai o autor original do anúncio (ADR-011 / US-15).
+def _extrair_remetente_citado(corpo_texto: str) -> Optional[str]:
+    """Extrai o remetente citado no corpo de um encaminhamento, se houver.
 
-    Se a mensagem for um encaminhamento explícito no corpo, extrai o remetente original
-    em vez da pessoa que encaminhou.
+    O valor é informativo (caso 20 do corpus). Ele NÃO substitui o cabeçalho From: o corpo
+    não é autenticado, e quem decide a autoria do anúncio é só o From (ADR-011, US-15).
     """
     match = PADRAO_ENCAMINHAMENTO.search(corpo_texto)
-    if match:
-        autor_extraido = match.group(1).strip()
-        # Normaliza caso venha com quebras de linha
-        autor_extraido = " ".join(autor_extraido.split())
-        return autor_extraido
-    return remetente_cabecalho
+    if not match:
+        return None
+    # Normaliza caso venha com quebras de linha
+    return " ".join(match.group(1).split())
 
 
 class LeitorArquivoLocal(FonteMensagens):
@@ -171,8 +169,9 @@ class LeitorArquivoLocal(FonteMensagens):
         # Corpo e Anexos
         corpo_texto, anexos = _extrair_corpo_e_anexos(msg)
 
-        # Remetente original (ADR-011)
-        remetente = _extrair_remetente_original(remetente_header, corpo_texto)
+        # O From é o remetente; o que aparece no corpo de um encaminhamento fica à parte (ADR-011)
+        remetente = remetente_header
+        remetente_citado = _extrair_remetente_citado(corpo_texto)
 
         # Verificação do header X-BeenThere para a lista de achados (ADR-011)
         been_there_headers = msg.get_all("X-BeenThere", [])
@@ -201,6 +200,7 @@ class LeitorArquivoLocal(FonteMensagens):
             em_resposta_a=em_resposta_a,
             referencias=referencias,
             anexos=anexos,
+            remetente_citado=remetente_citado,
         )
 
     def obter_mensagens(self) -> Iterable[MensagemFonte]:

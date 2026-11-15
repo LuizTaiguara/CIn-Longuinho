@@ -78,13 +78,23 @@ O sistema foi desenhado para desenvolvimento, teste e demonstração **sem depen
 
 * Clonar o repositório e preparar o arquivo `.env`.
 * Inspecionar o corpus curado de testes e casos reais em `worker/corpus/casos/`.
+* **Subir o banco PostgreSQL com as migrações aplicadas** (SCRUM-70):
+  ```bash
+  docker compose up -d banco
+  ```
+  As migrações de `shared/migrations/` rodam na primeira subida do volume. Para recomeçar do
+  zero: `docker compose down -v`. Para conferir as regras do banco (append-only, situação que
+  só avança): `psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f shared/testes/test_regras_banco.sql`.
+* **Rodar os testes do worker** (leitor de `.eml` contra o corpus):
+  ```bash
+  python -m unittest discover worker/testes
+  ```
+* **Rodar o site com o mock local:** ver `site/AGENTS.md` (`npm install`, `npm run dev`).
 
 ### Próximos passos e comandos previstos
 
-* **Subir o banco PostgreSQL via Docker Compose:** `(disponível após a SCRUM-70)`
-* **Executar as migrações do schema no banco de dados:** `(disponível após a SCRUM-69 e SCRUM-70)`
 * **Executar o worker de ingestão:** `(disponível quando a task correspondente for concluída)`
-* **Executar o site / catálogo:** `(disponível quando a task correspondente for concluída)`
+* **Executar a API:** `(disponível quando a task correspondente for concluída)`
 
 ---
 

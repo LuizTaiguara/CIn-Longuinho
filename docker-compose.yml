@@ -1,0 +1,32 @@
+# Sobe o PostgreSQL com um comando (SCRUM-70, F-02).
+#
+#   cp .env.example .env        # uma vez
+#   docker compose up -d banco  # sobe o banco e aplica as migrações de shared/migrations/
+#   docker compose down -v      # apaga o volume: na próxima subida as migrações rodam de novo
+#
+# As migrações só rodam na PRIMEIRA subida do volume (comportamento da imagem oficial).
+# Depois disso, aplique uma migração nova com:
+#   docker compose exec -T banco psql -U "$POSTGRES_USER" -d "$POSTGRES_DB" < shared/migrations/NNN_x.sql
+#
+# Os valores de ${...} vêm do .env (o compose lê o arquivo sozinho). Nenhum segredo fica aqui.
+
+services:
+  banco:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-longuinho}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-longuinho}
+      POSTGRES_DB: ${POSTGRES_DB:-longuinho}
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - banco-dados:/var/lib/postgresql/data
+      - ./shared/migrations:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-longuinho} -d ${POSTGRES_DB:-longuinho}"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+volumes:
+  banco-dados:

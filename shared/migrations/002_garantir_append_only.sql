@@ -5,14 +5,34 @@
 -- Invariantes implementadas:
 -- 1. Invariante 4: Nada é apagado.
 --    Tabelas mensagem_bruta, evento, quarentena e item não aceitam DELETE.
---    Remoção de item é exclusivamente lógica via coluna 'oculto = TRUE'.
+--    mensagem_bruta e evento também não aceitam UPDATE: são append-only de verdade.
+--    quarentena aceita UPDATE, porque `resolvida` muda quando o autor classifica a retida.
+--    Remoção de item é exclusivamente lógica via coluna 'oculto = TRUE', e é irreversível
+--    (decisão do PO em 28/10/2026, US-15).
 --    Exceção única permitida pelo sistema: tabela 'processamento' (Decisão 13).
 --
 -- 2. Invariante 2: situacao só avança: aberto -> reivindicado -> encerrado.
 --    Nunca retrocede e nunca pula etapa, com a única exceção autorizada pelo PO:
 --    declaração de desfecho de 'aberto' direto a 'encerrado' (casos 19 e 20).
+--    A cada transição aplicada, `data_situacao` recebe NOW() (US-04 mostra há quanto tempo).
+--
+-- 3. `fonte_encerramento` só aceita 'confirmação do autor' ou 'terceiro' (ou NULL).
+--
+-- Os itens de UPDATE, oculto irreversível, data_situacao e o CHECK foram pedidos pelo PO em
+-- 13/11/2026 (PR #17) e entraram nesta mesma migração antes de qualquer banco ser implantado.
 
 BEGIN;
+
+-- ============================================================================
+-- 0. LACUNAS DO SCHEMA INICIAL
+-- ============================================================================
+
+-- Momento da última transição de situação (o contrato expõe `data_situacao`).
+ALTER TABLE item ADD COLUMN data_situacao TIMESTAMPTZ NOT NULL DEFAULT NOW();
+
+-- Vocabulário fechado da fonte do encerramento (ARQUITETURA §2.2, regra 1).
+ALTER TABLE item ADD CONSTRAINT chk_item_fonte_encerramento
+    CHECK (fonte_encerramento IS NULL OR fonte_encerramento IN ('confirmação do autor', 'terceiro'));
 
 -- ============================================================================
 -- 1. FUNÇÃO E TRIGGERS PARA BLOQUEIO DE DELETE (INVARIANTE 4)
@@ -57,9 +77,53 @@ CREATE TRIGGER trg_proibir_delete_quarentena
 -- Nota: A tabela 'processamento' NÃO recebe esta trigger porque o DELETE nela
 -- é o mecanismo intencional de reprocessamento (Decisão 13 e ARQUITETURA §2.2).
 
+-- ============================================================================
+-- 2. FUNÇÃO E TRIGGERS PARA BLOQUEIO DE UPDATE (INVARIANTE 4, APPEND-ONLY)
+-- ============================================================================
+
+CREATE OR REPLACE FUNCTION proibir_update_append_only()
+RETURNS TRIGGER AS $$
+BEGIN
+    RAISE EXCEPTION 'Operação UPDATE proibida na tabela "%". Ela é append-only (Invariante 4): registre uma linha nova em vez de alterar.', TG_TABLE_NAME
+        USING ERRCODE = 'check_violation';
+END;
+$$ LANGUAGE plpgsql;
+
+DROP TRIGGER IF EXISTS trg_proibir_update_mensagem_bruta ON mensagem_bruta;
+CREATE TRIGGER trg_proibir_update_mensagem_bruta
+    BEFORE UPDATE ON mensagem_bruta
+    FOR EACH ROW
+    EXECUTE FUNCTION proibir_update_append_only();
+
+DROP TRIGGER IF EXISTS trg_proibir_update_evento ON evento;
+CREATE TRIGGER trg_proibir_update_evento
+    BEFORE UPDATE ON evento
+    FOR EACH ROW
+    EXECUTE FUNCTION proibir_update_append_only();
 
 -- ============================================================================
--- 2. FUNÇÃO E TRIGGER PARA TRANSIÇÃO ESTRITA DE SITUAÇÃO (INVARIANTE 2)
+-- 3. OCULTAR É IRREVERSÍVEL (US-15, decisão do PO em 28/10/2026)
+-- ============================================================================
+
+CREATE OR REPLACE FUNCTION proibir_reexibir_item()
+RETURNS TRIGGER AS $$
+BEGIN
+    IF OLD.oculto = TRUE AND NEW.oculto = FALSE THEN
+        RAISE EXCEPTION 'Item % foi ocultado e não pode voltar ao catálogo pelo sistema (US-15). Reexibir é operação manual, fora do site.', OLD.id
+            USING ERRCODE = 'check_violation';
+    END IF;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+DROP TRIGGER IF EXISTS trg_proibir_reexibir_item ON item;
+CREATE TRIGGER trg_proibir_reexibir_item
+    BEFORE UPDATE OF oculto ON item
+    FOR EACH ROW
+    EXECUTE FUNCTION proibir_reexibir_item();
+
+-- ============================================================================
+-- 4. FUNÇÃO E TRIGGER PARA TRANSIÇÃO ESTRITA DE SITUAÇÃO (INVARIANTE 2)
 -- ============================================================================
 
 CREATE OR REPLACE FUNCTION validar_transicao_situacao_item()
@@ -74,6 +138,7 @@ BEGIN
     -- ou direto para 'encerrado' (exceção autorizada de desfecho).
     IF OLD.situacao = 'aberto' THEN
         IF NEW.situacao IN ('reivindicado', 'encerrado') THEN
+            NEW.data_situacao := NOW();
             RETURN NEW;
         END IF;
     END IF;
@@ -82,6 +147,7 @@ BEGIN
     -- É proibido retroceder para 'aberto'.
     IF OLD.situacao = 'reivindicado' THEN
         IF NEW.situacao = 'encerrado' THEN
+            NEW.data_situacao := NOW();
             RETURN NEW;
         END IF;
     END IF;
