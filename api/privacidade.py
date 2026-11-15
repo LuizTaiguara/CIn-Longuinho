@@ -24,11 +24,35 @@ def mascarar_emails(texto: str) -> str:
     return _EMAIL.sub(MASCARA_EMAIL, texto)
 
 
+MASCARA_TELEFONE = "[telefone mascarado]"
+
+# Telefones brasileiros nos formatos comuns:
+#   (81) 9 9999-9999 · (81) 99999-9999 · 81 99999-9999 · 81999999999 · +55 81 99999-9999
+#   +55 (81) 9 9999-9999 · 5581999999999 · 081 99999-9999 · 99999-9999 · 9 9999-9999 · 9999-9999
+# Oito dígitos seguidos (com ou sem separador no meio) bastam para mascarar: na dúvida, esconde.
+_TELEFONE = re.compile(
+    r"""
+    (?<![\w@])
+    (?:\+?\s?55[\s.-]*)?                     # país
+    (?:\(\s?0?\d{2}\s?\)[\s.-]*               # DDD entre parênteses
+       |0?\d{2}[\s.-]+                       # DDD seguido de separador
+       |0?\d{2}(?=9?\d{8}(?!\d)))?            # DDD colado no número
+    (?:9[\s.-]?)?\d{4}[\s.-]?\d{4}            # número
+    (?![\w@])
+    """,
+    re.VERBOSE,
+)
+
+
+def mascarar_telefones(texto: str) -> str:
+    return _TELEFONE.sub(MASCARA_TELEFONE, texto)
+
+
 def mascarar(texto: str | None) -> str | None:
-    """Mascara tudo o que a regra reconhece como contato pessoal."""
+    """Mascara tudo o que a regra reconhece como contato pessoal: e-mail e telefone."""
     if texto is None:
         return None
-    return mascarar_emails(texto)
+    return mascarar_telefones(mascarar_emails(texto))
 
 
 # ---------------------------------------------------------------------------

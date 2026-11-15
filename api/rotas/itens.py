@@ -8,7 +8,7 @@ from __future__ import annotations
 
 from fastapi import APIRouter, Request
 
-from api import banco, erros, respostas, sessao
+from api import banco, erros, privacidade, respostas, sessao
 
 roteador = APIRouter()
 
@@ -78,8 +78,23 @@ def carregar_item_publicado(request: Request, id: str, email_sessao: str | None)
     return linha
 
 
+def texto_original(request: Request, linha: dict, atual: sessao.Sessao | None) -> str | None:
+    """Corpo da mensagem que abriu a thread, mascarado, só para quem entrou (US-04, US-05).
+
+    Sem sessão é sempre `null`: o texto nem é lido do banco. Item cadastrado pelo site não
+    tem mensagem de origem, então também é `null`.
+    """
+    if atual is None or linha.get("origem") != "lista" or not linha.get("thread_id"):
+        return None
+    with request.app.state.banco.conexao() as con:
+        abertura = banco.mensagem_de_abertura(con, linha["thread_id"])
+    if abertura is None:
+        return None
+    return privacidade.mascarar(abertura["corpo"])
+
+
 @roteador.get("/itens/{id}")
 def obter_item(request: Request, id: str) -> dict:
     atual = sessao.ler(request)
     linha = carregar_item_publicado(request, id, atual.email if atual else None)
-    return respostas.item_detalhe(linha, texto_original=None)
+    return respostas.item_detalhe(linha, texto_original(request, linha, atual))
