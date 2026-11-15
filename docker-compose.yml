@@ -40,6 +40,9 @@ services:
     environment:
       # Dentro da rede do compose, o banco atende pelo nome do serviço.
       DATABASE_URL: postgresql://${POSTGRES_USER:-longuinho}:${POSTGRES_PASSWORD:-longuinho}@banco:5432/${POSTGRES_DB:-longuinho}
+    volumes:
+      # Cache do modelo do GLiNER: baixa uma vez, sobrevive entre os ciclos do cron.
+      - worker-modelos:/modelos
     depends_on:
       banco:
         condition: service_healthy
@@ -47,3 +50,4 @@ services:
 
 volumes:
   banco-dados:
+  worker-modelos:

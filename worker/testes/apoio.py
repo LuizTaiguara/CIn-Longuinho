@@ -19,6 +19,8 @@ from worker.fonte import AnexoMensagem, FonteMensagens, MensagemFonte
 from worker.migracoes import limpar_tabelas, recriar_banco_de_teste
 
 carregar_dotenv()
+# Os testes não baixam o GLiNER (1 GB, precisa de rede): usam o modelo simulado, salvo pedido explícito.
+os.environ.setdefault("WORKER_EXTRATOR", "simulado")
 URL_PADRAO = "postgresql://longuinho:longuinho@localhost:5432/longuinho"
 URL_TESTE = os.environ.get("DATABASE_URL_TESTE") or url_banco_teste(
     os.environ.get("DATABASE_URL") or URL_PADRAO

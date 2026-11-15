@@ -18,8 +18,13 @@ from typing import Callable, Dict, List, Optional
 
 from worker.banco import MensagemBruta, Repositorio
 from worker.classificador import Classificacao, classificar
+from worker.extrator import Extracao, ModeloIndisponivel, criar_modelo, extrair
 from worker.fonte import FonteMensagens
 from worker.texto import limpar_assunto, limpar_corpo
+
+# `evento.tipo_evento` só aceita o vocabulário de shared/AGENTS.md: a extração entra como `edicao`
+# (ela preenche campos do item) e a regra nos detalhes diz de onde veio.
+REGRA_EXTRACAO = "extracao_automatica"
 
 log = logging.getLogger("worker.pipeline")
 
@@ -83,9 +88,36 @@ def descricao_inicial(mensagem: MensagemBruta, corpo_limpo: str) -> Optional[str
 
 
 class Pipeline:
-    def __init__(self, repositorio: Repositorio, classificador: Callable[..., Classificacao] = classificar):
+    def __init__(
+        self,
+        repositorio: Repositorio,
+        classificador: Callable[..., Classificacao] = classificar,
+        modelo_extracao: Optional[Callable] = None,
+    ):
         self.repo = repositorio
         self.classificar = classificador
+        self.modelo = modelo_extracao if modelo_extracao is not None else criar_modelo()
+
+    def _extrair(self, mensagem: MensagemBruta, corpo: str, tipo: str):
+        """Devolve (Extracao, None) ou (None, motivo) se o modelo estiver indisponível."""
+        try:
+            return extrair(mensagem.assunto, corpo, tipo, self.modelo), None
+        except ModeloIndisponivel as erro:
+            log.warning("extração indisponível para a mensagem_bruta %s: %s", mensagem.id, erro)
+            return None, str(erro)
+
+    def _registrar_extracao(self, item_id: int, extracao: Optional[Extracao], motivo: Optional[str], campos=None) -> None:
+        if extracao is None:
+            self.repo.registrar_evento(
+                item_id, "edicao", FONTE_AUTOMATICA, False,
+                motivo_recusa=f"modelo de extração indisponível; item reprocessável ({motivo})",
+                detalhes={"regra": REGRA_EXTRACAO},
+            )
+            return
+        detalhes = {"regra": REGRA_EXTRACAO, **extracao.detalhes()}
+        if campos is not None:
+            detalhes["campos_preenchidos"] = sorted(campos)
+        self.repo.registrar_evento(item_id, "edicao", FONTE_AUTOMATICA, True, detalhes=detalhes)
 
     # ------------------------------------------------------------------ fase 1
     def ingerir(self, fonte: FonteMensagens, resumo: ResumoCiclo) -> None:
@@ -131,8 +163,9 @@ class Pipeline:
         return self.processar_resposta(mensagem, anuncio)
 
     def processar_anuncio(self, mensagem: MensagemBruta, thread: List[MensagemBruta]) -> Optional[str]:
-        if self.repo.item_da_thread(mensagem.thread_id) is not None:
-            return "item"
+        item = self.repo.item_da_thread(mensagem.thread_id)
+        if item is not None:
+            return self.reextrair(mensagem, item)
 
         ids_da_thread = {m.mensagem_id for m in thread}
         thread_incompleta = bool(mensagem.em_resposta_a) and mensagem.em_resposta_a not in ids_da_thread
@@ -149,18 +182,24 @@ class Pipeline:
             self.repo.reter(mensagem, classificacao.motivo_retencao, classificacao.confianca)
             return "quarentena"
 
+        # Extração fraca nunca retém (ADR-004): sem modelo, o item publica só com a classificação.
+        extracao, motivo = self._extrair(mensagem, corpo, classificacao.tipo)
         item_id = self.repo.criar_item(
             thread_id=mensagem.thread_id,
             tipo=classificacao.tipo,
-            descricao=descricao_inicial(mensagem, corpo),
+            descricao=(extracao.descricao if extracao else None) or descricao_inicial(mensagem, corpo),
             autor_email=mensagem.email_remetente,
             data_anuncio=mensagem.data_envio,
             revisar=classificacao.revisar,
+            local=extracao.locais if extracao else [],
+            localizacao=extracao.localizacao if extracao else None,
+            setor=extracao.setor if extracao else None,
         )
         self.repo.registrar_evento(
             item_id, "classificacao", FONTE_AUTOMATICA, True,
             situacao_nova="aberto", detalhes=classificacao.detalhes(),
         )
+        self._registrar_extracao(item_id, extracao, motivo)
         if classificacao.ja_encerrado:
             # Caso 8: "esqueci, já fui buscar, estou registrando". Nasce encerrado pelo próprio autor.
             self.repo.mudar_situacao(item_id, "encerrado", fonte_encerramento=FONTE_AUTOR)
@@ -169,6 +208,32 @@ class Pipeline:
                 situacao_anterior="aberto", situacao_nova="encerrado",
                 detalhes={"regra": "anuncio_de_algo_ja_resolvido"},
             )
+        return "item"
+
+    def reextrair(self, mensagem: MensagemBruta, item) -> str:
+        """O anúncio voltou sem `processamento` e a thread já tem item: a API publicou uma retida
+        classificada pelo autor, ou a extração anterior falhou e alguém pediu reprocessamento.
+
+        Não classifica de novo. Roda só a extração e preenche apenas o que está vazio: `local`,
+        `localizacao`, `setor`, e `descricao` se ela for só o assunto. Nunca muda `tipo` nem `situacao`."""
+        corpo = limpar_corpo(mensagem.corpo)
+        extracao, motivo = self._extrair(mensagem, corpo, item.tipo)
+        if extracao is None:
+            self._registrar_extracao(item.id, None, motivo)
+            return "item"
+        campos = {}
+        if not item.local and extracao.locais:
+            campos["local"] = extracao.locais
+        if item.localizacao is None and extracao.localizacao:
+            campos["localizacao"] = extracao.localizacao
+            campos["setor"] = extracao.setor
+        elif not item.setor and extracao.setor and item.localizacao == "com um setor":
+            campos["setor"] = extracao.setor
+        descricao_era_o_assunto = not item.descricao or item.descricao == descricao_inicial(mensagem, corpo)
+        if descricao_era_o_assunto and extracao.descricao and extracao.descricao != item.descricao:
+            campos["descricao"] = extracao.descricao
+        self.repo.atualizar_campos(item.id, campos)
+        self._registrar_extracao(item.id, extracao, None, campos=campos)
         return "item"
 
     def processar_resposta(self, mensagem: MensagemBruta, anuncio: Optional[MensagemBruta]) -> Optional[str]:
