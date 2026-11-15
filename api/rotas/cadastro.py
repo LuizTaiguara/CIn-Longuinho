@@ -176,3 +176,58 @@ def obter_foto(request: Request, nome: str) -> FileResponse:
         media_type=fotos.TIPO_POR_EXTENSAO[nome.rsplit(".", 1)[1]],
         headers={"Cache-Control": "private, max-age=3600", "X-Content-Type-Options": "nosniff"},
     )
+
+
+# ---------------------------------------------------------------------------
+# E-mail pronto para a lista (US-07, ADR-011)
+# ---------------------------------------------------------------------------
+
+ENDERECO_DA_LISTA = "achados-perdidos@cin.ufpe.br"
+TAMANHO_DESCRICAO_CURTA = 60
+
+
+def descricao_curta(descricao: str) -> str:
+    """Primeira linha da descrição, cortada numa palavra inteira perto de 60 caracteres."""
+    texto = " ".join((descricao or "").split())
+    if len(texto) <= TAMANHO_DESCRICAO_CURTA:
+        return texto
+    corte = texto[:TAMANHO_DESCRICAO_CURTA].rsplit(" ", 1)[0]
+    return corte.rstrip(",.;:-") + "…"
+
+
+def montar_email_pronto(item: dict, site_url: str) -> dict:
+    rotulo = "Achado" if item["tipo"] == "achado" else "Perdido"
+    codigo = item["codigo"]
+    linhas = [
+        f"Tipo: {rotulo}",
+        f"Descrição: {item['descricao']}",
+        f"Local: {', '.join(item['local'] or [])}",
+    ]
+    if item["tipo"] == "achado" and item["localizacao"]:
+        onde = item["localizacao"]
+        if onde == "com um setor" and item["setor"]:
+            onde = f"com um setor ({item['setor']})"
+        linhas.append(f"Onde está: {onde}")
+    linhas += [
+        f"Veja no catálogo: {site_url}/itens/{respostas.id_item(item['id'])}",
+        "",
+        f"Código do item: {codigo} (não apague, é ele que liga esta conversa ao catálogo)",
+    ]
+    return {
+        "para": ENDERECO_DA_LISTA,
+        "assunto": f"[{codigo}] {rotulo}: {descricao_curta(item['descricao'])}",
+        "corpo": "\n".join(linhas) + "\n",
+    }
+
+
+@roteador.get("/itens/{id}/email-pronto")
+def obter_email_pronto(request: Request, id: str) -> dict:
+    """O texto que a pessoa envia da própria conta. O sistema nunca posta na lista."""
+    atual = _exigir_sessao(request)
+    numero = respostas.numero_do_id(id)
+    with request.app.state.banco.conexao() as con:
+        _item_do_autor(con, numero, atual)
+        item = banco.dados_do_email_pronto(con, numero)
+    if item is None or item["origem"] != "site" or not item["codigo"]:
+        raise erros.nao_encontrado()
+    return montar_email_pronto(item, request.app.state.config.site_url)

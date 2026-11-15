@@ -93,6 +93,8 @@ def roteiro(c: dict) -> list[tuple[str, str, str, dict]]:
         ("POST", "/itens/{id}/foto", f"/api/itens/{c['encerrado']}/foto", {"files": {"foto": ("f.png", _png(), "image/png")}}),
         ("POST", "/itens/{id}/foto", f"/api/itens/{c['encerrado']}/foto", {"files": {"foto": ("f.jpg", b"nada", "image/jpeg")}}),
         ("GET", "/fotos/{nome}", "/api/fotos/" + "0" * 32 + ".jpg", {}),
+        ("GET", "/itens/{id}/email-pronto", f"/api/itens/{c['do_site']}/email-pronto", {}),
+        ("GET", "/itens/{id}/email-pronto", f"/api/itens/{c['item']}/email-pronto", {}),
         ("GET", "/eu/itens", "/api/eu/itens", {}),
         ("POST", "/auth/logout", "/api/auth/logout", {}),
     ]
