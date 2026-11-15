@@ -5,6 +5,7 @@ import { Link, useLocation, useParams } from 'react-router-dom'
 import { linkDeLogin } from '../api/cliente.js'
 import AcoesDoAutor from '../componentes/AcoesDoAutor.jsx'
 import { ROTULO_TIPO } from '../componentes/CartaoItem.jsx'
+import Contato from '../componentes/Contato.jsx'
 import SeloRevisar from '../componentes/SeloRevisar.jsx'
 import { useItem } from '../hooks/useItem.js'
 import { useSessao } from '../hooks/useSessao.js'
@@ -123,7 +124,11 @@ export default function PaginaItem() {
       <TextoOriginal item={item} sessao={sessao} caminho={location.pathname} />
 
       {/* Só esconde os botões: quem recusa de verdade é a API, com 403. */}
-      {item.pode_gerir && <AcoesDoAutor item={item} onItemMudou={trocarItem} />}
+      {item.pode_gerir ? (
+        <AcoesDoAutor item={item} onItemMudou={trocarItem} />
+      ) : (
+        <Contato item={item} caminho={location.pathname} />
+      )}
     </article>
   )
 }

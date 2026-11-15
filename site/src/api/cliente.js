@@ -110,3 +110,11 @@ export function encerrarItem(id) {
 export function ocultarItem(id) {
   return requisitar(`/itens/${comId(id)}/ocultar`, { metodo: 'POST' })
 }
+
+// ---------- contato com quem anunciou (US-05) ----------
+
+// POST /api/itens/{id}/contato. A API manda pela conta do projeto, com o e-mail da sessão no
+// Reply-To. O site nunca vê, pede nem guarda endereço nenhum. 202 = aceita.
+export function contatarAutor(id, mensagem) {
+  return requisitar(`/itens/${comId(id)}/contato`, { metodo: 'POST', corpo: { mensagem } })
+}
