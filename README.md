@@ -96,6 +96,10 @@ O sistema foi desenhado para desenvolvimento, teste e demonstração **sem depen
   ```
   Em produção, o worker roda por cron e morre a cada ciclo:
   `*/5 * * * * cd /caminho && docker compose run --rm worker`
+
+  Para ler a conta Gmail do projeto: ponha o JSON do client OAuth em `worker/.segredos/credenciais.json`,
+  rode `python -m worker.autorizar_gmail` uma vez (abre o navegador) e use `WORKER_FONTE_MENSAGENS=gmail`.
+  Para o aviso ao autor sair, defina `WORKER_AVISO_A_PARTIR_DE` e `EMAIL_MODO_ENVIO=smtp`.
 * **Rodar o site com o mock local:** ver `site/AGENTS.md` (`npm install`, `npm run dev`).
 
 ### Próximos passos e comandos previstos

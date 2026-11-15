@@ -76,7 +76,15 @@ python -m worker.avaliar
 
 # em contêiner (o mesmo ciclo; produção chama isso pelo cron a cada 5 minutos)
 docker compose run --rm worker
+
+# fonte Gmail (ADR-011): uma vez, numa máquina com navegador, com o client OAuth em
+# GMAIL_PROJECT_CREDENTIALS_FILE (no Docker: worker/.segredos/credenciais.json)
+python -m worker.autorizar_gmail          # grava GMAIL_TOKEN_FILE (padrão worker/.segredos/token.json)
+python -m worker --fonte gmail --uma-vez
 ```
+
+O token e o client OAuth ficam em `worker/.segredos/` (no `.gitignore` do worker e fora da imagem);
+no compose, essa pasta é montada em `/segredos`. A conta lida é só a do projeto, em modo leitura.
 
 Códigos de saída de `python -m worker`: `0` ciclo ok ou outra execução em andamento; `1` fonte
 falhou (credencial, Gmail fora); `2` banco indisponível. Em todos, nada fica marcado pela metade.
