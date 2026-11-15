@@ -78,3 +78,35 @@ export function obterSessao({ signal } = {}) {
 export function linkDeLogin(retorno = '/') {
   return `${PREFIXO}/auth/google?retorno=${encodeURIComponent(retorno)}`
 }
+
+// POST /api/auth/logout. 401 (já não havia sessão) também conta como "saiu".
+export async function sair() {
+  try {
+    await requisitar('/auth/logout', { metodo: 'POST' })
+  } catch (erro) {
+    if (erro.status !== 401) throw erro
+  }
+}
+
+// ---------- área do autor (US-15). Quem nega é a API (401/403); o site só esconde botões. ----------
+
+export function listarMeusItens({ signal } = {}) {
+  return requisitar('/eu/itens', { signal })
+}
+
+export function classificarRetida(id, tipo) {
+  return requisitar(`/eu/retidas/${comId(id)}/classificar`, { metodo: 'POST', corpo: { tipo } })
+}
+
+// Só descricao, local, localizacao e setor (AtualizarItemRequisicao).
+export function corrigirItem(id, mudancas) {
+  return requisitar(`/itens/${comId(id)}`, { metodo: 'PATCH', corpo: mudancas })
+}
+
+export function encerrarItem(id) {
+  return requisitar(`/itens/${comId(id)}/encerrar`, { metodo: 'POST' })
+}
+
+export function ocultarItem(id) {
+  return requisitar(`/itens/${comId(id)}/ocultar`, { metodo: 'POST' })
+}

@@ -339,3 +339,204 @@ button:disabled {
 .rodape a {
   overflow-wrap: anywhere;
 }
+
+/* ---------- cabeçalho com a conta ---------- */
+
+.cabecalho-linha {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 16px;
+  align-items: baseline;
+  justify-content: space-between;
+}
+
+.menu {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: baseline;
+}
+
+button.link {
+  border: none;
+  background: none;
+  padding: 0;
+  color: var(--destaque);
+  text-decoration: underline;
+}
+
+.botao {
+  display: inline-block;
+  padding: 10px 16px;
+  border-radius: 6px;
+  background: var(--destaque);
+  color: #fff;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+/* ---------- formulários ---------- */
+
+.formulario {
+  display: grid;
+  gap: 14px;
+}
+
+.formulario h2 {
+  margin: 0;
+  font-size: 1.1rem;
+}
+
+textarea {
+  font: inherit;
+  padding: 8px 10px;
+  border: 1px solid var(--borda);
+  border-radius: 6px;
+  background: var(--superficie);
+  color: var(--texto);
+  resize: vertical;
+}
+
+.campo-grupo {
+  border: 1px solid var(--borda);
+  border-radius: 6px;
+  padding: 10px 12px;
+  margin: 0;
+  display: grid;
+  gap: 8px;
+}
+
+.campo-grupo legend {
+  font-size: 0.85rem;
+  font-weight: 600;
+  padding: 0 4px;
+}
+
+.opcoes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 16px;
+}
+
+.opcao {
+  display: inline-flex;
+  gap: 6px;
+  align-items: center;
+  min-height: 32px;
+}
+
+.opcao input {
+  width: 18px;
+  height: 18px;
+}
+
+[aria-invalid='true'] {
+  border-color: var(--destaque);
+}
+
+.erro-campo {
+  margin: 0;
+  color: var(--destaque);
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.alerta {
+  margin: 0;
+  padding: 10px 12px;
+  border: 1px solid var(--destaque);
+  border-radius: 6px;
+  background: #fdecea;
+  color: #7a1b14;
+}
+
+.botoes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.botoes button,
+.acoes-do-autor .botoes button {
+  background: var(--destaque);
+  border-color: var(--destaque);
+  color: #fff;
+}
+
+.botoes button.secundario {
+  background: var(--superficie);
+  color: var(--texto);
+  border-color: var(--borda);
+}
+
+.botoes button.perigo {
+  background: var(--superficie);
+  color: var(--destaque);
+  border-color: var(--destaque);
+}
+
+/* ---------- área do autor ---------- */
+
+.acoes-do-autor {
+  border-top: 1px solid var(--borda);
+  margin-top: 16px;
+  padding-top: 12px;
+  display: grid;
+  gap: 10px;
+}
+
+.acoes-do-autor h2 {
+  margin: 0;
+  font-size: 1.05rem;
+}
+
+.confirmacao {
+  padding: 12px;
+  border: 1px solid var(--borda);
+  border-radius: 6px;
+  background: var(--fundo);
+}
+
+.confirmacao p {
+  margin: 0 0 10px;
+}
+
+.meus-anuncios h1,
+.tela-login h1 {
+  margin: 0 0 8px;
+  font-size: 1.4rem;
+}
+
+.grupo {
+  margin-top: 20px;
+}
+
+.grupo h2 {
+  font-size: 1.1rem;
+  margin: 0 0 8px;
+}
+
+.marcacao {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #5c4800;
+  margin: 0;
+}
+
+.item-retido {
+  border-color: #8a6d00;
+  border-style: dashed;
+}
+
+.item-retido p {
+  margin: 4px 0;
+}
+
+.item-oculto {
+  background: var(--fundo);
+  color: var(--texto-suave);
+}
+
+.item-oculto .descricao {
+  margin: 6px 0 4px;
+}
