@@ -35,7 +35,8 @@ class MensagemFonte:
     # Identificador da thread/conversa para agrupamento de mensagens (ADR-005)
     id_conversa: str
 
-    # E-mail do autor original do anúncio (e não de quem encaminhou, conforme ADR-011 e US-15)
+    # Cabeçalho From, decodificado. É o único remetente confiável: o DKIM de cin.ufpe.br
+    # passa (ADR-011), e é ele que decide a autoria em "Meus anúncios" (US-15).
     remetente: str
 
     # Lista de destinatários (To e Cc, cobrindo envios múltiplos/aninhados)
@@ -61,6 +62,10 @@ class MensagemFonte:
 
     # Lista de arquivos anexados (padrão: lista vazia)
     anexos: List[AnexoMensagem] = field(default_factory=list)
+
+    # Remetente que aparece no corpo de um encaminhamento ("De: fulano <...>"), quando há.
+    # É só informativo: qualquer pessoa pode escrever isso no texto, então nunca decide autoria.
+    remetente_citado: Optional[str] = None
 
 
 class FonteMensagens(ABC):
