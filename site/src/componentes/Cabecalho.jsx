@@ -1,4 +1,4 @@
-// Cabeçalho de todas as telas: título e, à direita, "Entrar com a conta do CIn" ou
+// Cabeçalho de todas as telas: título, "Cadastrar" e "Entrar com a conta do CIn" ou
 // "Meus anúncios" + "Sair". O botão de entrar é um link para a API, que fala com o Google.
 
 import { Link, useLocation, useNavigate } from 'react-router-dom'
@@ -32,6 +32,8 @@ export default function Cabecalho() {
           <Link to="/">Achados e Perdidos do CIn</Link>
         </p>
         <nav className="menu" aria-label="Conta">
+          {/* Sem sessão, /cadastrar leva ao login e volta ao formulário (US-06). */}
+          <Link to="/cadastrar">Cadastrar</Link>
           {sessao.carregando ? null : sessao.autenticado ? (
             <>
               <Link to="/meus-anuncios">Meus anúncios</Link>
