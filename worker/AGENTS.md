@@ -67,6 +67,9 @@ python -m unittest discover worker/testes   # alternativa sem pytest
 # rodar um ciclo sobre o corpus local, sem credencial nem internet
 python -m worker --fonte arquivos --dir worker/corpus/casos --uma-vez
 
+# validar contra o corpus e o gabarito do PO (recria o banco de teste e imprime esperado × obtido)
+python -m worker.avaliar
+
 # em contêiner (o mesmo ciclo; produção chama isso pelo cron a cada 5 minutos)
 docker compose run --rm worker
 ```
@@ -81,3 +84,6 @@ falhou (credencial, Gmail fora); `2` banco indisponível. Em todos, nada fica ma
    e em ordem de envio. Reprocessar uma mensagem = `DELETE FROM processamento WHERE mensagem_id = ...`;
    o próximo ciclo a refaz a partir do bruto, sem reler a fonte.
 3. Mensagem que não passou por `achados-perdidos@cin.ufpe.br` fica `ignorada` (decisão do PO, 13/11).
+4. A primeira mensagem da thread que passou pela lista é o **anúncio**: vai ao classificador
+   (`classificador.py`, regras explicadas no topo do arquivo). As outras são **respostas**.
+5. Classificador com erro: a mensagem fica sem `processamento` e volta no próximo ciclo.
