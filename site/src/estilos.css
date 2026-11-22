@@ -557,3 +557,63 @@ textarea {
   font-size: 0.8rem;
   color: var(--texto-suave);
 }
+
+/* ---------- cadastro e e-mail pronto ---------- */
+
+.cadastro h1,
+.confirmacao-cadastro h1 {
+  margin: 0 0 12px;
+  font-size: 1.4rem;
+}
+
+.cadastro,
+.confirmacao-cadastro {
+  padding: 16px;
+  background: var(--superficie);
+  border: 1px solid var(--borda);
+  border-radius: 8px;
+}
+
+.confirmacao-cadastro h2 {
+  font-size: 1.1rem;
+  margin: 20px 0 8px;
+}
+
+input[type='file'] {
+  padding: 6px 0;
+  border: none;
+  background: none;
+}
+
+.email-pronto {
+  display: grid;
+  gap: 10px;
+  padding: 12px;
+  border: 1px solid var(--borda);
+  border-radius: 6px;
+  background: var(--fundo);
+}
+
+.email-pronto textarea {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.85rem;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.botao-secundario {
+  background: var(--superficie);
+  color: var(--destaque);
+  border: 1px solid var(--destaque);
+}
+
+.pendencia-lista {
+  margin-top: -2px;
+  padding: 10px 14px;
+  border: 1px solid var(--borda);
+  border-top: none;
+  border-radius: 0 0 8px 8px;
+  background: #fff6d6;
+  display: grid;
+  gap: 8px;
+}

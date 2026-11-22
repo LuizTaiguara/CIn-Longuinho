@@ -11,6 +11,17 @@
 # Os valores de ${...} vêm do .env (o compose lê o arquivo sozinho). Nenhum segredo fica aqui.
 
 services:
+  # Site (SCRUM-55): build do Vite servido pelo nginx, que repassa /api/ para o serviço `api`.
+  #   docker compose up -d --build api site     # site em http://localhost:8080
+  # Sobe mesmo com a API parada (o catálogo mostra a mensagem de erro), por isso não há depends_on.
+  site:
+    build:
+      context: ./site
+      args:
+        VITE_EMAIL_REMOCAO: ${VITE_EMAIL_REMOCAO:-}
+    ports:
+      - "${SITE_PORT:-8080}:80"
+
   banco:
     image: postgres:16-alpine
     environment:

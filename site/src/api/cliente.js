@@ -118,3 +118,22 @@ export function ocultarItem(id) {
 export function contatarAutor(id, mensagem) {
   return requisitar(`/itens/${comId(id)}/contato`, { metodo: 'POST', corpo: { mensagem } })
 }
+
+// ---------- cadastro pelo site e e-mail pronto (US-06, US-07) ----------
+
+// POST /api/itens. Achado precisa de `localizacao`; perdido não manda (contrato).
+export function cadastrarItem(dados) {
+  return requisitar('/itens', { metodo: 'POST', corpo: dados })
+}
+
+// POST /api/itens/{id}/foto, multipart com o campo `foto`.
+export function enviarFoto(id, arquivo) {
+  const formulario = new FormData()
+  formulario.append('foto', arquivo)
+  return requisitar(`/itens/${comId(id)}/foto`, { metodo: 'POST', corpo: formulario })
+}
+
+// GET /api/itens/{id}/email-pronto: { para, assunto, corpo }. Só para item cadastrado pelo site.
+export function obterEmailPronto(id, { signal } = {}) {
+  return requisitar(`/itens/${comId(id)}/email-pronto`, { signal })
+}

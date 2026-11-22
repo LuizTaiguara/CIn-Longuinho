@@ -41,10 +41,18 @@ Stack: **React + Vite + React Router**, com testes em **Vitest** + Testing Libra
 | Rodar contra a API de verdade | `API_URL=http://localhost:8000 npm run dev` |
 | Testar | `npm test` |
 | Gerar a versão de produção | `npm run build` (sai em `site/dist/`, que não é commitado) |
+| Subir a versão de produção no Docker | `docker compose up -d --build api site`, da raiz (porta 8080) |
 
 **Variáveis.** O Vite lê o `.env` da raiz do repositório. Só as que começam com `VITE_` chegam ao
 navegador, então nenhuma delas pode ter segredo. Hoje há uma: `VITE_EMAIL_REMOCAO`, o endereço do
 rodapé (US-09).
+
+**Docker (`site/Dockerfile`, `site/nginx.conf`).** A imagem gera o build e serve com nginx, que
+repassa `/api/` para o serviço `api` do compose: site e API ficam na mesma origem e o cookie de
+sessão vale para os dois. `VITE_EMAIL_REMOCAO` entra como argumento de build (mudou o valor,
+reconstrua com `--build`). O nginx sobe mesmo com a API parada; aí `/api` responde 502 e o
+catálogo mostra a mensagem de erro. Para o login voltar ao site, a API precisa de
+`SITE_URL=http://localhost:8080`.
 
 **Mock local (`site/mock/`).** Sem `API_URL`, o `npm run dev` responde as 14 rotas de `/api` do
 contrato com dados fictícios, imitando as regras do servidor: busca sem acento, filtros, paginação,

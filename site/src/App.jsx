@@ -7,6 +7,7 @@ import Cabecalho from './componentes/Cabecalho.jsx'
 import ExigeSessao from './componentes/ExigeSessao.jsx'
 import Rodape from './componentes/Rodape.jsx'
 import { ProvedorSessao } from './hooks/useSessao.js'
+import PaginaCadastrar from './paginas/PaginaCadastrar.jsx'
 import PaginaCatalogo from './paginas/PaginaCatalogo.jsx'
 import PaginaItem from './paginas/PaginaItem.jsx'
 import PaginaLogin from './paginas/PaginaLogin.jsx'
@@ -33,6 +34,14 @@ function Casca() {
           <Route path="/" element={<PaginaCatalogo />} />
           <Route path="/itens/:id" element={<PaginaItem />} />
           <Route path="/login" element={<PaginaLogin />} />
+          <Route
+            path="/cadastrar"
+            element={
+              <ExigeSessao>
+                <PaginaCadastrar />
+              </ExigeSessao>
+            }
+          />
           <Route
             path="/meus-anuncios"
             element={
