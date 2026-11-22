@@ -21,6 +21,8 @@ from worker.migracoes import limpar_tabelas, recriar_banco_de_teste
 carregar_dotenv()
 # Os testes não baixam o GLiNER (1 GB, precisa de rede): usam o modelo simulado, salvo pedido explícito.
 os.environ.setdefault("WORKER_EXTRATOR", "simulado")
+# Envio de e-mail nunca sai dos testes, nem com um .env de produção por perto (SMTP nunca roda aqui).
+os.environ["EMAIL_MODO_ENVIO"] = "nao_enviar"
 URL_PADRAO = "postgresql://longuinho:longuinho@localhost:5432/longuinho"
 URL_TESTE = os.environ.get("DATABASE_URL_TESTE") or url_banco_teste(
     os.environ.get("DATABASE_URL") or URL_PADRAO

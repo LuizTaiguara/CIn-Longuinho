@@ -98,3 +98,7 @@ falhou (credencial, Gmail fora); `2` banco indisponível. Em todos, nada fica ma
 7. Resposta numa thread com item vai a `situacao.py` (tabela de regras no topo do arquivo): gera no
    máximo um evento e só aplica a transição se ela for válida (invariante 2). Autor = mesmo e-mail do
    anúncio. Resposta numa thread sem item fica pendente até o anúncio virar item.
+8. Anúncio com `[AP-XXXXXX]` de um item do site (`origem = 'site'`, sem thread): a thread passa a
+   ser desse item (`processamento = ligada`), sem classificar. Código desconhecido segue o fluxo normal.
+9. No fim do ciclo, `avisar_autores` manda **um** aviso por thread ao autor (`aviso.py`, `envio.py`).
+   Nada sai sem `WORKER_AVISO_A_PARTIR_DE`; nos testes o envio é sempre `nao_enviar`.
