@@ -25,6 +25,9 @@ Não carregue os documentos de `docs/` inteiros, leia só a seção de que a tar
 | Visões gráficas | `docs/diagramas/*.svg` |
 | Regras específicas de uma pasta | `worker/AGENTS.md`, `site/AGENTS.md`, `shared/AGENTS.md` |
 | Quem é quem / quem revisa o quê | `docs/EQUIPE.md` |
+| Pôr no ar numa VPS, atualizar, fazer backup | `docs/DEPLOY.md` |
+| Quem está com a conta, o filtro, a VPS; como assumir | `docs/PASSAGEM.md` |
+| Cores, fonte e componentes do site | `site/DESIGN.md` |
 | A task que estou fazendo | Jira, pelo MCP Atlassian (ver abaixo) |
 
 ## Invariantes: nunca viole, nem se pedirem
@@ -167,5 +170,7 @@ Elas ficam em `.agents/skills/`. No AGY, chame com `/nome`. Em outras ferramenta
     unificar em `shared/`.
   - O trigger do banco grava `data_situacao = NOW()`. O worker corrige logo depois com a data da
     resposta na lista. O certo é o trigger aceitar a data, numa migração nova (revisão do Miguel).
-- Ainda não foi feito: deploy, login Google de verdade e leitura da conta Gmail do projeto em produção.
+- O deploy está **preparado, mas não feito**: `docker-compose.prod.yml`, `Caddyfile`, `deploy/backup.sh` e
+  o passo a passo em `docs/DEPLOY.md`. Faltam a VPS, o login Google de verdade e a leitura da conta Gmail
+  do projeto em produção. Quem está com cada conta fica em `docs/PASSAGEM.md`.
 - Este arquivo erra? Proponha a correção por PR. O PO aprova.

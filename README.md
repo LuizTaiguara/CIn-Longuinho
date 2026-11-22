@@ -8,7 +8,8 @@ worker/   Python — ETL agendado: lê e-mail, classifica, extrai, grava
 api/      Python (FastAPI) — a única porta do site para os dados
 site/     JavaScript — catálogo web
 shared/   contrato da API e schema (área protegida)
-docs/     arquitetura, ADRs, backlog, diagramas, equipe
+docs/     arquitetura, ADRs, backlog, diagramas, equipe, deploy e passagem
+deploy/   script de backup usado em produção
 .agents/  skills e configuração MCP do time para o AGY
 ```
 
@@ -34,6 +35,9 @@ Abra <http://localhost:8080>: o catálogo aparece com os itens do corpus.
 - Para ver os e-mails que o sistema mandaria, ponha `EMAIL_MODO_ENVIO=arquivo` e olhe
   `docker compose exec api ls /app/dados/emails-enviados`.
 - Recomeçar do zero: `docker compose down -v` (apaga o banco, as fotos e o cache do modelo).
+
+Para pôr no ar num servidor, com HTTPS, cron do worker e backup: `docs/DEPLOY.md`. Quem está com cada
+conta e como assumir: `docs/PASSAGEM.md`.
 
 Os testes também rodam em contêiner, sem instalar Python nem Node na máquina:
 
