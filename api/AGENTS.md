@@ -20,8 +20,9 @@ Vale além do `AGENTS.md` da raiz. Backend: Miguel (revisor do contrato em `shar
 | `sessao.py` | Cookie de sessão assinado, 7 dias, `HttpOnly`, `SameSite=Lax` |
 | `google.py` | Login Google: URL de autorização e verificação do `id_token` (trocável nos testes) |
 | `privacidade.py` | Mascaramento de e-mail e telefone; todo log nasce mascarado |
+| `fotos.py` | Confere a foto pelos bytes (JPEG, PNG, WebP, até 5 MB) e a regrava sem metadados |
 | `erros.py` | Formato `Erro` (`{codigo, mensagem}`) e os códigos do contrato |
-| `rotas/` | `itens.py` (catálogo e ações do autor), `locais.py`, `eu.py` (Meus anúncios, retidas), `auth.py` (login) |
+| `rotas/` | `itens.py` (catálogo e ações do autor), `locais.py`, `cadastro.py` (cadastro pelo site, foto, e-mail pronto), `eu.py` (Meus anúncios, retidas), `auth.py` (login) |
 | `testes/` | pytest + `TestClient`, contra um Postgres de verdade |
 
 ## Regras (as invariantes, materializadas aqui)
@@ -43,6 +44,9 @@ Mais:
   retida). Nunca de campo do corpo. Outra pessoa: `403`; retida de outra pessoa: `404`.
 - O único `DELETE` do sistema é em `processamento`, quando o autor classifica a retida: é o sinal
   para o worker rodar a extração dessa mensagem no próximo ciclo.
+- Item do site publica na hora, com `codigo` `AP-XXXXXX` e sem classificação. Clique duplo (mesma
+  pessoa, mesmo tipo e descrição em 30 s) devolve o mesmo item.
+- Foto só é servida enquanto é a foto de um item visível (ou ao autor, se o item foi ocultado).
 - Falha de login nunca é JSON: é `302` para `SITE_URL/login?erro=<motivo>`.
 - `LOGIN_SIMULADO` só em desenvolvimento; a API não sobe com ele e `SITE_URL` https.
 - Não invente campo no contrato. Se precisar, é `shared/` (revisão do Miguel) e, se mudar o que o
