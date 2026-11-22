@@ -5,6 +5,7 @@ IESI (CIN0139), UFPE 2026.2.
 
 ```
 worker/   Python — ETL agendado: lê e-mail, classifica, extrai, grava
+api/      Python (FastAPI) — a única porta do site para os dados
 site/     JavaScript — catálogo web
 shared/   contrato da API e schema (área protegida)
 docs/     arquitetura, ADRs, backlog, diagramas, equipe
@@ -15,11 +16,42 @@ docs/     arquitetura, ADRs, backlog, diagramas, equipe
 
 ---
 
+## Como rodar tudo
+
+Só precisa de Docker. Não precisa de credencial do Google nem de internet depois do primeiro ciclo.
+
+```bash
+cp .env.example .env                    # uma vez
+docker compose up -d banco api site     # banco com as migrações, API (porta 8000) e site (porta 8080)
+docker compose run --rm worker          # um ciclo do worker sobre o corpus de worker/corpus/casos
+```
+
+Abra <http://localhost:8080>: o catálogo aparece com os itens do corpus.
+
+- O primeiro ciclo do worker baixa o modelo do GLiNER (~1,2 GB) para um volume; os seguintes levam segundos.
+- Para entrar sem Google, ponha `LOGIN_SIMULADO=fic.ana.lemos@cin.ufpe.br` no `.env` (a autora do caso 1
+  do corpus) e rode `docker compose up -d api` de novo.
+- Para ver os e-mails que o sistema mandaria, ponha `EMAIL_MODO_ENVIO=arquivo` e olhe
+  `docker compose exec api ls /app/dados/emails-enviados`.
+- Recomeçar do zero: `docker compose down -v` (apaga o banco, as fotos e o cache do modelo).
+
+Os testes também rodam em contêiner, sem instalar Python nem Node na máquina:
+
+```bash
+docker compose run --rm -v "$PWD/worker:/app/worker" worker python -m pytest worker/testes -q
+docker compose run --rm -v "$PWD/api:/app/api:ro" -v "$PWD/shared:/app/shared:ro" api \
+  python -m pytest api/testes -q -p no:cacheprovider
+docker compose run --rm worker python -m worker.avaliar    # corpus × gabarito do PO
+(cd site && npm ci && npm test)                            # o site precisa de Node 20 ou mais novo
+```
+
+---
+
 ## O que é cada pasta
 
 * **`worker/`**: Script Python de ingestão de mensagens. Processo agendado (*batch job*) que lê e-mails, classifica, extrai entidades via NER (GLiNER) e grava no banco de dados (`docs/ARQUITETURA.md` §1.2, §2.1).
 * **`site/`**: Aplicação web em JavaScript que permanece de pé: catálogo web (`docs/ARQUITETURA.md` §2.1).
-* **`shared/`**: Modelos compartilhados e especificação da API REST (`openapi.yaml` — *disponível após o PR #8*). É uma área protegida sob governança compartilhada entre os subgrupos (`shared/AGENTS.md`, `docs/ADR.md` ADR-008).
+* **`shared/`**: Schema do banco (`migrations/`) e especificação da API REST (`openapi.yaml`). É uma área protegida sob governança compartilhada entre os subgrupos (`shared/AGENTS.md`, `docs/ADR.md` ADR-008).
 * **`docs/`**: Documentação técnica completa do projeto: arquitetura, registros de decisões arquiteturais (ADRs), backlog com critérios de aceitação, diagramas e divisão da equipe.
 * **`.agents/`**: Definições de *skills* e configurações de ferramentas de IA (MCP) para automação e padronização do fluxo do time.
 
@@ -72,13 +104,12 @@ O sistema foi desenhado para desenvolvimento, teste e demonstração **sem depen
 
 ---
 
-## Como rodar o ambiente
+## Como rodar cada parte
 
-### O que funciona hoje no repositório
+O caminho curto está em "Como rodar tudo", no começo deste arquivo. Aqui ficam os detalhes de cada parte,
+para quem desenvolve fora do contêiner.
 
-* Clonar o repositório e preparar o arquivo `.env`.
-* Inspecionar o corpus curado de testes e casos reais em `worker/corpus/casos/`.
-* **Subir o banco PostgreSQL com as migrações aplicadas** (SCRUM-70):
+* **Banco PostgreSQL com as migrações aplicadas** (SCRUM-70):
   ```bash
   docker compose up -d banco
   ```
@@ -118,16 +149,13 @@ Para subir a versão de produção (build servido por nginx, que repassa `/api/`
 docker compose up -d --build api site         # site em http://localhost:8080, API em :8000
 ```
 
-Com o compose, ponha `SITE_URL=http://localhost:8080` no `.env`, para o login voltar ao site.
+O `.env.example` já traz `SITE_URL=http://localhost:8080`, para o login voltar ao site do compose.
+Se o site estiver rodando com `npm run dev`, troque para `http://localhost:5173`.
 
 Sem `API_URL`, o site usa um mock local das 14 rotas do contrato, com login simulado (o botão
 "Entrar com a conta do CIn" entra direto, sem Google). Os estados de erro e vazio se veem com
 `MOCK_VAZIO=1`, `MOCK_FALHA=1`, `MOCK_CONTATO_FALHA=1` e `MOCK_LOGIN_FORA=1` (detalhes em
 `site/AGENTS.md`).
-
-### Próximos passos e comandos previstos
-
-* **Executar a API:** ver "Rodar a API" abaixo.
 
 ### Rodar a API
 
@@ -196,5 +224,6 @@ A IA errou algo que o contexto deveria ter evitado? Corrija o `AGENTS.md` e abra
 
 1. Pegue a task no Jira: `/minhas-tasks` e depois `/comecar-task SCRUM-NN`.
 2. Trabalhe numa branch `SCRUM-NN-descricao`. Nunca direto na `main`.
-3. Abra o PR com `/abrir-pr`. O revisor segue `docs/EQUIPE.md`, e ninguém faz merge do próprio PR.
+3. Abra o PR com `/abrir-pr`. O revisor segue `docs/EQUIPE.md`, e ninguém faz merge do próprio PR
+   (a exceção do PO está no `AGENTS.md`).
 4. O PO aceita contra o critério e move para Concluído.

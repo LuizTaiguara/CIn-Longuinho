@@ -46,6 +46,17 @@ class TestSituacaoNaThread(TesteComBanco):
         )
         self.assertEqual(self.repo.status_processamento(r.id_mensagem), "evento")
 
+    def test_a_data_da_situacao_e_a_da_resposta_e_nao_a_do_processamento(self):
+        # US-04: "reivindicado há ..." conta desde a resposta na lista, mesmo se o worker a ler depois.
+        r = resposta(2, OUTRA_PESSOA, "Oi! Acho que é minha, deixei lá ontem.")
+        self.rodar(mensagem(1, **ACHADO), r)
+        self.assertEqual(self.consultar("SELECT data_situacao FROM item")[0][0], r.data_envio)
+
+    def test_a_data_da_situacao_nunca_fica_no_futuro(self):
+        r = resposta(2, OUTRA_PESSOA, "Oi! Acho que é minha, deixei lá ontem.", minutos=60 * 24 * 365 * 30)
+        self.rodar(mensagem(1, **ACHADO), r)
+        self.assertEqual(self.consultar("SELECT data_situacao <= NOW() FROM item")[0][0], True)
+
     def test_num_perdido_esta_comigo_de_terceiro_reivindica(self):
         self.rodar(mensagem(1, **PERDIDO), resposta(2, OUTRA_PESSOA, "Está aqui comigo, pode vir buscar no Grad 3."))
         self.assertEqual(self.item()[0], "reivindicado")

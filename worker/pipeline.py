@@ -241,7 +241,9 @@ class Pipeline:
         self._registrar_extracao(item_id, extracao, motivo)
         if classificacao.ja_encerrado:
             # Caso 8: "esqueci, já fui buscar, estou registrando". Nasce encerrado pelo próprio autor.
-            self.repo.mudar_situacao(item_id, "encerrado", fonte_encerramento=FONTE_AUTOR)
+            self.repo.mudar_situacao(
+                item_id, "encerrado", fonte_encerramento=FONTE_AUTOR, quando=mensagem.data_envio
+            )
             self.repo.registrar_evento(
                 item_id, "desfecho", FONTE_AUTOR, True,
                 situacao_anterior="aberto", situacao_nova="encerrado",
@@ -312,6 +314,7 @@ class Pipeline:
             self.repo.mudar_situacao(
                 item.id, decisao.situacao_nova,
                 fonte_encerramento=decisao.fonte_encerramento, revisar=decisao.revisar,
+                quando=mensagem.data_envio,
             )
         if decisao.aplicado and decisao.campos:
             self.repo.atualizar_campos(item.id, decisao.campos)

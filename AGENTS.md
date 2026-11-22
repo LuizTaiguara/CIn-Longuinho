@@ -150,6 +150,22 @@ Elas ficam em `.agents/skills/`. No AGY, chame com `/nome`. Em outras ferramenta
 
 ## Estado atual
 
-- **Sprint 0, pré-código.** A meta é o *walking skeleton*: um e-mail de teste atravessa o sistema inteiro.
-- Ainda não há comandos de build ou teste. Quando houver, eles entram no `AGENTS.md` da pasta.
+- **Não é mais pré-código.** Em 22/11/2026 o *walking skeleton* fechou: uma mensagem do corpus entra,
+  é classificada e extraída, e aparece na busca do catálogo sem o e-mail de ninguém (SCRUM-82).
+- O que existe:
+  - `worker/`: leitor de arquivos e de Gmail, classificador, extrator (GLiNER), situação pelas
+    respostas, ligação pelo código `[AP-...]` e aviso ao autor.
+  - `api/`: FastAPI com as rotas do `shared/openapi.yaml`, login Google (ou simulado), cadastro com
+    foto, contato e "Meus anúncios".
+  - `site/`: React + Vite, com catálogo, página do item, cadastro, login e "Meus anúncios".
+  - `shared/`: contrato e migrações.
+- Como roda: `cp .env.example .env`, `docker compose up -d banco api site`,
+  `docker compose run --rm worker` e abrir `http://localhost:8080`. Detalhes no `README.md`.
+- Comandos de build e teste ficam no `AGENTS.md` de cada pasta (`worker/`, `api/`, `site/`).
+- Dívidas conhecidas:
+  - A camada de dados está duplicada entre `worker/banco.py` e `api/banco.py`. O ADR-008 prevê
+    unificar em `shared/`.
+  - O trigger do banco grava `data_situacao = NOW()`. O worker corrige logo depois com a data da
+    resposta na lista. O certo é o trigger aceitar a data, numa migração nova (revisão do Miguel).
+- Ainda não foi feito: deploy, login Google de verdade e leitura da conta Gmail do projeto em produção.
 - Este arquivo erra? Proponha a correção por PR. O PO aprova.
