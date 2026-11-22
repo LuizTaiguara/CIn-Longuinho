@@ -367,9 +367,20 @@ class Repositorio:
             return cur.fetchone()[0]
 
     def mudar_situacao(
-        self, item_id: int, nova: str, fonte_encerramento: Optional[str] = None, revisar: Optional[bool] = None
+        self,
+        item_id: int,
+        nova: str,
+        fonte_encerramento: Optional[str] = None,
+        revisar: Optional[bool] = None,
+        quando: Optional[datetime] = None,
     ) -> None:
-        """Aplica uma transição já validada pelo chamador. O trigger do banco é só rede de segurança."""
+        """Aplica uma transição já validada pelo chamador. O trigger do banco é só rede de segurança.
+
+        `quando` é a data da mensagem que causou a transição. O trigger grava `data_situacao = NOW()`,
+        que é a hora em que o worker rodou; ao ler o histórico da lista, isso faria um item reivindicado
+        há um mês aparecer como "reivindicado há 1 minuto" (US-04: há quanto tempo está na situação).
+        Por isso a data da mensagem é gravada logo depois, nunca no futuro.
+        """
         with self.conexao.cursor() as cur:
             cur.execute(
                 """
@@ -382,6 +393,10 @@ class Repositorio:
                 """,
                 (nova, fonte_encerramento, revisar, item_id),
             )
+            if quando is not None:
+                cur.execute(
+                    "UPDATE item SET data_situacao = LEAST(%s, NOW()) WHERE id = %s", (quando, item_id)
+                )
 
     def reter(self, mensagem: "MensagemBruta", motivo: str, grau_confianca: Optional[float]) -> int:
         with self.conexao.cursor() as cur:
