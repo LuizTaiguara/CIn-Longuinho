@@ -67,9 +67,24 @@ python -m unittest discover worker/testes   # alternativa sem pytest
 # rodar um ciclo sobre o corpus local, sem credencial nem internet
 python -m worker --fonte arquivos --dir worker/corpus/casos --uma-vez
 
+# GLiNER (extração): baixa ~1,2 GB no primeiro uso para HF_HOME (padrão ~/.cache/huggingface).
+# Os testes usam o modelo simulado; para incluir o teste com o modelo real:
+WORKER_TESTE_GLINER=1 python -m pytest worker/testes/test_extracao.py
+
+# validar contra o corpus e o gabarito do PO (recria o banco de teste e imprime esperado × obtido)
+python -m worker.avaliar
+
 # em contêiner (o mesmo ciclo; produção chama isso pelo cron a cada 5 minutos)
 docker compose run --rm worker
+
+# fonte Gmail (ADR-011): uma vez, numa máquina com navegador, com o client OAuth em
+# GMAIL_PROJECT_CREDENTIALS_FILE (no Docker: worker/.segredos/credenciais.json)
+python -m worker.autorizar_gmail          # grava GMAIL_TOKEN_FILE (padrão worker/.segredos/token.json)
+python -m worker --fonte gmail --uma-vez
 ```
+
+O token e o client OAuth ficam em `worker/.segredos/` (no `.gitignore` do worker e fora da imagem);
+no compose, essa pasta é montada em `/segredos`. A conta lida é só a do projeto, em modo leitura.
 
 Códigos de saída de `python -m worker`: `0` ciclo ok ou outra execução em andamento; `1` fonte
 falhou (credencial, Gmail fora); `2` banco indisponível. Em todos, nada fica marcado pela metade.
@@ -81,3 +96,17 @@ falhou (credencial, Gmail fora); `2` banco indisponível. Em todos, nada fica ma
    e em ordem de envio. Reprocessar uma mensagem = `DELETE FROM processamento WHERE mensagem_id = ...`;
    o próximo ciclo a refaz a partir do bruto, sem reler a fonte.
 3. Mensagem que não passou por `achados-perdidos@cin.ufpe.br` fica `ignorada` (decisão do PO, 13/11).
+4. A primeira mensagem da thread que passou pela lista é o **anúncio**: vai ao classificador
+   (`classificador.py`, regras explicadas no topo do arquivo). As outras são **respostas**.
+5. Classificador com erro: a mensagem fica sem `processamento` e volta no próximo ciclo.
+6. Item publicado passa pela extração (`extrator.py`). Sem modelo, publica só com a classificação
+   e um evento `edicao` (regra `extracao_automatica`) com `aplicado = FALSE`; apagar a linha de `processamento` do anúncio
+   refaz só a extração, preenchendo o que estiver vazio. É o mesmo caminho que a API usa depois
+   que o autor classifica uma retida em "Meus anúncios".
+7. Resposta numa thread com item vai a `situacao.py` (tabela de regras no topo do arquivo): gera no
+   máximo um evento e só aplica a transição se ela for válida (invariante 2). Autor = mesmo e-mail do
+   anúncio. Resposta numa thread sem item fica pendente até o anúncio virar item.
+8. Anúncio com `[AP-XXXXXX]` de um item do site (`origem = 'site'`, sem thread): a thread passa a
+   ser desse item (`processamento = ligada`), sem classificar. Código desconhecido segue o fluxo normal.
+9. No fim do ciclo, `avisar_autores` manda **um** aviso por thread ao autor (`aviso.py`, `envio.py`).
+   Nada sai sem `WORKER_AVISO_A_PARTIR_DE`; nos testes o envio é sempre `nao_enviar`.

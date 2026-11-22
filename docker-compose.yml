@@ -40,6 +40,14 @@ services:
     environment:
       # Dentro da rede do compose, o banco atende pelo nome do serviço.
       DATABASE_URL: postgresql://${POSTGRES_USER:-longuinho}:${POSTGRES_PASSWORD:-longuinho}@banco:5432/${POSTGRES_DB:-longuinho}
+      # Fonte Gmail: token e client OAuth ficam na pasta montada abaixo (fora do Git e da imagem).
+      GMAIL_TOKEN_FILE: /segredos/token.json
+      GMAIL_PROJECT_CREDENTIALS_FILE: /segredos/credenciais.json
+    volumes:
+      # Cache do modelo do GLiNER: baixa uma vez, sobrevive entre os ciclos do cron.
+      - worker-modelos:/modelos
+      # Gravável: o worker renova o token do Gmail sozinho.
+      - ${GMAIL_SEGREDOS_DIR:-./worker/.segredos}:/segredos
     depends_on:
       banco:
         condition: service_healthy
@@ -47,3 +55,4 @@ services:
 
 volumes:
   banco-dados:
+  worker-modelos:

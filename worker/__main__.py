@@ -10,6 +10,7 @@ Códigos de saída:
 """
 import argparse
 import logging
+import os
 import sys
 import time
 from typing import Callable, List, Optional
@@ -34,6 +35,13 @@ def criar_fonte(nome: str, diretorio: str, repositorio: Optional[Repositorio] = 
         from worker.leitor_local import LeitorArquivoLocal
 
         return LeitorArquivoLocal(diretorio)
+    if nome == "gmail":
+        from worker.leitor_gmail import LeitorGmail
+
+        return LeitorGmail(
+            arquivo_token=os.environ.get("GMAIL_TOKEN_FILE") or "worker/.segredos/token.json",
+            ultima_gravacao=repositorio.ultima_gravacao if repositorio is not None else None,
+        )
     raise ValueError(f"fonte desconhecida: {nome!r}")
 
 
