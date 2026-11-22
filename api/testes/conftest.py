@@ -123,3 +123,32 @@ def entrar(cliente, config):
         return cliente
 
     return _entrar
+
+
+class GoogleFalso:
+    """Substitui o ClienteGoogle: nenhum teste fala com o Google de verdade."""
+
+    configurado = True
+
+    def __init__(self) -> None:
+        self.identidade_devolvida: dict = {}
+        self.falhar = False
+
+    def url_autorizacao(self, estado: str) -> str:
+        from urllib.parse import urlencode
+
+        return "https://accounts.google.com/o/oauth2/v2/auth?" + urlencode({"state": estado})
+
+    def identidade(self, codigo: str) -> dict:
+        from api.google import FalhaGoogle
+
+        if self.falhar:
+            raise FalhaGoogle("simulada")
+        return dict(self.identidade_devolvida)
+
+
+@pytest.fixture
+def google(cliente) -> GoogleFalso:
+    falso = GoogleFalso()
+    cliente.app.state.google = falso
+    return falso

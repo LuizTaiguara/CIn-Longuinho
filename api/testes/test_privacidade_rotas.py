@@ -71,6 +71,25 @@ def roteiro(c: dict) -> list[tuple[str, str, str, dict]]:
     ]
     for chave in ("item", "oculto", "encerrado", "do_site", "retida"):
         chamadas.append(("GET", "/itens/{id}", f"/api/itens/{c[chave]}", {}))
+    chamadas += [
+        ("GET", "/eu", "/api/eu", {}),
+        ("GET", "/eu/itens", "/api/eu/itens", {}),
+        ("GET", "/auth/google", "/api/auth/google?retorno=/meus-anuncios", {}),
+        ("GET", "/auth/google", f"/api/auth/google?retorno=//{quote(AUTORA)}", {}),
+        ("GET", "/auth/google/callback", "/api/auth/google/callback?state=x&code=y", {}),
+        ("GET", "/auth/google/callback", "/api/auth/google/callback?error=access_denied", {}),
+        # Rotas que mudam dados vêm depois das leituras; o logout fica por último.
+        ("PATCH", "/itens/{id}", f"/api/itens/{c['item']}", {"json": {"descricao": "Garrafa azul de tampa preta"}}),
+        ("PATCH", "/itens/{id}", f"/api/itens/{c['encerrado']}", {"json": {"autor_email": AUTORA}}),
+        ("POST", "/eu/retidas/{id}/classificar", f"/api/eu/retidas/{c['retida']}/classificar", {"json": {"tipo": "perdido"}}),
+        ("GET", "/eu/itens", "/api/eu/itens", {}),
+        ("POST", "/itens/{id}/encerrar", f"/api/itens/{c['encerrado']}/encerrar", {}),
+        ("POST", "/itens/{id}/encerrar", f"/api/itens/{c['item']}/encerrar", {}),
+        ("POST", "/itens/{id}/ocultar", f"/api/itens/{c['oculto']}/ocultar", {}),
+        ("POST", "/itens/{id}/ocultar", f"/api/itens/{c['item']}/ocultar", {}),
+        ("GET", "/eu/itens", "/api/eu/itens", {}),
+        ("POST", "/auth/logout", "/api/auth/logout", {}),
+    ]
     return chamadas
 
 

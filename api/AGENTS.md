@@ -18,8 +18,10 @@ Vale além do `AGENTS.md` da raiz. Backend: Miguel (revisor do contrato em `shar
 | `banco.py` | Pool do psycopg 3 e uma função por consulta nomeada |
 | `respostas.py` | Monta cada resposta do contrato campo a campo (lista branca) |
 | `sessao.py` | Cookie de sessão assinado, 7 dias, `HttpOnly`, `SameSite=Lax` |
+| `google.py` | Login Google: URL de autorização e verificação do `id_token` (trocável nos testes) |
+| `privacidade.py` | Mascaramento de e-mail e telefone; todo log nasce mascarado |
 | `erros.py` | Formato `Erro` (`{codigo, mensagem}`) e os códigos do contrato |
-| `rotas/` | Uma rota por função, agrupadas por recurso |
+| `rotas/` | `itens.py` (catálogo e ações do autor), `locais.py`, `eu.py` (Meus anúncios, retidas), `auth.py` (login) |
 | `testes/` | pytest + `TestClient`, contra um Postgres de verdade |
 
 ## Regras (as invariantes, materializadas aqui)
@@ -37,6 +39,12 @@ Vale além do `AGENTS.md` da raiz. Backend: Miguel (revisor do contrato em `shar
 
 Mais:
 - Sem sessão, a busca **nunca** consulta `mensagem_bruta` (US-04).
+- Autoria vem **só** do e-mail da sessão, comparado no SQL com `autor_email` (ou com o remetente da
+  retida). Nunca de campo do corpo. Outra pessoa: `403`; retida de outra pessoa: `404`.
+- O único `DELETE` do sistema é em `processamento`, quando o autor classifica a retida: é o sinal
+  para o worker rodar a extração dessa mensagem no próximo ciclo.
+- Falha de login nunca é JSON: é `302` para `SITE_URL/login?erro=<motivo>`.
+- `LOGIN_SIMULADO` só em desenvolvimento; a API não sobe com ele e `SITE_URL` https.
 - Não invente campo no contrato. Se precisar, é `shared/` (revisão do Miguel) e, se mudar o que o
   usuário vê, é decisão do PO.
 
