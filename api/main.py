@@ -14,15 +14,17 @@ from contextlib import asynccontextmanager
 from fastapi import APIRouter, FastAPI, Request
 
 from api import config as modulo_config
-from api import erros, privacidade
+from api import envio, erros, privacidade
 from api.banco import Banco
 from api.google import ClienteGoogle
-from api.rotas import auth, cadastro, eu, itens, locais
+from api.rotas import auth, cadastro, contato, eu, itens, locais
 
 log_acesso = logging.getLogger("api.acesso")
 
 # Todos os roteadores montados sob API_PREFIX. O teste de privacidade percorre esta lista.
-ROTEADORES = (itens.roteador, cadastro.roteador, locais.roteador, eu.roteador, auth.roteador)
+ROTEADORES = (
+    itens.roteador, cadastro.roteador, contato.roteador, locais.roteador, eu.roteador, auth.roteador,
+)
 
 
 def criar_app(config: modulo_config.Config | None = None) -> FastAPI:
@@ -47,6 +49,11 @@ def criar_app(config: modulo_config.Config | None = None) -> FastAPI:
     app.state.config = config
     app.state.banco = banco
     app.state.google = ClienteGoogle(config)
+    app.state.envio = envio.criar(config)
+    if config.cookie_seguro and config.email_modo_envio == "nao_enviar":
+        logging.getLogger("api.envio").warning(
+            "SITE_URL é https e EMAIL_MODO_ENVIO=nao_enviar: os contatos (US-05) não serão entregues."
+        )
     erros.instalar(app)
 
     @app.middleware("http")

@@ -144,6 +144,16 @@ api/.venv/bin/python -m pytest api/testes
 Só contas `@cin.ufpe.br` com e-mail verificado entram: a conferência é feita pela API, e o `hd`
 mandado ao Google é só dica de tela.
 
+**E-mail de contato (US-05).** O botão de contato manda a mensagem pela conta do projeto, sem mostrar
+o endereço de quem anunciou. `EMAIL_MODO_ENVIO` escolhe o que acontece:
+
+- `nao_enviar` (padrão): nada sai; a API só registra no log que descartou.
+- `arquivo`: cada mensagem vira um `.eml` em `EMAIL_ARQUIVO_DIR`, para conferir o que sairia.
+- `smtp`: envia pelo Gmail do projeto (`SMTP_HOST=smtp.gmail.com`, porta 587, senha de app em
+  `SMTP_SENHA`). **Só em produção.** A API não sobe em `smtp` sem `EMAIL_REMETENTE` e `SMTP_*` reais.
+
+O sistema nunca posta na lista.
+
 ---
 
 ## Uso de IA no time
