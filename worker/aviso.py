@@ -31,9 +31,9 @@ O que você mandou para a lista achados-perdidos@cin.ufpe.br já está no catál
 
 Para corrigir o anúncio ou encerrá-lo quando o objeto voltar para o dono, basta entrar no site com a sua conta do CIn. Não precisa responder a este e-mail.
 
-Este é o único aviso sobre esta conversa.
+Este é o único aviso sobre essa conversa.
 
-Achados e Perdidos do CIn (mensagem automática)
+CIn-Longuinho, seu item em 3 pulinhos! (mensagem automática)
 """
 
 
