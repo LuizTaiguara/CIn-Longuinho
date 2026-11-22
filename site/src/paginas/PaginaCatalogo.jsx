@@ -10,6 +10,8 @@ import { FILTROS_VAZIOS } from '../filtros.js'
 import { useItens, useLocais } from '../hooks/useCatalogo.js'
 import { useFiltrosNaUrl } from '../hooks/useFiltrosNaUrl.js'
 
+const contagem = (total) => (total === 1 ? '1 anúncio' : `${total} anúncios`)
+
 export default function PaginaCatalogo() {
   const { filtros, pagina, mudarFiltros, mudarPagina } = useFiltrosNaUrl()
   const locais = useLocais()
@@ -24,7 +26,7 @@ export default function PaginaCatalogo() {
   }
 
   return (
-    <>
+    <div className="catalogo">
       <h1 className="visualmente-oculto">Catálogo</h1>
       <BarraDeBusca filtros={filtros} locais={locais} onMudar={mudarFiltros} />
 
@@ -38,6 +40,7 @@ export default function PaginaCatalogo() {
       >
         {estado === ESTADOS.COM_ITENS ? (
           <>
+            <p className="contagem">{contagem(itens.resposta.paginacao?.total_itens ?? itens.resposta.itens.length)}</p>
             <ListaItens itens={itens.resposta.itens} />
             <Paginacao paginacao={itens.resposta.paginacao} onMudar={trocarPagina} />
           </>
@@ -49,6 +52,6 @@ export default function PaginaCatalogo() {
           />
         )}
       </section>
-    </>
+    </div>
   )
 }

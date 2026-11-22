@@ -150,7 +150,7 @@ describe('do catálogo para o item e de volta', () => {
     fireEvent.click(await screen.findByRole('link', { name: 'Garrafa térmica azul' }))
     expect(await screen.findByRole('heading', { level: 1, name: 'Garrafa térmica azul' })).toBeTruthy()
     expect(window.location.pathname).toBe('/itens/item_1')
-    fireEvent.click(screen.getByRole('link', { name: '← Voltar ao catálogo' }))
+    fireEvent.click(screen.getByRole('link', { name: 'Voltar ao catálogo' }))
     await screen.findByRole('heading', { level: 2, name: 'Garrafa térmica azul' })
     expect(window.location.search).toBe('?tipo=achado')
   })

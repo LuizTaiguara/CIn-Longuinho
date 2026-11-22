@@ -24,3 +24,6 @@ dist/
 # Sistema
 .DS_Store
 Thumbs.db
+
+# Material de trabalho da skill de design (briefs, capturas); o que vale está em site/DESIGN.md
+site/.impeccable/
