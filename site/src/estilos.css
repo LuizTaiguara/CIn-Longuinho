@@ -111,6 +111,27 @@ time,
 
 /* ---------------------------------------------------------------- casca */
 
+.pular {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  z-index: 10;
+  padding: 10px 14px;
+  border-radius: var(--raio-campo);
+  background: var(--papel);
+  color: var(--tinta);
+  font-weight: 700;
+  transform: translateY(-200%);
+}
+
+.pular:focus {
+  transform: none;
+}
+
+main:focus {
+  outline: none;
+}
+
 .pagina {
   min-height: 100vh;
   min-height: 100dvh;

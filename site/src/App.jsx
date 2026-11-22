@@ -27,9 +27,13 @@ function NaoEncontrada() {
 function Casca() {
   return (
     <div className="pagina">
+      {/* Primeiro foco do teclado: pula o cabeçalho e vai direto ao conteúdo. */}
+      <a className="pular" href="#conteudo">
+        Ir para o conteúdo
+      </a>
       <Cabecalho />
 
-      <main>
+      <main id="conteudo" tabIndex={-1}>
         <Routes>
           <Route path="/" element={<PaginaCatalogo />} />
           <Route path="/itens/:id" element={<PaginaItem />} />
