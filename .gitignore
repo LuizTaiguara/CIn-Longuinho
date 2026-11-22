@@ -8,6 +8,9 @@
 IMG_*.jpeg
 apresentacao/
 
+# Dados locais gerados em desenvolvimento (fotos enviadas, e-mails gravados em arquivo)
+dados/
+
 # Python
 __pycache__/
 *.pyc

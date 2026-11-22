@@ -1,0 +1,11 @@
+# API (FastAPI). Versões fixas; instalar com: pip install -r api/requirements.txt
+fastapi==0.163.1
+uvicorn[standard]==0.54.0
+psycopg[binary,pool]==3.3.9
+itsdangerous==2.2.0
+python-dotenv==1.2.4
+pyyaml==6.0.3
+
+# Testes
+pytest==9.2.0
+httpx==0.28.1

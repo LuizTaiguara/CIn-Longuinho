@@ -28,6 +28,25 @@ services:
       timeout: 3s
       retries: 10
 
+  # API REST (FastAPI). Sobe depois do banco ficar saudável e lê o resto do .env.
+  #   docker compose up -d api
+  api:
+    build:
+      context: .
+      dockerfile: api/Dockerfile
+    env_file: .env
+    environment:
+      # Dentro da rede do compose o banco se chama `banco`, não `localhost`.
+      DATABASE_URL: postgresql://${POSTGRES_USER:-longuinho}:${POSTGRES_PASSWORD:-longuinho}@banco:5432/${POSTGRES_DB:-longuinho}
+      FOTOS_DIR: /app/dados/fotos
+    ports:
+      - "8000:8000"
+    depends_on:
+      banco:
+        condition: service_healthy
+    volumes:
+      - ./dados/fotos:/app/dados/fotos
+
   # Worker de ingestão (SCRUM-50). Não sobe com `docker compose up`: roda um ciclo e sai.
   #   docker compose run --rm worker
   # Em produção, pelo cron: */5 * * * * cd /caminho && docker compose run --rm worker

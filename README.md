@@ -104,7 +104,28 @@ O sistema foi desenhado para desenvolvimento, teste e demonstração **sem depen
 
 ### Próximos passos e comandos previstos
 
-* **Executar a API:** `(disponível quando a task correspondente for concluída)`
+* **Executar a API:** ver "Rodar a API" abaixo.
+
+### Rodar a API
+
+A API (FastAPI, Python 3.12) é a única porta do site para os dados. Contrato: `shared/openapi.yaml`,
+todas as rotas sob `/api`. Detalhes e regras em `api/AGENTS.md`.
+
+```bash
+# uma vez: ambiente Python da API
+python3.12 -m venv api/.venv
+api/.venv/bin/pip install -r api/requirements.txt
+
+# com o banco no ar (docker compose up -d banco), da raiz do repositório:
+api/.venv/bin/uvicorn api.main:app --reload --port 8000
+curl http://localhost:8000/api/itens
+
+# ou tudo em contêiner (banco + API):
+docker compose up -d api
+
+# testes (usam o Postgres do compose, num banco à parte chamado longuinho_teste_api):
+api/.venv/bin/python -m pytest api/testes
+```
 
 ---
 
