@@ -117,6 +117,71 @@ def _extrair_remetente_citado(corpo_texto: str) -> Optional[str]:
     return " ".join(match.group(1).split())
 
 
+def interpretar_email(msg: email.message.Message, id_reserva: str, data_reserva) -> MensagemFonte:
+    """Transforma um e-mail RFC 822 já carregado em MensagemFonte. Usado pelo leitor de .eml e pelo
+    leitor do Gmail, que baixa a mensagem no formato `raw` (o mesmo de um arquivo .eml)."""
+    # Identificador único da mensagem
+    id_mensagem = msg.get("Message-ID", id_reserva)
+
+    # Identificador da thread / conversa
+    id_conversa = msg.get("X-Gmail-Thread-Id")
+    if not id_conversa:
+        # Recomposição de conversa via RFC 5322
+        id_conversa = msg.get("In-Reply-To") or msg.get("References") or id_mensagem
+        id_conversa = id_conversa.split()[0].strip()
+
+    # Remetente e destinatários dos cabeçalhos
+    remetente_header = _decodificar_cabecalho(msg.get("From", ""))
+    destinatarios = _extrair_destinatarios(msg)
+    assunto = _decodificar_cabecalho(msg.get("Subject", ""))
+
+    # Data de envio
+    data_header = msg.get("Date")
+    data_envio = data_reserva
+    if data_header:
+        try:
+            data_envio = parsedate_to_datetime(data_header)
+        except Exception:
+            pass
+
+    # Corpo e Anexos
+    corpo_texto, anexos = _extrair_corpo_e_anexos(msg)
+
+    # O From é o remetente; o que aparece no corpo de um encaminhamento fica à parte (ADR-011)
+    remetente = remetente_header
+    remetente_citado = _extrair_remetente_citado(corpo_texto)
+
+    # Verificação do header X-BeenThere para a lista de achados (ADR-011)
+    been_there_headers = msg.get_all("X-BeenThere", [])
+    veio_da_lista = any("achados-perdidos@cin.ufpe.br" in str(h).lower() for h in been_there_headers)
+    # Se X-BeenThere não existir (ex: arquivo de teste sem cabeçalho de lista),
+    # verifica se achados-perdidos está entre os destinatários
+    if not been_there_headers:
+        veio_da_lista = any("achados-perdidos@cin.ufpe.br" in d.lower() for d in destinatarios)
+
+    em_resposta_a = msg.get("In-Reply-To")
+    if em_resposta_a:
+        em_resposta_a = em_resposta_a.strip()
+
+    referencias_raw = msg.get("References")
+    referencias = referencias_raw.split() if referencias_raw else []
+
+    return MensagemFonte(
+        id_mensagem=id_mensagem,
+        id_conversa=id_conversa,
+        remetente=remetente,
+        destinatarios=destinatarios,
+        assunto=assunto,
+        corpo_texto=corpo_texto,
+        data_envio=data_envio,
+        veio_da_lista=veio_da_lista,
+        em_resposta_a=em_resposta_a,
+        referencias=referencias,
+        anexos=anexos,
+        remetente_citado=remetente_citado,
+    )
+
+
 class LeitorArquivoLocal(FonteMensagens):
     """Lê arquivos .eml a partir do sistema de arquivos local."""
 
@@ -138,70 +203,10 @@ class LeitorArquivoLocal(FonteMensagens):
                 msg = email.message_from_binary_file(f, policy=policy.compat32)
         except Exception:
             return None
+        from datetime import datetime, timezone
 
-        # Identificador único da mensagem
-        id_mensagem = msg.get("Message-ID", f"<{arquivo_path.name}@local>")
-
-        # Identificador da thread / conversa
-        id_conversa = msg.get("X-Gmail-Thread-Id")
-        if not id_conversa:
-            # Recomposição de conversa via RFC 5322
-            id_conversa = msg.get("In-Reply-To") or msg.get("References") or id_mensagem
-            id_conversa = id_conversa.split()[0].strip()
-
-        # Remetente e destinatários dos cabeçalhos
-        remetente_header = _decodificar_cabecalho(msg.get("From", ""))
-        destinatarios = _extrair_destinatarios(msg)
-        assunto = _decodificar_cabecalho(msg.get("Subject", ""))
-
-        # Data de envio
-        data_header = msg.get("Date")
-        if data_header:
-            try:
-                data_envio = parsedate_to_datetime(data_header)
-            except Exception:
-                from datetime import datetime, timezone
-                data_envio = datetime.fromtimestamp(arquivo_path.stat().st_mtime, tz=timezone.utc)
-        else:
-            from datetime import datetime, timezone
-            data_envio = datetime.fromtimestamp(arquivo_path.stat().st_mtime, tz=timezone.utc)
-
-        # Corpo e Anexos
-        corpo_texto, anexos = _extrair_corpo_e_anexos(msg)
-
-        # O From é o remetente; o que aparece no corpo de um encaminhamento fica à parte (ADR-011)
-        remetente = remetente_header
-        remetente_citado = _extrair_remetente_citado(corpo_texto)
-
-        # Verificação do header X-BeenThere para a lista de achados (ADR-011)
-        been_there_headers = msg.get_all("X-BeenThere", [])
-        veio_da_lista = any("achados-perdidos@cin.ufpe.br" in str(h).lower() for h in been_there_headers)
-        # Se X-BeenThere não existir (ex: arquivo de teste sem cabeçalho de lista),
-        # verifica se achados-perdidos está entre os destinatários
-        if not been_there_headers:
-            veio_da_lista = any("achados-perdidos@cin.ufpe.br" in d.lower() for d in destinatarios)
-
-        em_resposta_a = msg.get("In-Reply-To")
-        if em_resposta_a:
-            em_resposta_a = em_resposta_a.strip()
-
-        referencias_raw = msg.get("References")
-        referencias = referencias_raw.split() if referencias_raw else []
-
-        return MensagemFonte(
-            id_mensagem=id_mensagem,
-            id_conversa=id_conversa,
-            remetente=remetente,
-            destinatarios=destinatarios,
-            assunto=assunto,
-            corpo_texto=corpo_texto,
-            data_envio=data_envio,
-            veio_da_lista=veio_da_lista,
-            em_resposta_a=em_resposta_a,
-            referencias=referencias,
-            anexos=anexos,
-            remetente_citado=remetente_citado,
-        )
+        data_reserva = datetime.fromtimestamp(arquivo_path.stat().st_mtime, tz=timezone.utc)
+        return interpretar_email(msg, f"<{arquivo_path.name}@local>", data_reserva)
 
     def obter_mensagens(self) -> Iterable[MensagemFonte]:
         """Lê os arquivos .eml do caminho e entrega instâncias de MensagemFonte."""

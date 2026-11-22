@@ -1,0 +1,10 @@
+# Vale só para api/Dockerfile (BuildKit). Nada de venv, cache, segredos nem dados locais.
+**/.venv
+**/__pycache__
+**/*.pyc
+**/.pytest_cache
+.env
+.env.*
+dados/
+site/node_modules
+.git
