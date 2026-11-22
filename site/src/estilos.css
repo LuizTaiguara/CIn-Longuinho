@@ -1172,6 +1172,11 @@ input[type='file']::file-selector-button {
     justify-content: space-between;
   }
 
+  /* Lado a lado, o botão de texto alinha pelo texto, sem o recuo de um botão com borda. */
+  .botoes button.perigo {
+    padding-inline: 4px;
+  }
+
   .tela-login .botao,
   .tela-login p:has(.botao) {
     width: auto;
