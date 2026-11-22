@@ -1,0 +1,18 @@
+# API (FastAPI). Versões fixas; instalar com: pip install -r api/requirements.txt
+fastapi==0.163.1
+uvicorn[standard]==0.54.0
+psycopg[binary,pool]==3.3.9
+itsdangerous==2.2.0
+python-dotenv==1.2.4
+# Login Google (US-15). requests é o transporte que o google-auth usa para buscar as chaves
+# públicas do Google ao verificar o id_token.
+google-auth==2.62.2
+requests==2.34.2
+httpx==0.28.1
+pyyaml==6.0.3
+# Cadastro com foto (US-06): upload multipart e conferência da imagem pelos bytes.
+python-multipart==0.0.33
+Pillow==13.0.0
+
+# Testes
+pytest==9.2.0

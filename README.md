@@ -85,10 +85,21 @@ O sistema foi desenhado para desenvolvimento, teste e demonstração **sem depen
   As migrações de `shared/migrations/` rodam na primeira subida do volume. Para recomeçar do
   zero: `docker compose down -v`. Para conferir as regras do banco (append-only, situação que
   só avança): `psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f shared/testes/test_regras_banco.sql`.
-* **Rodar os testes do worker** (leitor de `.eml` contra o corpus):
+* **Worker de ingestão** (detalhes em `worker/AGENTS.md`, seção "Comandos"):
   ```bash
-  python -m unittest discover worker/testes
+  python -m venv .venv && . .venv/bin/activate
+  pip install -r worker/requirements.txt
+  docker compose up -d banco
+  python -m pytest worker/testes            # testes (usam o banco <nome>_teste_worker)
+  python -m worker --fonte arquivos --dir worker/corpus/casos --uma-vez   # um ciclo sobre o corpus
+  docker compose run --rm worker            # o mesmo ciclo, em contêiner
   ```
+  Em produção, o worker roda por cron e morre a cada ciclo:
+  `*/5 * * * * cd /caminho && docker compose run --rm worker`
+
+  Para ler a conta Gmail do projeto: ponha o JSON do client OAuth em `worker/.segredos/credenciais.json`,
+  rode `python -m worker.autorizar_gmail` uma vez (abre o navegador) e use `WORKER_FONTE_MENSAGENS=gmail`.
+  Para o aviso ao autor sair, defina `WORKER_AVISO_A_PARTIR_DE` e `EMAIL_MODO_ENVIO=smtp`.
 * **Rodar o site:** ver a subseção abaixo e `site/AGENTS.md`.
 
 ### Rodar o site
@@ -116,8 +127,55 @@ Sem `API_URL`, o site usa um mock local das 14 rotas do contrato, com login simu
 
 ### Próximos passos e comandos previstos
 
-* **Executar o worker de ingestão:** `(disponível quando a task correspondente for concluída)`
-* **Executar a API:** `(disponível quando a task correspondente for concluída)`
+* **Executar a API:** ver "Rodar a API" abaixo.
+
+### Rodar a API
+
+A API (FastAPI, Python 3.12) é a única porta do site para os dados. Contrato: `shared/openapi.yaml`,
+todas as rotas sob `/api`. Detalhes e regras em `api/AGENTS.md`.
+
+```bash
+# uma vez: ambiente Python da API
+python3.12 -m venv api/.venv
+api/.venv/bin/pip install -r api/requirements.txt
+
+# com o banco no ar (docker compose up -d banco), da raiz do repositório:
+api/.venv/bin/uvicorn api.main:app --reload --port 8000
+curl http://localhost:8000/api/itens
+
+# ou tudo em contêiner (banco + API):
+docker compose up -d api
+
+# testes (usam o Postgres do compose, num banco à parte chamado longuinho_teste_api):
+api/.venv/bin/python -m pytest api/testes
+```
+
+**Entrar sem Google (desenvolvimento).** Ponha no `.env` um endereço fictício do CIn, por exemplo
+`LOGIN_SIMULADO=fic.teste@cin.ufpe.br`. Aí `GET /api/auth/google` cria a sessão direto, com o nome
+"Pessoa de Teste", e volta ao site. A API **recusa subir** com `LOGIN_SIMULADO` preenchido se
+`SITE_URL` for `https://`: em produção ele fica vazio.
+
+**Login Google de verdade.** Crie o client OAuth uma vez, no Google Cloud Console da conta do projeto:
+
+1. *APIs e serviços → Tela de consentimento OAuth*: tipo **Externo**, só os escopos de identidade
+   (`openid`, `email`, `profile`). Nenhum escopo sensível.
+2. *Credenciais → Criar credenciais → ID do cliente OAuth*: tipo **Aplicativo da Web**.
+3. Em *URIs de redirecionamento autorizados*, cadastre `API_URL/api/auth/google/callback`
+   (em desenvolvimento, `http://localhost:8000/api/auth/google/callback`; é o `GOOGLE_REDIRECT_URI`).
+4. Copie o ID e a chave secreta para `GOOGLE_CLIENT_ID` e `GOOGLE_CLIENT_SECRET` no `.env` (nunca no código).
+
+Só contas `@cin.ufpe.br` com e-mail verificado entram: a conferência é feita pela API, e o `hd`
+mandado ao Google é só dica de tela.
+
+**E-mail de contato (US-05).** O botão de contato manda a mensagem pela conta do projeto, sem mostrar
+o endereço de quem anunciou. `EMAIL_MODO_ENVIO` escolhe o que acontece:
+
+- `nao_enviar` (padrão): nada sai; a API só registra no log que descartou.
+- `arquivo`: cada mensagem vira um `.eml` em `EMAIL_ARQUIVO_DIR`, para conferir o que sairia.
+- `smtp`: envia pelo Gmail do projeto (`SMTP_HOST=smtp.gmail.com`, porta 587, senha de app em
+  `SMTP_SENHA`). **Só em produção.** A API não sobe em `smtp` sem `EMAIL_REMETENTE` e `SMTP_*` reais.
+
+O sistema nunca posta na lista.
 
 ---
 
