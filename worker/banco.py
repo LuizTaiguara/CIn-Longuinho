@@ -198,6 +198,14 @@ class Repositorio:
         """Mensagens gravadas e ainda sem `processamento`, em ordem de thread e de envio."""
         return self._mensagens("p.mensagem_id IS NULL", ())
 
+    def ultima_gravacao(self) -> Optional[datetime]:
+        """Quando a última mensagem foi gravada (relógio do banco). O leitor do Gmail usa como corte."""
+        with self.conexao.cursor() as cur:
+            cur.execute("SELECT max(criado_em) FROM mensagem_bruta")
+            valor = cur.fetchone()[0]
+        self.conexao.commit()
+        return valor
+
     def mensagens_da_thread(self, thread_id: str) -> List[MensagemBruta]:
         """Todas as mensagens gravadas de uma thread, processadas ou não, em ordem de envio."""
         return self._mensagens("m.thread_id = %s", (thread_id,))
