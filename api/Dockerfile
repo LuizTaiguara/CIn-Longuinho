@@ -12,8 +12,8 @@ RUN pip install --no-cache-dir -r api/requirements.txt
 
 COPY api/ api/
 
-# Fotos enviadas (US-06). No compose, vira volume em ./dados/fotos.
-RUN mkdir -p /app/dados/fotos && useradd --system --uid 1000 api && chown -R api /app/dados
+# Fotos enviadas (US-06) e e-mails gravados em arquivo. No compose, /app/dados é o volume `api-dados`.
+RUN mkdir -p /app/dados/fotos /app/dados/emails-enviados && useradd --system --uid 1000 api && chown -R api /app/dados
 USER api
 
 EXPOSE 8000

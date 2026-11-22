@@ -50,13 +50,17 @@ services:
       # Dentro da rede do compose o banco se chama `banco`, não `localhost`.
       DATABASE_URL: postgresql://${POSTGRES_USER:-longuinho}:${POSTGRES_PASSWORD:-longuinho}@banco:5432/${POSTGRES_DB:-longuinho}
       FOTOS_DIR: /app/dados/fotos
+      EMAIL_ARQUIVO_DIR: /app/dados/emails-enviados
     ports:
       - "8000:8000"
     depends_on:
       banco:
         condition: service_healthy
     volumes:
-      - ./dados/fotos:/app/dados/fotos
+      # Volume nomeado, e não pasta do host: a pasta do host nasceria do root e a API (usuário sem
+      # privilégio) não conseguiria gravar a foto. Para ver os arquivos:
+      #   docker compose exec api ls /app/dados/fotos /app/dados/emails-enviados
+      - api-dados:/app/dados
 
   # Worker de ingestão (SCRUM-50). Não sobe com `docker compose up`: roda um ciclo e sai.
   #   docker compose run --rm worker
@@ -85,4 +89,5 @@ services:
 
 volumes:
   banco-dados:
+  api-dados:
   worker-modelos:
