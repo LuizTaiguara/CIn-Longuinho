@@ -83,3 +83,14 @@ class FonteMensagens(ABC):
             Um iterável contendo as instâncias de MensagemFonte a processar.
         """
         pass
+
+
+class FonteIndisponivel(Exception):
+    """A fonte não respondeu (ex.: API do Gmail fora do ar). O ciclo encerra e tenta no próximo.
+
+    Nada é marcado como processado: o estado vive no banco, não na caixa de e-mail (US-01).
+    """
+
+
+class CredencialInvalida(FonteIndisponivel):
+    """A credencial da fonte expirou ou foi revogada. Mesmo tratamento: registra e encerra."""
