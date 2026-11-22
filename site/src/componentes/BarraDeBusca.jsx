@@ -4,6 +4,7 @@
 
 import { useEffect, useState } from 'react'
 import { FILTROS_VAZIOS, SITUACOES, temFiltroAtivo } from '../filtros.js'
+import Icone from './Icone.jsx'
 
 const ROTULO_SITUACAO = { aberto: 'Aberto', reivindicado: 'Reivindicado', encerrado: 'Encerrado' }
 
@@ -33,12 +34,24 @@ export default function BarraDeBusca({ filtros, locais, onMudar }) {
           <input
             id="busca-texto"
             type="search"
-            placeholder="Ex.: garrafa azul, carregador, chave"
+            placeholder="Ex.: garrafa azul, chave"
             value={texto}
             onChange={(evento) => setTexto(evento.target.value)}
           />
-          <button type="submit">Buscar</button>
+          <button type="submit">
+            <Icone nome="busca" tamanho={18} />
+            Buscar
+          </button>
         </div>
+      </div>
+
+      <div className="campo campo-tipo">
+        <label htmlFor="filtro-tipo">Tipo</label>
+        <select id="filtro-tipo" value={filtros.tipo} onChange={mudar('tipo')}>
+          <option value="">Achados e perdidos</option>
+          <option value="achado">Só achados</option>
+          <option value="perdido">Só perdidos</option>
+        </select>
       </div>
 
       <div className="campo">
@@ -57,15 +70,6 @@ export default function BarraDeBusca({ filtros, locais, onMudar }) {
               {nome}
             </option>
           ))}
-        </select>
-      </div>
-
-      <div className="campo">
-        <label htmlFor="filtro-tipo">Tipo</label>
-        <select id="filtro-tipo" value={filtros.tipo} onChange={mudar('tipo')}>
-          <option value="">Achados e perdidos</option>
-          <option value="achado">Só achados</option>
-          <option value="perdido">Só perdidos</option>
         </select>
       </div>
 

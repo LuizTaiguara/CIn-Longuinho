@@ -5,7 +5,17 @@ import { ESTADOS } from '../estadoDoCatalogo.js'
 
 export default function EstadoDoCatalogo({ estado, onLimparFiltros, onTentarDeNovo }) {
   if (estado === ESTADOS.CARREGANDO) {
-    return <p className="aviso">Carregando o catálogo…</p>
+    return (
+      <div className="carregando">
+        <p className="aviso">Carregando o catálogo…</p>
+        {/* Esqueleto dos crachás: só visual, some para leitor de tela. */}
+        <div className="esqueleto" aria-hidden="true">
+          <span />
+          <span />
+          <span />
+        </div>
+      </div>
+    )
   }
 
   if (estado === ESTADOS.VAZIO) {

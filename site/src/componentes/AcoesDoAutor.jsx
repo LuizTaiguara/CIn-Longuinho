@@ -253,14 +253,14 @@ export default function AcoesDoAutor({ item, onItemMudou }) {
         />
       ) : (
         <div className="botoes">
-          <button type="button" onClick={() => { setAviso(null); setModo('corrigir') }}>
-            Corrigir
-          </button>
           {item.situacao !== 'encerrado' && (
             <button type="button" onClick={() => { setAviso(null); setModo('encerrar') }}>
               Marcar como devolvido
             </button>
           )}
+          <button type="button" className="secundario" onClick={() => { setAviso(null); setModo('corrigir') }}>
+            Corrigir
+          </button>
           <button type="button" className="perigo" onClick={() => { setAviso(null); setModo('ocultar') }}>
             Remover do catálogo
           </button>

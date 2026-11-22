@@ -5,6 +5,7 @@ import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { linkDeLogin } from '../api/cliente.js'
 import { useSessao } from '../hooks/useSessao.js'
 import { retornoSeguro } from '../rotasDoLogin.js'
+import Icone from './Icone.jsx'
 
 export default function Cabecalho() {
   const sessao = useSessao()
@@ -27,16 +28,28 @@ export default function Cabecalho() {
 
   return (
     <header className="cabecalho">
-      <div className="cabecalho-linha">
+      <div className="cabecalho-marca">
         <p className="titulo">
           <Link to="/">Achados e Perdidos do CIn</Link>
         </p>
-        <nav className="menu" aria-label="Conta">
+        <p className="subtitulo">O que circula na lista achados-perdidos@cin.ufpe.br, num lugar só.</p>
+      </div>
+      <nav className="menu" aria-label="Conta">
+        <div className="menu-itens">
           {/* Sem sessão, /cadastrar leva ao login e volta ao formulário (US-06). */}
-          <Link to="/cadastrar">Cadastrar</Link>
+          <Link
+            to="/cadastrar"
+            className="menu-cadastrar"
+            aria-current={location.pathname === '/cadastrar' ? 'page' : undefined}
+          >
+            <Icone nome="mais" tamanho={16} />
+            Cadastrar
+          </Link>
           {sessao.carregando ? null : sessao.autenticado ? (
             <>
-              <Link to="/meus-anuncios">Meus anúncios</Link>
+              <Link to="/meus-anuncios" aria-current={location.pathname === '/meus-anuncios' ? 'page' : undefined}>
+                Meus anúncios
+              </Link>
               <button type="button" className="link" onClick={sair}>
                 Sair
               </button>
@@ -44,9 +57,8 @@ export default function Cabecalho() {
           ) : (
             <a href={linkDeLogin(retorno)}>Entrar com a conta do CIn</a>
           )}
-        </nav>
-      </div>
-      <p className="subtitulo">O que circula na lista achados-perdidos@cin.ufpe.br, num lugar só.</p>
+        </div>
+      </nav>
     </header>
   )
 }

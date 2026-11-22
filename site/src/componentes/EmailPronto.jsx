@@ -37,7 +37,7 @@ export default function EmailPronto({ email, id = 'email-pronto' }) {
       </div>
       <div className="campo">
         <label htmlFor={`${id}-texto`}>Ou copie o texto e envie para {email.para}</label>
-        <textarea id={`${id}-texto`} ref={campo} readOnly rows={10} value={texto} />
+        <textarea id={`${id}-texto`} ref={campo} readOnly rows={Math.min(Math.max(texto.split('\n').length + 3, 8), 24)} value={texto} />
       </div>
       <div className="botoes">
         <button type="button" className="secundario" onClick={copiar}>

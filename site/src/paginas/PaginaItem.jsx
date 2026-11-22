@@ -4,9 +4,10 @@
 import { Link, useLocation, useParams } from 'react-router-dom'
 import { linkDeLogin } from '../api/cliente.js'
 import AcoesDoAutor from '../componentes/AcoesDoAutor.jsx'
-import { ROTULO_TIPO } from '../componentes/CartaoItem.jsx'
+import { FaixaDoTipo, classesDoCracha } from '../componentes/CartaoItem.jsx'
 import Contato from '../componentes/Contato.jsx'
-import SeloRevisar from '../componentes/SeloRevisar.jsx'
+import Icone from '../componentes/Icone.jsx'
+import { EXPLICACAO_REVISAR } from '../componentes/SeloRevisar.jsx'
 import { useItem } from '../hooks/useItem.js'
 import { useSessao } from '../hooks/useSessao.js'
 import { textoDaLocalizacao, textoDaSituacao } from '../situacao.js'
@@ -43,7 +44,10 @@ export default function PaginaItem() {
 
   const linkVoltar = (
     <p className="voltar">
-      <Link to={voltar}>← Voltar ao catálogo</Link>
+      <Link to={voltar}>
+        <Icone nome="voltar" tamanho={18} />
+        Voltar ao catálogo
+      </Link>
     </p>
   )
 
@@ -86,15 +90,17 @@ export default function PaginaItem() {
   return (
     <article className="detalhe-item">
       {linkVoltar}
-      <p className="etiquetas">
-        <span className={`tipo tipo-${item.tipo}`}>{ROTULO_TIPO[item.tipo] ?? item.tipo}</span>
-        {item.revisar && <SeloRevisar />}
-      </p>
-      <h1>{item.descricao}</h1>
+      <div className="principal">
+      <div className={`ficha ${classesDoCracha(item)}`}>
+        <FaixaDoTipo item={item} />
+        <div className="cracha-corpo">
+          <h1>{item.descricao}</h1>
+          {/* No celular não há "passar o mouse": a explicação do selo aparece escrita. */}
+          {item.revisar && <p className="nota-revisar">{EXPLICACAO_REVISAR}</p>}
 
-      {item.foto_url && <img className="foto" src={item.foto_url} alt={`Foto do objeto: ${item.descricao}`} />}
+          {item.foto_url && <img className="foto" src={item.foto_url} alt={`Foto do objeto: ${item.descricao}`} />}
 
-      <dl className="dados">
+          <dl className="dados">
         <dt>{item.tipo === 'perdido' ? 'Onde foi perdido' : 'Onde foi achado'}</dt>
         <dd>{item.local.length ? item.local.join(', ') : 'Local não informado'}</dd>
 
@@ -108,8 +114,14 @@ export default function PaginaItem() {
 
         <dt>Situação</dt>
         <dd className={`situacao situacao-${item.situacao}`}>
-          <span title={item.data_situacao ? `Desde ${dataCompleta(item.data_situacao)}` : undefined}>
-            {textoDaSituacao(item)}
+          <Icone nome={item.situacao} tamanho={18} />
+          <span>
+            <span title={item.data_situacao ? `Desde ${dataCompleta(item.data_situacao)}` : undefined}>
+              {textoDaSituacao(item)}
+            </span>
+            {item.situacao !== 'aberto' && item.data_situacao && (
+              <span className="desde">desde {dataCompleta(item.data_situacao)}</span>
+            )}
           </span>
         </dd>
 
@@ -119,16 +131,21 @@ export default function PaginaItem() {
             <dd>{localizacao}</dd>
           </>
         )}
-      </dl>
+          </dl>
+        </div>
+      </div>
 
       <TextoOriginal item={item} sessao={sessao} caminho={location.pathname} />
+      </div>
 
       {/* Só esconde os botões: quem recusa de verdade é a API, com 403. */}
-      {item.pode_gerir ? (
-        <AcoesDoAutor item={item} onItemMudou={trocarItem} />
-      ) : (
-        <Contato item={item} caminho={location.pathname} />
-      )}
+      <div className="lateral">
+        {item.pode_gerir ? (
+          <AcoesDoAutor item={item} onItemMudou={trocarItem} />
+        ) : (
+          <Contato item={item} caminho={location.pathname} />
+        )}
+      </div>
     </article>
   )
 }

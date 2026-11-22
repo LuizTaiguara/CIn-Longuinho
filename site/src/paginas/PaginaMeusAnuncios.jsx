@@ -11,7 +11,8 @@
 import { useCallback, useEffect, useState } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { classificarRetida, listarMeusItens, obterEmailPronto } from '../api/cliente.js'
-import CartaoItem, { ROTULO_TIPO } from '../componentes/CartaoItem.jsx'
+import CartaoItem, { FaixaDoTipo } from '../componentes/CartaoItem.jsx'
+import Icone from '../componentes/Icone.jsx'
 import EmailPronto from '../componentes/EmailPronto.jsx'
 import { telaDeLogin } from '../rotasDoLogin.js'
 import { dataCompleta, tempoRelativo } from '../tempoRelativo.js'
@@ -53,28 +54,33 @@ function Retida({ retida, onClassificada, onRecarregar }) {
   const motivo = MOTIVO_DA_RETENCAO[retida.motivo_retencao] ?? retida.motivo_retencao ?? 'motivo não informado'
 
   return (
-    <article className="item item-retido">
-      <p className="marcacao">não entrou no catálogo: {motivo}</p>
-      <p className="descricao">{retida.descricao}</p>
-      <p className="detalhes">
-        <time dateTime={retida.data_registro} title={dataCompleta(retida.data_registro)}>
-          {tempoRelativo(retida.data_registro)}
-        </time>
-      </p>
-      <p>Diga o que é, e ela entra no catálogo:</p>
-      <div className="botoes">
-        <button type="button" onClick={() => classificar('achado')} disabled={enviando}>
-          É um achado
-        </button>
-        <button type="button" onClick={() => classificar('perdido')} disabled={enviando}>
-          É um perdido
-        </button>
+    <article className="cracha cracha-retido">
+      <div className="faixa">
+        <Icone nome="alerta" tamanho={16} />
+        <p className="marcacao">não entrou no catálogo: {motivo}</p>
       </div>
-      {falha && (
-        <p className="alerta" role="alert">
-          {falha}
+      <div className="cracha-corpo">
+        <p className="nome">{retida.descricao}</p>
+        <p className="nota">
+          <time dateTime={retida.data_registro} title={dataCompleta(retida.data_registro)}>
+            {tempoRelativo(retida.data_registro)}
+          </time>
         </p>
-      )}
+        <p className="pergunta">Diga o que é, e ela entra no catálogo:</p>
+        <div className="botoes">
+          <button type="button" className="secundario" onClick={() => classificar('achado')} disabled={enviando}>
+            É um achado
+          </button>
+          <button type="button" className="secundario" onClick={() => classificar('perdido')} disabled={enviando}>
+            É um perdido
+          </button>
+        </div>
+        {falha && (
+          <p className="alerta" role="alert">
+            {falha}
+          </p>
+        )}
+      </div>
     </article>
   )
 }
@@ -95,7 +101,10 @@ function AindaNaoFoiParaALista({ item }) {
 
   return (
     <div className="pendencia-lista">
-      <p className="marcacao">ainda não foi para a lista</p>
+      <p className="marcacao">
+        <Icone nome="carta" tamanho={16} />
+        <span>ainda não foi para a lista</span>
+      </p>
       {estado.email ? (
         <EmailPronto email={estado.email} id={`email-${item.id}`} />
       ) : (
@@ -116,13 +125,17 @@ function AindaNaoFoiParaALista({ item }) {
 
 function Oculto({ item }) {
   return (
-    <article className="item item-oculto">
-      <p className="etiquetas">
-        <span className={`tipo tipo-${item.tipo}`}>{ROTULO_TIPO[item.tipo] ?? item.tipo}</span>
-        <span className="marcacao">removido do catálogo</span>
-      </p>
-      <p className="descricao">{item.descricao}</p>
-      <p className="detalhes">A remoção não pode ser desfeita pelo site.</p>
+    <article className={`cracha cracha-${item.tipo} cracha-oculto`}>
+      <FaixaDoTipo item={{ tipo: item.tipo }}>
+        <span className="marcacao marcacao-removido">
+          <Icone nome="removido" tamanho={16} />
+          <span>removido do catálogo</span>
+        </span>
+      </FaixaDoTipo>
+      <div className="cracha-corpo">
+        <p className="nome">{item.descricao}</p>
+        <p className="nota">A remoção não pode ser desfeita pelo site.</p>
+      </div>
     </article>
   )
 }
@@ -200,10 +213,10 @@ export default function PaginaMeusAnuncios() {
             </Grupo>
             <Grupo titulo="No catálogo" itens={noCatalogo}>
               {(item) => (
-                <>
+                <div className="com-pendencia">
                   <CartaoItem item={item} />
                   {item.origem === 'site' && !item.foi_para_a_lista && <AindaNaoFoiParaALista item={item} />}
-                </>
+                </div>
               )}
             </Grupo>
             <Grupo titulo="Removidos do catálogo" itens={ocultos}>
