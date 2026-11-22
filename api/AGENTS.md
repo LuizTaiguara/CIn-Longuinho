@@ -1,0 +1,77 @@
+# api/ — API REST (Python, FastAPI)
+
+Vale além do `AGENTS.md` da raiz. Backend: Miguel (revisor do contrato em `shared/`).
+
+## O que é
+
+- A **única porta do site para os dados** (invariante 8). O site nunca fala com o banco nem com o worker.
+- Implementa **exatamente** `shared/openapi.yaml`, com todas as rotas sob `/api` (`API_PREFIX`).
+- Python, como o worker (ADR-008). Nesta rodada a camada de dados está duplicada
+  (`api/banco.py` e `worker/banco.py`); unificar em `shared/` é dívida registrada.
+
+## Mapa
+
+| Arquivo | Faz |
+|---|---|
+| `main.py` | `criar_app()`: monta as rotas sob `API_PREFIX` e os tratadores de erro |
+| `config.py` | Lê o ambiente (`.env`). Recusa subir com configuração perigosa |
+| `banco.py` | Pool do psycopg 3 e uma função por consulta nomeada |
+| `respostas.py` | Monta cada resposta do contrato campo a campo (lista branca) |
+| `sessao.py` | Cookie de sessão assinado, 7 dias, `HttpOnly`, `SameSite=Lax` |
+| `google.py` | Login Google: URL de autorização e verificação do `id_token` (trocável nos testes) |
+| `privacidade.py` | Mascaramento de e-mail e telefone; todo log nasce mascarado |
+| `fotos.py` | Confere a foto pelos bytes (JPEG, PNG, WebP, até 5 MB) e a regrava sem metadados |
+| `envio.py` | E-mail privado pela conta do projeto: modos `nao_enviar`, `arquivo` (`.eml`) e `smtp` |
+| `erros.py` | Formato `Erro` (`{codigo, mensagem}`) e os códigos do contrato |
+| `rotas/` | `itens.py` (catálogo e ações do autor), `locais.py`, `cadastro.py` (cadastro pelo site, foto, e-mail pronto), `contato.py` (falar com quem anunciou), `eu.py` (Meus anúncios, retidas), `auth.py` (login) |
+| `testes/` | pytest + `TestClient`, contra um Postgres de verdade |
+
+## Regras (as invariantes, materializadas aqui)
+
+1. **E-mail nunca sai** (invariante 1). As consultas de leitura não trazem `autor_email` nem
+   `remetente` para o Python: a autoria é comparada dentro do SQL. As respostas são montadas por
+   lista branca em `respostas.py`. Nenhum erro ecoa o valor recebido. Há teste que procura o
+   endereço da fixture em todo corpo, cabeçalho e log.
+2. **`situacao` só avança** (invariante 2). A API confere a situação **antes** do `UPDATE`; o
+   trigger do banco é rede de segurança. Evento fora de ordem é gravado com `aplicado = FALSE`.
+4. **Nada é apagado** (invariante 4). Não há rota `DELETE`. Remover é ocultar, e ocultar não volta.
+5. **Visibilidade no servidor** (invariante 5). Oculto, retido e inexistente devolvem o mesmo `404`.
+   As duas exceções vivem só em `GET /eu/itens`, para o próprio autor.
+9. **Sem credencial em código** (invariante 9). Tudo vem do ambiente; ver `.env.example`.
+
+Mais:
+- Sem sessão, a busca **nunca** consulta `mensagem_bruta` (US-04).
+- Autoria vem **só** do e-mail da sessão, comparado no SQL com `autor_email` (ou com o remetente da
+  retida). Nunca de campo do corpo. Outra pessoa: `403`; retida de outra pessoa: `404`.
+- O único `DELETE` do sistema é em `processamento`, quando o autor classifica a retida: é o sinal
+  para o worker rodar a extração dessa mensagem no próximo ciclo.
+- Item do site publica na hora, com `codigo` `AP-XXXXXX` e sem classificação. Clique duplo (mesma
+  pessoa, mesmo tipo e descrição em 30 s) devolve o mesmo item.
+- Foto só é servida enquanto é a foto de um item visível (ou ao autor, se o item foi ocultado).
+- Contato (US-05): o endereço do autor só entra no Python em `banco.destinatario_do_contato`, vai
+  direto para o `To` e não volta na resposta (`202` vazio), no erro, no log nem no evento (`{tamanho}`).
+  `Reply-To` é sempre o e-mail da sessão. Falha de envio: `502 ENVIO_FALHOU`, sem evento.
+- E-mail: o sistema nunca posta na lista. Em desenvolvimento e em teste, **nunca** `smtp` (os testes
+  trocam `smtplib.SMTP` por uma função que falha; use `EMAIL_MODO_ENVIO=arquivo` para ver o `.eml`).
+  Com `smtp`, a API não sobe sem `EMAIL_REMETENTE` e `SMTP_*` reais.
+- Falha de login nunca é JSON: é `302` para `SITE_URL/login?erro=<motivo>`.
+- `LOGIN_SIMULADO` só em desenvolvimento; a API não sobe com ele e `SITE_URL` https.
+- Não invente campo no contrato. Se precisar, é `shared/` (revisão do Miguel) e, se mudar o que o
+  usuário vê, é decisão do PO.
+
+## Comandos
+
+Rode da raiz do repositório, com Python 3.12.
+
+| Para… | Comando |
+|---|---|
+| Instalar | `python3.12 -m venv api/.venv && api/.venv/bin/pip install -r api/requirements.txt` |
+| Subir o banco | `docker compose up -d banco` |
+| Rodar (desenvolvimento) | `api/.venv/bin/uvicorn api.main:app --reload --port 8000` |
+| Rodar (contêiner) | `docker compose up -d api` |
+| Testar | `api/.venv/bin/python -m pytest api/testes` |
+| Testar um arquivo | `api/.venv/bin/python -m pytest api/testes/test_catalogo.py -q` |
+
+Os testes apagam e recriam o banco `longuinho_teste_api` (ou o de `DATABASE_URL_TESTE`, que
+precisa ter "teste" no nome), aplicam `shared/migrations/*.sql` e limpam as tabelas entre testes.
+Não precisam de internet nem de credencial.
