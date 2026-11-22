@@ -37,13 +37,19 @@ export default function Cabecalho() {
       <nav className="menu" aria-label="Conta">
         <div className="menu-itens">
           {/* Sem sessão, /cadastrar leva ao login e volta ao formulário (US-06). */}
-          <Link to="/cadastrar" className="menu-cadastrar">
+          <Link
+            to="/cadastrar"
+            className="menu-cadastrar"
+            aria-current={location.pathname === '/cadastrar' ? 'page' : undefined}
+          >
             <Icone nome="mais" tamanho={16} />
             Cadastrar
           </Link>
           {sessao.carregando ? null : sessao.autenticado ? (
             <>
-              <Link to="/meus-anuncios">Meus anúncios</Link>
+              <Link to="/meus-anuncios" aria-current={location.pathname === '/meus-anuncios' ? 'page' : undefined}>
+                Meus anúncios
+              </Link>
               <button type="button" className="link" onClick={sair}>
                 Sair
               </button>

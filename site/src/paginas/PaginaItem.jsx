@@ -7,6 +7,7 @@ import AcoesDoAutor from '../componentes/AcoesDoAutor.jsx'
 import { FaixaDoTipo, classesDoCracha } from '../componentes/CartaoItem.jsx'
 import Contato from '../componentes/Contato.jsx'
 import Icone from '../componentes/Icone.jsx'
+import { EXPLICACAO_REVISAR } from '../componentes/SeloRevisar.jsx'
 import { useItem } from '../hooks/useItem.js'
 import { useSessao } from '../hooks/useSessao.js'
 import { textoDaLocalizacao, textoDaSituacao } from '../situacao.js'
@@ -89,10 +90,13 @@ export default function PaginaItem() {
   return (
     <article className="detalhe-item">
       {linkVoltar}
+      <div className="principal">
       <div className={`ficha ${classesDoCracha(item)}`}>
         <FaixaDoTipo item={item} />
         <div className="cracha-corpo">
           <h1>{item.descricao}</h1>
+          {/* No celular não há "passar o mouse": a explicação do selo aparece escrita. */}
+          {item.revisar && <p className="nota-revisar">{EXPLICACAO_REVISAR}</p>}
 
           {item.foto_url && <img className="foto" src={item.foto_url} alt={`Foto do objeto: ${item.descricao}`} />}
 
@@ -111,8 +115,13 @@ export default function PaginaItem() {
         <dt>Situação</dt>
         <dd className={`situacao situacao-${item.situacao}`}>
           <Icone nome={item.situacao} tamanho={18} />
-          <span title={item.data_situacao ? `Desde ${dataCompleta(item.data_situacao)}` : undefined}>
-            {textoDaSituacao(item)}
+          <span>
+            <span title={item.data_situacao ? `Desde ${dataCompleta(item.data_situacao)}` : undefined}>
+              {textoDaSituacao(item)}
+            </span>
+            {item.situacao !== 'aberto' && item.data_situacao && (
+              <span className="desde">desde {dataCompleta(item.data_situacao)}</span>
+            )}
           </span>
         </dd>
 
@@ -127,6 +136,7 @@ export default function PaginaItem() {
       </div>
 
       <TextoOriginal item={item} sessao={sessao} caminho={location.pathname} />
+      </div>
 
       {/* Só esconde os botões: quem recusa de verdade é a API, com 403. */}
       <div className="lateral">

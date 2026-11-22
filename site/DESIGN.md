@@ -70,9 +70,8 @@ components:
     rounded: "{rounded.campo}"
     padding: "10px 18px"
     height: "48px"
-  botao-perigo:
-    backgroundColor: "{colors.papel}"
-    textColor: "{colors.vermelho-escuro}"
+  botao-sem-volta:
+    textColor: "{colors.preto}"
     rounded: "{rounded.campo}"
   campo:
     backgroundColor: "{colors.papel}"
@@ -136,7 +135,7 @@ A paleta é a do Manual de Identidade Visual do CIn (ago/2020), mais poucas core
   (Buscar, Publicar anúncio, Enviar mensagem, Salvar correção). Também marca seleção de texto, cursor e
   caixas marcadas.
 - **Vermelho escuro CIn** (#AF0421): a segunda faixa do cabeçalho, o estado de passar o mouse do botão
-  principal, links, textos de erro e o botão de remover.
+  principal, links e textos de erro.
 
 ### Secondary
 - **Verde-petróleo do achado** (#0A6B5E): só a faixa de anúncio achado e os avisos de sucesso. É a cor
@@ -199,7 +198,9 @@ de 600px.
   lado a lado, depois a lista. De 600px a 899px os três filtros ficam numa linha. A partir de 900px a busca
   vira uma coluna fixa de 300px à esquerda, que acompanha a rolagem, e a lista fica à direita.
 - **Item.** Uma coluna no celular: ficha, texto original, contato ou ações do autor. A partir de 900px, a
-  ficha e o texto ficam à esquerda e o contato ou as ações numa coluna de 360px à direita.
+  ficha e o texto ficam à esquerda e o contato ou as ações numa coluna de 360px à direita, onde as opções
+  de formulário ficam sempre em uma coluna.
+- **Paginação.** No celular, o "Página 1 de 2" fica numa linha e os dois botões dividem a de baixo.
 - **Formulários.** Opções em uma coluna no celular e em duas a partir de 600px. Botões empilhados abaixo de
   480px, lado a lado acima disso.
 - **Ritmo.** Espaços de 6, 10, 14 e 18px dentro dos blocos; 12 a 16px entre cartões; 32px entre colunas.
@@ -225,6 +226,7 @@ do crachá e os campos da ficha: é o único ornamento, e vem do próprio crach�
 ### Crachá (o registro de um anúncio)
 - **Estrutura:** faixa do tipo (ícone, "ACHADO" ou "PERDIDO", selo "revisar" quando houver, e a data à
   direita); nome do objeto; local com o ícone de alfinete; picote; situação.
+- **Local:** tinta cheia e peso 600, com só o alfinete em tinta suave. É por ele que a pessoa se orienta.
 - **Faixa:** verde-petróleo para achado, preto para perdido, texto branco. Anúncio encerrado ou removido
   tem a faixa **vazada**: fundo branco, texto na cor do tipo e uma linha embaixo.
 - **Situação:** peso 700, com o desenho da situação à esquerda. "aberto" em preto, "reivindicado há …,
@@ -232,6 +234,8 @@ do crachá e os campos da ficha: é o único ornamento, e vem do próprio crach�
   objeto está agora vem na mesma linha, em peso 400.
 - **Comportamento:** na lista, o cartão inteiro é clicável (o link do nome se estica por cima). O foco do
   teclado contorna o cartão todo.
+- **Nada só no `title`:** o celular não tem "passar o mouse". Na página do item, a explicação do selo
+  "revisar" e o "desde …" da situação aparecem escritos.
 - **Variações:** a ficha da página do item é o mesmo crachá, maior. Em "Meus anúncios", a mensagem que não
   entrou no catálogo tem faixa âmbar com o motivo, e o anúncio que ainda não foi para a lista ganha uma
   aba âmbar colada embaixo.
@@ -241,8 +245,11 @@ do crachá e os campos da ficha: é o único ornamento, e vem do próprio crach�
 - **Primary:** fundo vermelho, texto branco. Um por bloco.
 - **Hover / Focus:** o fundo vai a vermelho escuro em 160ms. O foco é um anel preto de 3px, afastado 2px
   (branco quando o botão está no cabeçalho).
-- **Secondary:** fundo branco, borda e texto pretos. **Perigo:** fundo branco, borda e texto vermelho-escuros
-  (só "Remover do catálogo"). **Link:** "Sair" e "Limpar filtros" são botões com cara de link sublinhado.
+- **Secondary:** fundo branco, borda e texto pretos. **Sem volta:** "Remover do catálogo" é um botão de
+  texto preto sublinhado, o mais discreto do bloco, e sempre passa por uma confirmação. Ele não usa
+  vermelho. **Link:** "Sair" e "Limpar filtros" são botões com cara de link sublinhado.
+- **Ordem nas ações do autor:** "Marcar como devolvido" (principal), "Corrigir" (secundário), "Remover do
+  catálogo" (sem volta).
 - **Disabled:** fundo cinza claro, texto cinza, sem mudança ao passar o mouse.
 
 ### Chips

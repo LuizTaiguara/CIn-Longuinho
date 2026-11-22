@@ -3,13 +3,14 @@
 
 import Icone from './Icone.jsx'
 
-const EXPLICACAO = 'A classificação automática deste anúncio teve confiança média: confira o texto antes de confiar nela.'
+export const EXPLICACAO_REVISAR =
+  'A classificação automática deste anúncio teve confiança média: confira o texto antes de confiar nela.'
 
 export default function SeloRevisar() {
   return (
-    <span className="selo-revisar" title={EXPLICACAO}>
+    <span className="selo-revisar" title={EXPLICACAO_REVISAR}>
       <Icone nome="alerta" tamanho={14} />
-      revisar<span className="visualmente-oculto"> ({EXPLICACAO})</span>
+      revisar<span className="visualmente-oculto"> ({EXPLICACAO_REVISAR})</span>
     </span>
   )
 }

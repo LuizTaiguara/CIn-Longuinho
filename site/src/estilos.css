@@ -214,6 +214,12 @@ main {
   text-decoration-thickness: 2px;
 }
 
+.menu a[aria-current='page']:not(.menu-cadastrar) {
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 6px;
+}
+
 .menu .menu-cadastrar {
   gap: 6px;
   min-height: 36px;
@@ -308,20 +314,31 @@ button.secundario:hover,
   background: var(--chao);
 }
 
+/* Ação sem volta: discreta, sem o vermelho da marca. Ela ainda passa por uma confirmação. */
 button.perigo {
-  background: var(--papel);
-  border-color: var(--vermelho-escuro);
-  color: var(--vermelho-escuro);
+  background: none;
+  border-color: transparent;
+  color: var(--tinta);
+  font-weight: 600;
+  text-decoration: underline;
+  text-decoration-thickness: 1.5px;
+  text-underline-offset: 3px;
 }
 
 button.perigo:hover {
-  background: var(--erro-claro);
+  background: var(--chao);
+  text-decoration-thickness: 2.5px;
 }
 
-button.secundario:disabled,
-button.perigo:disabled {
+button.secundario:disabled {
   background: var(--chao);
   border-color: var(--borda);
+  color: #6f6a6b;
+}
+
+button.perigo:disabled {
+  background: none;
+  border-color: transparent;
   color: #6f6a6b;
 }
 
@@ -714,10 +731,22 @@ input[type='file']::file-selector-button {
   outline-offset: 2px;
 }
 
+/* O local é por onde a pessoa se orienta no prédio: tinta cheia, só o alfinete é suave. */
 .onde {
   display: flex;
   align-items: flex-start;
   gap: 6px;
+  margin-top: 6px;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+.onde .icone {
+  color: var(--tinta-suave);
+}
+
+.nota {
   margin-top: 6px;
   color: var(--tinta-suave);
   font-size: 0.9375rem;
@@ -755,13 +784,20 @@ input[type='file']::file-selector-button {
   font-weight: 400;
 }
 
+/* No celular: o indicador numa linha e os dois botões dividindo a de baixo. */
 .paginacao {
-  display: flex;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   align-items: center;
-  justify-content: space-between;
   gap: 10px;
   margin-top: 16px;
   font-size: 0.875rem;
+  white-space: nowrap;
+}
+
+.paginacao span {
+  grid-column: 1 / -1;
+  grid-row: 1;
 }
 
 .paginacao button {
@@ -851,9 +887,19 @@ input[type='file']::file-selector-button {
 
 /* ---------------------------------------------------------------- página do item */
 
-.detalhe-item {
+.detalhe-item,
+.principal {
   display: grid;
   gap: 16px;
+  min-width: 0;
+}
+
+.lateral {
+  min-width: 0;
+}
+
+.lateral .opcoes {
+  grid-template-columns: minmax(0, 1fr);
 }
 
 .voltar a {
@@ -888,6 +934,23 @@ input[type='file']::file-selector-button {
   letter-spacing: -0.015em;
   overflow-wrap: anywhere;
   text-wrap: balance;
+}
+
+.nota-revisar {
+  margin-top: 10px;
+  padding: 10px 12px;
+  border-radius: var(--raio-campo);
+  background: var(--atencao-claro);
+  color: var(--atencao-tinta);
+  font-size: 0.9375rem;
+  line-height: 1.4;
+}
+
+.desde {
+  display: block;
+  color: var(--tinta-suave);
+  font-size: 0.875rem;
+  font-weight: 400;
 }
 
 .foto {
@@ -1013,8 +1076,11 @@ input[type='file']::file-selector-button {
   background: var(--papel);
 }
 
+/* O texto inteiro à vista: a linha do código é a que não pode ser apagada. */
 .email-pronto textarea {
+  max-height: 70vh;
   font-size: 0.9375rem;
+  field-sizing: content;
 }
 
 .grupo > h2 {
@@ -1082,8 +1148,15 @@ input[type='file']::file-selector-button {
   font-weight: 700;
 }
 
+/* Sobre o âmbar, o texto de apoio puxa para o âmbar, não para o cinza. */
+.pendencia-lista .aviso {
+  color: var(--atencao-tinta);
+}
+
 .pendencia-lista .email-pronto {
-  padding: 14px;
+  padding: 0;
+  border: 0;
+  background: none;
 }
 
 /* ---------------------------------------------------------------- telas maiores */
@@ -1092,6 +1165,11 @@ input[type='file']::file-selector-button {
   .botoes {
     display: flex;
     flex-wrap: wrap;
+  }
+
+  .paginacao {
+    display: flex;
+    justify-content: space-between;
   }
 
   .tela-login .botao,
@@ -1214,16 +1292,12 @@ input[type='file']::file-selector-button {
     grid-column: 1 / -1;
   }
 
-  .detalhe-item > .ficha,
-  .detalhe-item > .texto-original {
+  .detalhe-item > .principal {
     grid-column: 1;
   }
 
   .detalhe-item > .lateral {
-    position: sticky;
-    top: 16px;
     grid-column: 2;
-    grid-row: 2 / span 2;
   }
 }
 

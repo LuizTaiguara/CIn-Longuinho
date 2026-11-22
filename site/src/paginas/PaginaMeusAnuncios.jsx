@@ -61,7 +61,7 @@ function Retida({ retida, onClassificada, onRecarregar }) {
       </div>
       <div className="cracha-corpo">
         <p className="nome">{retida.descricao}</p>
-        <p className="onde">
+        <p className="nota">
           <time dateTime={retida.data_registro} title={dataCompleta(retida.data_registro)}>
             {tempoRelativo(retida.data_registro)}
           </time>
@@ -134,7 +134,7 @@ function Oculto({ item }) {
       </FaixaDoTipo>
       <div className="cracha-corpo">
         <p className="nome">{item.descricao}</p>
-        <p className="onde">A remoção não pode ser desfeita pelo site.</p>
+        <p className="nota">A remoção não pode ser desfeita pelo site.</p>
       </div>
     </article>
   )
