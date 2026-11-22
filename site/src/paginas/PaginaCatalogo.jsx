@@ -1,0 +1,54 @@
+// Catálogo (US-04): busca, filtros, lista única e paginação. Aberto para leitura, sem login.
+
+import { useRef } from 'react'
+import BarraDeBusca from '../componentes/BarraDeBusca.jsx'
+import EstadoDoCatalogo from '../componentes/EstadoDoCatalogo.jsx'
+import ListaItens from '../componentes/ListaItens.jsx'
+import Paginacao from '../componentes/Paginacao.jsx'
+import { ESTADOS, estadoDoCatalogo } from '../estadoDoCatalogo.js'
+import { FILTROS_VAZIOS } from '../filtros.js'
+import { useItens, useLocais } from '../hooks/useCatalogo.js'
+import { useFiltrosNaUrl } from '../hooks/useFiltrosNaUrl.js'
+
+export default function PaginaCatalogo() {
+  const { filtros, pagina, mudarFiltros, mudarPagina } = useFiltrosNaUrl()
+  const locais = useLocais()
+  const itens = useItens(filtros, pagina)
+  const estado = estadoDoCatalogo(itens, filtros)
+  const resultados = useRef(null)
+
+  // Ao trocar de página, o foco vai para o topo dos resultados (e a tela rola até lá).
+  const trocarPagina = (nova) => {
+    mudarPagina(nova)
+    resultados.current?.focus()
+  }
+
+  return (
+    <>
+      <h1 className="visualmente-oculto">Catálogo</h1>
+      <BarraDeBusca filtros={filtros} locais={locais} onMudar={mudarFiltros} />
+
+      <section
+        className="resultados"
+        aria-label="Resultados"
+        aria-live="polite"
+        aria-busy={itens.carregando}
+        tabIndex={-1}
+        ref={resultados}
+      >
+        {estado === ESTADOS.COM_ITENS ? (
+          <>
+            <ListaItens itens={itens.resposta.itens} />
+            <Paginacao paginacao={itens.resposta.paginacao} onMudar={trocarPagina} />
+          </>
+        ) : (
+          <EstadoDoCatalogo
+            estado={estado}
+            onLimparFiltros={() => mudarFiltros({ ...FILTROS_VAZIOS })}
+            onTentarDeNovo={itens.tentarDeNovo}
+          />
+        )}
+      </section>
+    </>
+  )
+}

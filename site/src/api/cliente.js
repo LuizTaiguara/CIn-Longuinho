@@ -1,5 +1,6 @@
 // Cliente da API REST (contrato em shared/openapi.yaml, prefixo /api).
 // O site só conversa com a API: nunca com o banco nem com o worker (site/AGENTS.md).
+// A sessão é o cookie HTTP-only que a API grava; o fetch o manda sozinho (mesma origem).
 
 import { paramsDosFiltros } from '../filtros.js'
 
@@ -16,10 +17,20 @@ export class ErroApi extends Error {
   }
 }
 
-async function obterJson(caminho, { signal } = {}) {
+// `corpo`: objeto (vai como JSON) ou FormData (vai como multipart). Respostas sem corpo
+// (202, 204) devolvem null.
+async function requisitar(caminho, { metodo = 'GET', corpo, signal } = {}) {
+  const opcoes = { method: metodo, signal, headers: { Accept: 'application/json' } }
+  if (corpo instanceof FormData) {
+    opcoes.body = corpo
+  } else if (corpo !== undefined) {
+    opcoes.headers['Content-Type'] = 'application/json'
+    opcoes.body = JSON.stringify(corpo)
+  }
+
   let resposta
   try {
-    resposta = await fetch(`${PREFIXO}${caminho}`, { signal, headers: { Accept: 'application/json' } })
+    resposta = await fetch(`${PREFIXO}${caminho}`, opcoes)
   } catch (erro) {
     if (erro.name === 'AbortError') throw erro
     throw new ErroApi('Falha de rede ao falar com a API.')
@@ -33,18 +44,37 @@ async function obterJson(caminho, { signal } = {}) {
     }
     throw new ErroApi(`A API respondeu ${resposta.status}.`, { status: resposta.status, codigo })
   }
-  return resposta.json()
+  if (resposta.status === 202 || resposta.status === 204) return null
+  const texto = await resposta.text()
+  return texto ? JSON.parse(texto) : null
 }
+
+const comId = (id) => encodeURIComponent(id)
 
 export function listarItens(filtros, { pagina = 1, signal } = {}) {
   const params = paramsDosFiltros(filtros)
   if (pagina > 1) params.set('pagina', String(pagina))
   const query = params.toString()
-  return obterJson(`/itens${query ? `?${query}` : ''}`, { signal })
+  return requisitar(`/itens${query ? `?${query}` : ''}`, { signal })
 }
 
 // GET /api/locais: vocabulário fechado de locais do F-07 (SCRUM-64).
-// ATENÇÃO: esta rota ainda não está no contrato (PR #8). Foi pedida ao Miguel em 13/11/2026.
 export function listarLocais({ signal } = {}) {
-  return obterJson('/locais', { signal })
+  return requisitar('/locais', { signal })
+}
+
+// GET /api/itens/{id}: 404 para item oculto, retido ou inexistente, sem distinguir.
+export function obterItem(id, { signal } = {}) {
+  return requisitar(`/itens/${comId(id)}`, { signal })
+}
+
+// GET /api/eu: 401 quer dizer só "ninguém entrou". Não é erro de tela.
+export function obterSessao({ signal } = {}) {
+  return requisitar('/eu', { signal })
+}
+
+// O login é todo da API: o site só manda a pessoa para lá, com o caminho para voltar.
+// O site nunca fala com o Google.
+export function linkDeLogin(retorno = '/') {
+  return `${PREFIXO}/auth/google?retorno=${encodeURIComponent(retorno)}`
 }

@@ -31,22 +31,39 @@ Vale além do `AGENTS.md` da raiz. Front: Pedro e Rafael. UX: Klarissa.
 
 ## Comandos
 
-Stack: **React + Vite**, com testes em **Vitest** + Testing Library (decisão de 13/11/2026). Rode
-tudo de dentro de `site/`, com Node 20 ou mais novo.
+Stack: **React + Vite + React Router**, com testes em **Vitest** + Testing Library (decisão de
+13/11/2026). Rode tudo de dentro de `site/`, com Node 20 ou mais novo.
 
 | Para… | Comando |
 |---|---|
-| Instalar | `npm install` |
+| Instalar | `npm ci` |
 | Rodar com o mock local | `npm run dev` e abrir o endereço que aparecer (porta 5173) |
-| Rodar contra uma API de verdade ou o mock oficial | `API_URL=http://localhost:8000 npm run dev` |
+| Rodar contra a API de verdade | `API_URL=http://localhost:8000 npm run dev` |
 | Testar | `npm test` |
-| Gerar a versão de produção | `npm run build` |
+| Gerar a versão de produção | `npm run build` (sai em `site/dist/`, que não é commitado) |
 
-**Mock local (`site/mock/`).** Sem `API_URL`, o `npm run dev` responde `/api/itens` e
-`/api/locais` com dados fictícios, imitando o servidor (busca sem acento, filtros, paginação).
-É **temporário**: quando o mock oficial do contrato (SCRUM-67) existir, rode com `API_URL` e apague
-a pasta.
+**Variáveis.** O Vite lê o `.env` da raiz do repositório. Só as que começam com `VITE_` chegam ao
+navegador, então nenhuma delas pode ter segredo. Hoje há uma: `VITE_EMAIL_REMOCAO`, o endereço do
+rodapé (US-09).
 
-Para ver os estados da SCRUM-100 no navegador: `MOCK_VAZIO=1 npm run dev` (catálogo vazio) e
-`MOCK_FALHA=1 npm run dev` (API fora do ar). A busca sem resultado aparece com qualquer termo
-que não exista, por exemplo `?texto=guarda-chuva`.
+**Mock local (`site/mock/`).** Sem `API_URL`, o `npm run dev` responde as 14 rotas de `/api` do
+contrato com dados fictícios, imitando as regras do servidor: busca sem acento, filtros, paginação,
+404 para item oculto, texto original só com sessão, `pode_gerir`, 401 e 403. As regras ficam em
+`mock/rotas.js` (testadas em `mock/servidorLocal.test.js`) e os dados em `mock/dados.js`.
+O mock oficial da SCRUM-67 foi dispensado: a API de verdade substitui este mock, que é descartável.
+
+- **Login simulado:** "Entrar com a conta do CIn" grava o cookie `sessao_mock` e volta para onde
+  você estava. "Sair" apaga o cookie. A sessão simulada é autora de alguns itens fictícios, tem uma
+  mensagem retida e um item oculto, para dar para ver "Meus anúncios" inteiro.
+- **Estados para ver no navegador:**
+
+| Variável | Efeito |
+|---|---|
+| `MOCK_VAZIO=1` | catálogo sem nenhum item (primeira execução) |
+| `MOCK_FALHA=1` | API fora do ar: tudo responde 503 |
+| `MOCK_CONTATO_FALHA=1` | o contato com quem anunciou responde 502 |
+| `MOCK_LOGIN_FORA=1` | o login volta como conta de fora do CIn |
+
+A busca sem resultado aparece com qualquer termo que não exista, por exemplo `?texto=guarda-chuva`.
+Os dados do mock mudam em memória (corrigir, encerrar, ocultar, cadastrar) e voltam ao início
+quando o `npm run dev` é reiniciado.

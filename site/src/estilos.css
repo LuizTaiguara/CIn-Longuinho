@@ -1,5 +1,5 @@
-/* Estilo mínimo e provisório. O visual segue os wireframes da Klarissa (F-04) quando o Pedro
-   montar a lista (SCRUM-97). */
+/* Estilo mínimo, mobile-first e sem biblioteca de UI. O visual definitivo segue os wireframes da
+   Klarissa (F-04), que estão no Figma: a UX revisa estas telas depois. */
 
 :root {
   --fundo: #f7f7f5;
@@ -26,14 +26,29 @@ body {
   padding: 24px 16px 48px;
 }
 
-.cabecalho h1 {
+.cabecalho .titulo {
   margin: 0 0 4px;
   font-size: 1.6rem;
+  font-weight: 700;
 }
 
-.cabecalho p {
+.cabecalho .titulo a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.cabecalho .subtitulo {
   margin: 0 0 20px;
   color: var(--texto-suave);
+}
+
+a {
+  color: var(--destaque);
+}
+
+:focus-visible {
+  outline: 3px solid #1a5fb4;
+  outline-offset: 2px;
 }
 
 .barra-de-busca {
@@ -122,6 +137,42 @@ button[type='submit'] {
 
 .item .descricao {
   margin: 6px 0 4px;
+  font-size: 1.05rem;
+}
+
+.item .descricao a {
+  color: var(--texto);
+}
+
+.etiquetas {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+  margin: 0;
+}
+
+.item .situacao {
+  margin: 6px 0 0;
+  font-size: 0.9rem;
+}
+
+.resultados:focus {
+  outline: none;
+}
+
+.paginacao {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: center;
+  justify-content: center;
+  margin-top: 16px;
+}
+
+button:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
 }
 
 .item .detalhes {
@@ -178,4 +229,113 @@ button[type='submit'] {
 
 .estado-erro {
   border-color: var(--destaque);
+}
+
+.visualmente-oculto {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.selo-revisar {
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 1px 8px;
+  border-radius: 999px;
+  border: 1px solid #8a6d00;
+  color: #5c4800;
+  background: #fff6d6;
+  cursor: help;
+}
+
+.item .localizacao {
+  color: var(--texto-suave);
+}
+
+.voltar {
+  margin: 0 0 12px;
+}
+
+.detalhe-item {
+  padding: 16px;
+  background: var(--superficie);
+  border: 1px solid var(--borda);
+  border-radius: 8px;
+}
+
+.detalhe-item h1 {
+  margin: 8px 0 12px;
+  font-size: 1.4rem;
+}
+
+.detalhe-item .foto {
+  display: block;
+  max-width: 100%;
+  max-height: 420px;
+  margin: 0 0 12px;
+  border-radius: 6px;
+}
+
+.dados {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  gap: 6px 16px;
+  margin: 0 0 16px;
+}
+
+.dados dt {
+  font-weight: 600;
+}
+
+.dados dd {
+  margin: 0;
+}
+
+.texto-original {
+  border-top: 1px solid var(--borda);
+  padding-top: 12px;
+  margin-top: 12px;
+}
+
+.texto-original h2 {
+  margin: 0 0 4px;
+  font-size: 1.05rem;
+}
+
+.texto-original pre {
+  white-space: pre-wrap;
+  word-break: break-word;
+  font-family: inherit;
+  background: var(--fundo);
+  padding: 12px;
+  border-radius: 6px;
+  margin: 8px 0 0;
+}
+
+@media (max-width: 480px) {
+  .dados {
+    grid-template-columns: 1fr;
+  }
+
+  .dados dd {
+    margin-bottom: 6px;
+  }
+}
+
+.rodape {
+  margin-top: 40px;
+  padding-top: 16px;
+  border-top: 1px solid var(--borda);
+  font-size: 0.9rem;
+  color: var(--texto-suave);
+}
+
+.rodape a {
+  overflow-wrap: anywhere;
 }

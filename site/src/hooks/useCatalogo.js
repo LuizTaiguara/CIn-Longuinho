@@ -1,18 +1,19 @@
 import { useCallback, useEffect, useState } from 'react'
 import { listarItens, listarLocais } from '../api/cliente.js'
 
-// Busca os itens sempre que os filtros mudam. Uma busca nova cancela a anterior,
+// Busca os itens sempre que os filtros ou a página mudam. Uma busca nova cancela a anterior,
 // para uma resposta atrasada não sobrescrever a mais recente.
 // `tentarDeNovo` refaz a mesma busca (botão da tela de erro, SCRUM-100).
-export function useItens(filtros) {
+export function useItens(filtros, pagina = 1) {
   const [estado, setEstado] = useState({ carregando: true, erro: null, resposta: null })
   const [tentativa, setTentativa] = useState(0)
-  const chave = JSON.stringify(filtros)
+  const chave = JSON.stringify({ filtros, pagina })
 
   useEffect(() => {
     const controle = new AbortController()
     setEstado((anterior) => ({ ...anterior, carregando: true, erro: null }))
-    listarItens(JSON.parse(chave), { signal: controle.signal })
+    const pedido = JSON.parse(chave)
+    listarItens(pedido.filtros, { pagina: pedido.pagina, signal: controle.signal })
       .then((resposta) => setEstado({ carregando: false, erro: null, resposta }))
       .catch((erro) => {
         if (erro.name === 'AbortError') return
