@@ -1,0 +1,67 @@
+# Produção (SCRUM-108). É um complemento do docker-compose.yml: use sempre os dois juntos.
+#
+#   docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d --build
+#
+# Para não digitar os dois arquivos toda vez, ponha no .env da VPS:
+#   COMPOSE_FILE=docker-compose.yml:docker-compose.prod.yml
+# Aí `docker compose up -d`, `docker compose logs` e o cron do worker já usam os dois.
+#
+# O que muda em relação ao desenvolvimento:
+#   - só o Caddy fica exposto (80 e 443); banco, API e site não têm porta para fora;
+#   - o Caddy cuida do HTTPS sozinho (certificado Let's Encrypt para DOMINIO);
+#   - tudo reinicia sozinho depois de queda ou reboot;
+#   - LOGIN_SIMULADO fica vazio, mesmo que alguém o preencha no .env;
+#   - SITE_URL, API_URL e o retorno do login Google saem de DOMINIO.
+#
+# Precisa do Docker Compose 2.24 ou mais novo (por causa do `!reset`). Passo a passo: docs/DEPLOY.md.
+
+services:
+  caddy:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    environment:
+      DOMINIO: "${DOMINIO:?Defina DOMINIO no .env, por exemplo longuinho.exemplo.br}"
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      # Certificados e estado do Caddy. Apagar este volume força a emissão de certificado novo.
+      - caddy-dados:/data
+      - caddy-config:/config
+    depends_on:
+      - site
+      - api
+
+  site:
+    restart: unless-stopped
+    ports: !reset []
+
+  banco:
+    restart: unless-stopped
+    ports: !reset []
+    environment:
+      POSTGRES_PASSWORD: "${POSTGRES_PASSWORD:?Defina POSTGRES_PASSWORD no .env}"
+
+  api:
+    restart: unless-stopped
+    ports: !reset []
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER:-longuinho}:${POSTGRES_PASSWORD}@banco:5432/${POSTGRES_DB:-longuinho}
+      # Login simulado nunca em produção: este valor vazio vence o que estiver no .env.
+      LOGIN_SIMULADO: ""
+      SITE_URL: https://${DOMINIO}
+      API_URL: https://${DOMINIO}
+      GOOGLE_REDIRECT_URI: https://${DOMINIO}/api/auth/google/callback
+
+  # Continua sem subir com `up`: o cron chama `docker compose run --rm worker` a cada 5 minutos.
+  worker:
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER:-longuinho}:${POSTGRES_PASSWORD}@banco:5432/${POSTGRES_DB:-longuinho}
+      # O aviso ao autor (US-15) leva o link do item: precisa do endereço público.
+      SITE_URL: https://${DOMINIO}
+
+volumes:
+  caddy-dados:
+  caddy-config:

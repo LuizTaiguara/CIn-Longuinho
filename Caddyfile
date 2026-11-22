@@ -1,0 +1,24 @@
+# Proxy de entrada em produção (SCRUM-108). O endereço vem da variável DOMINIO (.env da VPS).
+# O Caddy pede e renova o certificado HTTPS sozinho; para isso o DNS de DOMINIO precisa apontar
+# para a VPS e as portas 80 e 443 precisam estar abertas.
+#
+# /api/* vai para a API; todo o resto vai para o site (nginx com o build do Vite).
+
+{$DOMINIO} {
+	encode zstd gzip
+
+	header {
+		Strict-Transport-Security "max-age=31536000"
+		X-Content-Type-Options "nosniff"
+		Referrer-Policy "strict-origin-when-cross-origin"
+		-Server
+	}
+
+	handle /api/* {
+		reverse_proxy api:8000
+	}
+
+	handle {
+		reverse_proxy site:80
+	}
+}
