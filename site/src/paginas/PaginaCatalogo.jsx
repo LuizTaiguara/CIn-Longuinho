@@ -28,6 +28,13 @@ export default function PaginaCatalogo() {
   return (
     <div className="catalogo">
       <h1 className="visualmente-oculto">Catálogo</h1>
+      <div className="abertura">
+        {/* Chamada pedida pelo PO em 23/11/2026. Não é um título: o h1 da página continua "Catálogo". */}
+        <p className="chamada">
+          O seu item em <em>3</em> cliquinhos
+        </p>
+        <p className="subtitulo">O que circula na lista achados-perdidos@cin.ufpe.br, num lugar só.</p>
+      </div>
       <BarraDeBusca filtros={filtros} locais={locais} onMudar={mudarFiltros} />
 
       <section

@@ -1,4 +1,4 @@
-// Cabeçalho de todas as telas: título, "Cadastrar" e "Entrar com a conta do CIn" ou
+// Cabeçalho de todas as telas: a marca CIn-Longuinho, "Cadastrar" e "Entrar com a conta do CIn" ou
 // "Meus anúncios" + "Sair". O botão de entrar é um link para a API, que fala com o Google.
 
 import { Link, useLocation, useNavigate } from 'react-router-dom'
@@ -28,12 +28,15 @@ export default function Cabecalho() {
 
   return (
     <header className="cabecalho">
-      <div className="cabecalho-marca">
-        <p className="titulo">
-          <Link to="/">Achados e Perdidos do CIn</Link>
-        </p>
-        <p className="subtitulo">O que circula na lista achados-perdidos@cin.ufpe.br, num lugar só.</p>
-      </div>
+      {/* Marca só tipográfica (ADR-011: não é o logotipo do CIn). O hífen é desenhado como um
+          traço vermelho, mas continua no texto para o nome ser lido como "CIn-Longuinho". */}
+      <p className="marca">
+        <Link to="/">
+          <span className="marca-cin">CIn</span>
+          <span className="marca-traco">-</span>
+          Longuinho
+        </Link>
+      </p>
       <nav className="menu" aria-label="Conta">
         <div className="menu-itens">
           {/* Sem sessão, /cadastrar leva ao login e volta ao formulário (US-06). */}

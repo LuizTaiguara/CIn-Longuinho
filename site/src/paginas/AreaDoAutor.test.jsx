@@ -66,7 +66,7 @@ describe('entrar com a conta do CIn (SCRUM-106, US-15)', () => {
     expect((await screen.findByRole('alert')).textContent).toBe(
       'Só contas @cin.ufpe.br podem gerir anúncios. O catálogo continua aberto para leitura.',
     )
-    fireEvent.click(screen.getByRole('link', { name: 'Achados e Perdidos do CIn' }))
+    fireEvent.click(screen.getByRole('link', { name: 'CIn-Longuinho' }))
     expect(await screen.findByText('Garrafa térmica azul')).toBeTruthy()
   })
 

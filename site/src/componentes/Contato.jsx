@@ -26,9 +26,10 @@ export default function Contato({ item, caminho }) {
     return (
       <section className="contato" aria-labelledby="titulo-contato">
         <h2 id="titulo-contato">Falar com quem anunciou</h2>
-        <p>
-          <a href={linkDeLogin(caminho)}>Entre com a conta do CIn para falar com quem anunciou</a>.
-        </p>
+        <p className="aviso">A mensagem vai por e-mail, e o endereço de ninguém aparece aqui.</p>
+        <a className="botao botao-largo" href={linkDeLogin(caminho)}>
+          Entre com a conta do CIn para falar com quem anunciou
+        </a>
       </section>
     )
   }
