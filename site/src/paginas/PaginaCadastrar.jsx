@@ -271,14 +271,24 @@ export default function PaginaCadastrar() {
 
         <div className="campo">
           <label htmlFor="cadastro-foto">Foto (opcional): JPEG, PNG ou WebP, até 5 MB</label>
-          <input
-            id="cadastro-foto"
-            type="file"
-            accept={FORMATOS_DE_FOTO.join(',')}
-            aria-invalid={erros.foto ? true : undefined}
-            aria-describedby={erros.foto ? 'cadastro-foto-erro' : undefined}
-            onChange={escolherFoto}
-          />
+          {/* O campo nativo fica invisível por cima do botão desenhado: continua sendo o mesmo
+              campo para o teclado e o leitor de tela, mas sem o "Choose File" do navegador. */}
+          <div className="campo-arquivo">
+            <span className="botao botao-secundario" aria-hidden="true">
+              {foto ? 'Trocar foto' : 'Escolher foto'}
+            </span>
+            <span className="nome-do-arquivo" aria-hidden="true">
+              {foto ? foto.name : 'Nenhuma foto escolhida'}
+            </span>
+            <input
+              id="cadastro-foto"
+              type="file"
+              accept={FORMATOS_DE_FOTO.join(',')}
+              aria-invalid={erros.foto ? true : undefined}
+              aria-describedby={erros.foto ? 'cadastro-foto-erro' : undefined}
+              onChange={escolherFoto}
+            />
+          </div>
           {erros.foto && (
             <p className="erro-campo" id="cadastro-foto-erro">
               {erros.foto}

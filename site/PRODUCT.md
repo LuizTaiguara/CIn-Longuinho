@@ -3,8 +3,9 @@
 <!-- impeccable:product-schema 1 -->
 
 Registro de produto usado pela skill de design. Não é fonte de verdade: resume o `AGENTS.md` da raiz, o
-`site/AGENTS.md` e o `docs/BACKLOG.md`. Se divergir deles, eles vencem. Escrito em 22/11/2026, numa rodada
-sem entrevista: o que não vem citado de um documento está marcado como *(inferido)*.
+`site/AGENTS.md` e o `docs/BACKLOG.md`. Se divergir deles, eles vencem. Escrito em 22/11/2026 numa rodada
+sem entrevista e revisto no mesmo dia com o PO (entrevista de briefing do redesign). O que não vem citado de
+um documento nem da entrevista está marcado como *(inferido)*.
 
 ## Platform
 
@@ -13,8 +14,11 @@ web
 ## Users
 
 - Alunos, professores e funcionários do Centro de Informática da UFPE (US-04).
-- Quase sempre no celular, entre uma aula e outra, com pouca atenção disponível (briefing do PO, 22/11/2026).
+- Quase sempre no celular, de passagem, entre uma aula e outra, com pouca atenção disponível. O desktop é
+  secundário (confirmado pelo PO, 22/11/2026).
 - Dois trabalhos: achar "minha garrafa azul" no que já foi anunciado, e avisar que achou ou perdeu algo.
+- O primeiro gesto, na maioria das vezes, é **buscar uma coisa**: digitar e filtrar. Rolar os recentes e
+  anunciar vêm depois (PO, 22/11/2026).
 - Quem anunciou volta para gerir o próprio anúncio: corrigir, marcar como devolvido, remover (US-15).
 - Ler o catálogo não exige login. Só entra quem tem conta Google `@cin.ufpe.br` (ADR-010).
 
@@ -51,11 +55,18 @@ devolver nada: mostra o que foi anunciado e o que se sabe, dizendo de onde veio 
 
 ## Brand Commitments
 
+- **Nome e marca: CIn-Longuinho** (decisão do PO, 23/11/2026). Marca só tipográfica, desenhada pelo projeto;
+  não é logotipo do CIn. Longuinho remete a São Longuinho, o santo das coisas perdidas.
+- Frase de chamada pedida pelo PO: "o seu item em 3 cliquinhos" (redação final em aberto).
 - O sistema **não é institucional**: usa as cores do CIn-UFPE, mas não o logotipo do CIn nem o da UFPE (ADR-011).
 - Paleta do Manual de Identidade Visual do CIn (ago/2020): vermelho `#DB1E2F` (primária), vermelho escuro
   `#AF0421`, preto `#231F20`, cinza claro `#E0E1E0`. Cores complementares, com moderação, para os estados.
 - A fonte oficial (Proxima Nova) é paga. Usa-se uma gratuita parecida, servida pelo próprio site.
 - Tudo em português. Tom direto, de colega para colega, sem jargão de sistema *(inferido dos textos atuais)*.
+- O PO considera errado, mesmo bem-feito (22/11/2026): cara de órgão público ou sistema da universidade
+  (burocrático, tipo SIGAA); cara de painel administrativo (tabela cinza, fria, ferramenta interna); e
+  fofo ou infantil (mascote, ilustração simpática). Cara de marketplace **não** foi marcada como errada.
+- O visual da rodada de 22/11 (direção "crachá") foi rejeitado pelo PO: ficou sem graça. Não serve de base.
 
 ## Evidence on Hand
 
@@ -69,7 +80,8 @@ devolver nada: mostra o que foi anunciado e o que se sabe, dizendo de onde veio 
 2. **Privacidade no servidor.** A tela nunca mostra nem esconde por conta própria.
 3. **Preencher lacunas, não substituir.** A lista continua sendo o processo; o site aponta para ela.
 4. **Sobreviver ao abandono.** Nada que dependa de alguém cuidando: sem painel, sem moderação, sem prazo.
-5. **Ferramenta, não vitrine.** Leitura rápida no celular vale mais que expressão visual.
+5. **Achar em segundos, no celular.** A busca é o centro. Isso não pede um visual apagado: o PO rejeitou o
+   resultado contido e sem personalidade.
 
 ## Accessibility & Inclusion
 

@@ -54,12 +54,12 @@ function Retida({ retida, onClassificada, onRecarregar }) {
   const motivo = MOTIVO_DA_RETENCAO[retida.motivo_retencao] ?? retida.motivo_retencao ?? 'motivo não informado'
 
   return (
-    <article className="cracha cracha-retido">
+    <article className="anuncio anuncio-retido">
       <div className="faixa">
         <Icone nome="alerta" tamanho={16} />
         <p className="marcacao">não entrou no catálogo: {motivo}</p>
       </div>
-      <div className="cracha-corpo">
+      <div className="anuncio-corpo">
         <p className="nome">{retida.descricao}</p>
         <p className="nota">
           <time dateTime={retida.data_registro} title={dataCompleta(retida.data_registro)}>
@@ -125,14 +125,14 @@ function AindaNaoFoiParaALista({ item }) {
 
 function Oculto({ item }) {
   return (
-    <article className={`cracha cracha-${item.tipo} cracha-oculto`}>
+    <article className={`anuncio anuncio-${item.tipo} anuncio-oculto`}>
       <FaixaDoTipo item={{ tipo: item.tipo }}>
         <span className="marcacao marcacao-removido">
           <Icone nome="removido" tamanho={16} />
           <span>removido do catálogo</span>
         </span>
       </FaixaDoTipo>
-      <div className="cracha-corpo">
+      <div className="anuncio-corpo">
         <p className="nome">{item.descricao}</p>
         <p className="nota">A remoção não pode ser desfeita pelo site.</p>
       </div>

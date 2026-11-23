@@ -133,4 +133,31 @@ describe('situação e há quanto tempo no catálogo (SCRUM-99, US-04)', () => {
     expect(tempo.textContent).toBe('há 2 dias')
     expect(tempo.getAttribute('title')).toBe('12 de novembro de 2026 às 11:32')
   })
+
+  it('item com foto tem "Ver foto": a linha abre e mostra a foto, e fecha de novo (SCRUM-47)', async () => {
+    simularApi({ itens: [{ ...ITEM, foto_url: '/api/fotos/garrafa.jpg' }] })
+    render(<App />)
+    const cartao = (await screen.findByText('Garrafa térmica azul')).closest('article')
+    const botao = within(cartao).getByRole('button', { name: 'Ver foto' })
+    expect(botao.getAttribute('aria-expanded')).toBe('false')
+    // Fechada, a imagem nem é baixada.
+    expect(within(cartao).queryByRole('img')).toBeNull()
+
+    fireEvent.click(botao)
+    expect(botao.getAttribute('aria-expanded')).toBe('true')
+    const foto = within(cartao).getByRole('img', { name: 'Foto do objeto: Garrafa térmica azul' })
+    expect(foto.getAttribute('src')).toBe('/api/fotos/garrafa.jpg')
+    expect(document.getElementById(botao.getAttribute('aria-controls')).contains(foto)).toBe(true)
+
+    fireEvent.click(within(cartao).getByRole('button', { name: 'Fechar foto' }))
+    expect(within(cartao).queryByRole('img')).toBeNull()
+  })
+
+  it('item sem foto não tem botão de foto nem espaço vazio', async () => {
+    simularApi({ itens: [{ ...ITEM, foto_url: null }] })
+    render(<App />)
+    const cartao = (await screen.findByText('Garrafa térmica azul')).closest('article')
+    expect(within(cartao).queryByRole('button', { name: /foto/i })).toBeNull()
+    expect(cartao.querySelector('.painel-foto')).toBeNull()
+  })
 })

@@ -26,11 +26,14 @@ Vale além do `AGENTS.md` da raiz. Front: Pedro e Rafael. UX: Klarissa.
   - Não existe conta própria, senha nem tela de cadastro de usuário.
   - Autoria é verificada no servidor. O front só esconde botões; quem nega é a API, com 403.
 - **O visual segue o `site/DESIGN.md`.** Em 22/11/2026 o PO mandou refazer as telas do zero, com as
-  cores do CIn-UFPE, sem seguir os wireframes da UX (SCRUM-47). Os fluxos e os textos exigidos pelos
-  critérios do `docs/BACKLOG.md` continuam valendo.
+  cores do CIn-UFPE, sem seguir os wireframes da UX (SCRUM-47). Em 23/11/2026 ele descartou o primeiro
+  resultado e escolheu, com a skill de design, a direção "Grade de Crouwel" (grade visível, letras de grade)
+  e a marca **CIn-Longuinho**. Os fluxos e os textos exigidos pelos critérios do `docs/BACKLOG.md`
+  continuam valendo.
   - Cores, fonte, componentes e o que não fazer estão no `DESIGN.md`. Tela nova usa o que já existe lá.
   - O sistema não é institucional (ADR-011): usa as cores do CIn, mas **não** o logotipo do CIn nem o da UFPE.
-  - A fonte (Figtree) é servida pelo próprio site, via `@fontsource/figtree`. Nada de Google Fonts nem de CDN.
+  - As fontes (Tektur e Hanken Grotesk, licença OFL) são servidas pelo próprio site, de `src/fontes/`,
+    sem dependência npm. Nada de Google Fonts nem de CDN.
   - Estado nunca é diferenciado só pela cor: cada situação tem desenho e texto.
   - Mudar o que o usuário vê é decisão de produto: veja a seção "Decisões de produto" na raiz.
   - O catálogo é **uma lista única** com achados e perdidos juntos, e o filtro refina. Não há abas (US-04, decisão do PO em 25/10/2026).

@@ -1,6 +1,6 @@
 // Ícones do site, desenhados aqui (sem biblioteca): mesmo traço, mesmo tamanho, sempre decorativos.
 // O texto ao lado é que diz o que é; por isso todos saem com aria-hidden.
-// Estado nunca depende só da cor: cada situação tem um desenho próprio (anel, meio disco, disco com visto).
+// Estado nunca depende só da cor: cada situação tem um desenho próprio (célula vazada, meio cheia, cheia com visto).
 
 const TRACOS = {
   // Tipo do anúncio
@@ -16,18 +16,18 @@ const TRACOS = {
       <path d="m20.5 20.5-5.4-5.4" />
     </>
   ),
-  // Situação
-  aberto: <circle cx="12" cy="12" r="8" />,
+  // Situação: marca de célula da grade (vazada, meio cheia, cheia com visto).
+  aberto: <rect x="5" y="5" width="14" height="14" strokeLinejoin="miter" />,
   reivindicado: (
     <>
-      <circle cx="12" cy="12" r="8" />
-      <path d="M12 4a8 8 0 0 1 0 16Z" fill="currentColor" />
+      <rect x="5" y="5" width="14" height="14" strokeLinejoin="miter" />
+      <path d="M5 5h7v14H5Z" fill="currentColor" stroke="none" />
     </>
   ),
   encerrado: (
     <>
-      <circle cx="12" cy="12" r="9" fill="currentColor" stroke="none" />
-      <path d="m7.8 12.3 2.8 2.8 5.6-5.9" stroke="var(--icone-vazado, #fff)" />
+      <rect x="4" y="4" width="16" height="16" fill="currentColor" stroke="none" />
+      <path d="m8 12.3 2.8 2.8 5.4-5.6" stroke="var(--icone-vazado, #fff)" strokeLinecap="square" strokeLinejoin="miter" />
     </>
   ),
   // Apoio
@@ -62,6 +62,13 @@ const TRACOS = {
     <>
       <path d="M3 3l18 18" />
       <path d="M10.6 5.2A9.6 9.6 0 0 1 12 5c5.5 0 9 7 9 7a15.700 15.700 0 0 1-3 3.800M6.300 6.800C4.100 8.400 3 12 3 12s3.500 7 9 7a9.200 9.200 0 0 0 4-1" />
+    </>
+  ),
+  foto: (
+    <>
+      <rect x="3" y="5" width="18" height="14" strokeLinejoin="miter" />
+      <path d="m3 16 5-5 4 4 3-3 6 6" strokeLinejoin="miter" />
+      <circle cx="16.5" cy="9.5" r="1.5" />
     </>
   ),
   visto: <path d="m5 12.500 4.500 4.500L19 7" />,

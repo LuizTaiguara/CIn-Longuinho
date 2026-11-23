@@ -4,7 +4,7 @@
 import { Link, useLocation, useParams } from 'react-router-dom'
 import { linkDeLogin } from '../api/cliente.js'
 import AcoesDoAutor from '../componentes/AcoesDoAutor.jsx'
-import { FaixaDoTipo, classesDoCracha } from '../componentes/CartaoItem.jsx'
+import { FaixaDoTipo, classesDoAnuncio } from '../componentes/CartaoItem.jsx'
 import Contato from '../componentes/Contato.jsx'
 import Icone from '../componentes/Icone.jsx'
 import { EXPLICACAO_REVISAR } from '../componentes/SeloRevisar.jsx'
@@ -12,6 +12,19 @@ import { useItem } from '../hooks/useItem.js'
 import { useSessao } from '../hooks/useSessao.js'
 import { textoDaLocalizacao, textoDaSituacao } from '../situacao.js'
 import { dataCompleta, tempoRelativo } from '../tempoRelativo.js'
+
+// As três células da situação. Só a atual é marcada: o site não sabe se um item encerrado passou
+// por "reivindicado" (a declaração de desfecho pula a etapa), então não pinta o caminho.
+const ETAPAS = ['aberto', 'reivindicado', 'encerrado']
+function TrilhaDaSituacao({ situacao }) {
+  return (
+    <span className="trilha" aria-hidden="true">
+      {ETAPAS.map((etapa) => (
+        <span key={etapa} className={etapa === situacao ? 'etapa etapa-atual' : 'etapa'} data-rotulo={etapa} />
+      ))}
+    </span>
+  )
+}
 
 function TextoOriginal({ item, sessao, caminho }) {
   if (item.texto_original !== null && item.texto_original !== undefined) {
@@ -91,9 +104,9 @@ export default function PaginaItem() {
     <article className="detalhe-item">
       {linkVoltar}
       <div className="principal">
-      <div className={`ficha ${classesDoCracha(item)}`}>
+      <div className={`ficha ${classesDoAnuncio(item)}`}>
         <FaixaDoTipo item={item} />
-        <div className="cracha-corpo">
+        <div className="anuncio-corpo">
           <h1>{item.descricao}</h1>
           {/* No celular não há "passar o mouse": a explicação do selo aparece escrita. */}
           {item.revisar && <p className="nota-revisar">{EXPLICACAO_REVISAR}</p>}
@@ -114,6 +127,7 @@ export default function PaginaItem() {
 
         <dt>Situação</dt>
         <dd className={`situacao situacao-${item.situacao}`}>
+          <TrilhaDaSituacao situacao={item.situacao} />
           <Icone nome={item.situacao} tamanho={18} />
           <span>
             <span title={item.data_situacao ? `Desde ${dataCompleta(item.data_situacao)}` : undefined}>
